@@ -47,18 +47,18 @@ function PostPinnedCard({ post }: { post: any }) {
   const cd = post.pinnedUntil ? countdown(post.pinnedUntil) : "";
   return (
     <Link href={`/post/${post.id}`}
-      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-3 hover:shadow-md hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full">
-      <Pin className="absolute top-2 right-2 w-3 h-3 text-red-400 shrink-0" />
-      <div className="flex items-center gap-2 mb-1.5">
+      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-4 hover:shadow-md hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full">
+      <Pin className="absolute top-2.5 right-2.5 w-4 h-4 text-red-400 shrink-0" />
+      <div className="flex items-center gap-2.5 mb-2">
         <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="md" />
-        <p className="text-[10px] font-semibold text-foreground truncate flex-1 pr-3">{post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`}</p>
+        <p className="text-xs font-semibold text-foreground truncate flex-1 pr-5">{post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`}</p>
       </div>
-      <p className="text-[11px] font-bold text-foreground line-clamp-2 leading-snug flex-1">{post.title}</p>
+      <p className="text-sm font-bold text-foreground line-clamp-2 leading-snug flex-1">{post.title}</p>
       {post.content && (
-        <p className="text-[9px] text-muted-foreground line-clamp-1 mt-1 leading-snug">{post.content.slice(0, 50)}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2 mt-1.5 leading-snug">{post.content.slice(0, 80)}</p>
       )}
       {cd && (
-        <span className="mt-1.5 self-start text-[9px] text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded-full">{cd}</span>
+        <span className="mt-2 self-start text-xs text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2 py-0.5 rounded-full">{cd}</span>
       )}
     </Link>
   );
@@ -66,9 +66,9 @@ function PostPinnedCard({ post }: { post: any }) {
 
 function PinnedSlotEmpty({ idx }: { idx: number }) {
   return (
-    <div className="rounded-xl border-2 border-dashed border-border/25 bg-muted/5 flex flex-col items-center justify-center gap-1 h-full">
-      <Pin className="w-3.5 h-3.5 text-border/30" />
-      <span className="text-[9px] text-border/30 font-mono">{idx + 1}</span>
+    <div className="rounded-xl border-2 border-dashed border-border/25 bg-muted/5 flex flex-col items-center justify-center gap-1.5 h-full">
+      <Pin className="w-5 h-5 text-border/30" />
+      <span className="text-xs text-border/30 font-mono">{idx + 1}</span>
     </div>
   );
 }
@@ -215,8 +215,8 @@ export default function Home() {
             置顶区（项目方专属 · {pinnedPosts.length}/{PIN_SLOTS} 已占用 · 3天倒计时）
           </span>
         </div>
-        {/* 8 cols on lg, 4 on sm, 2 on mobile — always 16 equal slots */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {/* 4 cols on md+, 2 on mobile — always 16 equal slots, ~3x larger than before */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {pinnedSlots.map((post, i) => (
             <div key={post ? `post-${post.id}` : `empty-${i}`} className="aspect-[2/1]">
               {post ? <PostPinnedCard post={post} /> : <PinnedSlotEmpty idx={i} />}
