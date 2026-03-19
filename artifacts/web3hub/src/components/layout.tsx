@@ -4,7 +4,7 @@ import { useWeb3Auth } from "@/lib/web3";
 import { useGetMe } from "@workspace/api-client-react";
 import { useLang, type LangCode } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
-import { LogOut, Home, Mail, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare } from "lucide-react";
+import { LogOut, Mail, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare } from "lucide-react";
 import { cn, truncateAddress, generateGradient } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
@@ -60,6 +60,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const admin = isAdmin(address);
+  const meLoading = !address || (!!address && meData === undefined);
   const isSpaceOwner = meData?.user?.spaceStatus === "approved" || meData?.user?.spaceStatus === "active";
 
   const toggleDarkMode = () => {
@@ -119,23 +120,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo — 1.5× bigger */}
-            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-12 h-12 rounded-xl bg-blue-600/15 flex items-center justify-center group-hover:bg-blue-600/25 transition-colors">
-                <svg viewBox="0 0 24 24" className="w-7 h-7 fill-blue-600">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" className="stroke-blue-600" />
-                </svg>
-              </div>
-              <span className="font-display font-bold text-2xl tracking-tight text-blue-600">Web3Hub</span>
-            </Link>
+            <div className="flex items-center gap-3 shrink-0">
+              <Link href="/" className="flex items-center gap-2.5 group">
+                <div className="w-12 h-12 rounded-xl bg-blue-600/15 flex items-center justify-center group-hover:bg-blue-600/25 transition-colors">
+                  <svg viewBox="0 0 24 24" className="w-7 h-7 fill-blue-600">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" className="stroke-blue-600" />
+                  </svg>
+                </div>
+                <span className="font-display font-bold text-2xl tracking-tight text-blue-600">Web3Hub</span>
+              </Link>
+              <Link href="/"
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-all",
+                  location === "/"
+                    ? "bg-blue-600 text-white border-blue-600 shadow"
+                    : "bg-white dark:bg-slate-800 text-blue-600 border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                )}
+              >
+                {t("navHome")}
+              </Link>
+            </div>
 
             <div className="flex items-center gap-3 ml-auto">
-              {/* Space owner → red Post button; else Apply link */}
+              {/* Space owner → red Post button; loading → hide; not owner → Apply link */}
               {isConnected && isSpaceOwner ? (
                 <Link href="/post/new"
                   className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold bg-red-500 hover:bg-red-600 text-white shadow-sm transition-all">
                   <PenSquare className="w-4 h-4" /> {t("postNow")}
                 </Link>
-              ) : (
+              ) : isConnected && meLoading ? null : (
                 <Link href="/apply" className="hidden sm:flex items-center gap-1 text-sm font-medium text-muted-foreground dark:text-slate-400 hover:text-foreground dark:hover:text-slate-200 transition-colors">
                   {t("apply")}
                 </Link>
@@ -191,58 +204,43 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* ── Nav rows ── */}
         <div className="border-t border-border/30 bg-muted/20">
           <div className="max-w-7xl mx-auto px-2 py-1.5 space-y-1">
-            {/* Row 1: left controls + 9 nav items right-aligned */}
-            <div className="flex items-center gap-2">
-              {/* Left controls: Home + Language + Dark */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <Link
-                  href="/"
-                  className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-lg font-extrabold transition-all shrink-0",
-                    location === "/"
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-300"
-                      : "bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60"
-                  )}
-                  title={t("home")}
+            {/* Controls row: Language + Dark on left */}
+            <div className="flex items-center gap-1.5 mb-1">
+              <div className="relative">
+                <select
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as LangCode)}
+                  className="appearance-none bg-white dark:bg-slate-800 border border-border dark:border-slate-700 rounded-full pl-3 pr-7 py-1.5 text-sm font-semibold text-muted-foreground dark:text-slate-200 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
                 >
-                  <Home className="w-5 h-5" />
-                </Link>
-                <div className="relative">
-                  <select
-                    value={lang}
-                    onChange={(e) => setLang(e.target.value as LangCode)}
-                    className="appearance-none bg-white dark:bg-slate-800 border border-border dark:border-slate-700 rounded-full pl-3 pr-7 py-1.5 text-sm font-semibold text-muted-foreground dark:text-slate-200 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
-                  >
-                    {LANGUAGES.map((l) => (
-                      <option key={l.value} value={l.value}>{l.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground dark:text-slate-400 pointer-events-none" />
-                </div>
-                <button
-                  onClick={toggleDarkMode}
-                  className="px-3 py-1.5 rounded-full bg-muted dark:bg-slate-700 border border-border dark:border-slate-600 text-muted-foreground dark:text-slate-300 hover:bg-muted/80 dark:hover:bg-slate-600 transition-all font-semibold text-sm"
-                  title="Toggle dark mode"
-                >
-                  {isDark ? "☀️" : "🌙"}
-                </button>
+                  {LANGUAGES.map((l) => (
+                    <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground dark:text-slate-400 pointer-events-none" />
               </div>
-
-              {/* Right: 9 nav items right-aligned */}
-              <div className="flex-1 flex items-center gap-0.5 justify-end overflow-x-auto scrollbar-none">
-                {NAV_ROW1_KEYS.map(({ key, href }) => (
-                  <Link key={key} href={href} className={navLinkClass(href)}>
-                    {location !== href && (
-                      <span className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/8 group-hover:scale-105 transition-all duration-200 origin-center" />
-                    )}
-                    <span className="relative z-10">{t(key)}</span>
-                  </Link>
-                ))}
-              </div>
+              <button
+                onClick={toggleDarkMode}
+                className="px-3 py-1.5 rounded-full bg-muted dark:bg-slate-700 border border-border dark:border-slate-600 text-muted-foreground dark:text-slate-300 hover:bg-muted/80 dark:hover:bg-slate-600 transition-all font-semibold text-sm"
+                title="Toggle dark mode"
+              >
+                {isDark ? "☀️" : "🌙"}
+              </button>
             </div>
 
-            {/* Row 2: 9 nav items right-aligned (aligns with row 1 right edge) */}
-            <div className="flex items-center gap-0.5 justify-end overflow-x-auto scrollbar-none">
+            {/* Row 1: 9 nav items left-aligned */}
+            <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
+              {NAV_ROW1_KEYS.map(({ key, href }) => (
+                <Link key={key} href={href} className={navLinkClass(href)}>
+                  {location !== href && (
+                    <span className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/8 group-hover:scale-105 transition-all duration-200 origin-center" />
+                  )}
+                  <span className="relative z-10">{t(key)}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Row 2: 9 nav items left-aligned */}
+            <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
               {NAV_ROW2_KEYS.map(({ key, href }) => (
                 <Link key={key} href={href} className={navLinkClass(href)}>
                   {location !== href && (

@@ -1,16 +1,16 @@
 import { useGetPosts } from "@workspace/api-client-react";
 import { PostTimeline } from "@/components/post-timeline";
+import { useLang } from "@/lib/i18n";
 
 export default function Showcase() {
-  const { data, isLoading } = useGetPosts({ section: "项目展示", limit: 50 });
+  const { t } = useLang();
+  const { data, isLoading } = useGetPosts({ section: "showcase", limit: 50 });
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">项目展示</h1>
-        <p className="text-muted-foreground">
-          发现最新 Web3 项目动态、产品更新和重要里程碑。
-        </p>
+        <h1 className="text-3xl font-bold mb-2">{t("showcaseTitle")}</h1>
+        <p className="text-muted-foreground">{t("showcaseDesc")}</p>
       </div>
 
       {isLoading ? (
@@ -20,10 +20,10 @@ export default function Showcase() {
           ))}
         </div>
       ) : (
-        <PostTimeline 
-          posts={data?.posts || []} 
+        <PostTimeline
+          posts={data?.posts || []}
           avatarBorderColor="border-primary"
-          emptyMessage="暂无项目展示动态"
+          emptyMessage={t("showcaseEmpty")}
         />
       )}
     </div>

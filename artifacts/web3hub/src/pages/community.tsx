@@ -1,16 +1,16 @@
 import { useGetPosts } from "@workspace/api-client-react";
 import { PostTimeline } from "@/components/post-timeline";
+import { useLang } from "@/lib/i18n";
 
 export default function Community() {
-  const { data, isLoading } = useGetPosts({ section: "社区聊天", limit: 50 });
+  const { t } = useLang();
+  const { data, isLoading } = useGetPosts({ section: "community", limit: 50 });
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">社区交流</h1>
-        <p className="text-muted-foreground">
-          畅所欲言，结识志同道合的 Web3 建设者。
-        </p>
+        <h1 className="text-3xl font-bold mb-2">{t("communityTitle")}</h1>
+        <p className="text-muted-foreground">{t("communityDesc")}</p>
       </div>
 
       {isLoading ? (
@@ -20,10 +20,10 @@ export default function Community() {
           ))}
         </div>
       ) : (
-        <PostTimeline 
-          posts={data?.posts || []} 
+        <PostTimeline
+          posts={data?.posts || []}
           avatarBorderColor="border-border"
-          emptyMessage="社区很安静，来发第一条消息吧！"
+          emptyMessage={t("communityEmpty")}
         />
       )}
     </div>
