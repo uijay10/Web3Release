@@ -43,26 +43,41 @@ artifacts-monorepo/
 ## Web3Hub Features
 
 ### Pages
-- **/** – Homepage with pinned projects grid + regular projects grid + empty state
+- **/** – Homepage with pinned projects grid + regular projects grid + hot rank sidebar
 - **/showcase** – Project Showcase (Twitter-style timeline)
 - **/kol** – KOL Zone (leaderboard + timeline, gold/purple borders)
 - **/developer** – Developer Column (timeline, green borders)
 - **/community** – Community Chat (timeline with KOL/project tags)
-- **/profile** – User profile (check-in, points, energy, social links, invite code)
-- **/apply** – Apply for Space form (KOL / Project Team / Developer)
+- **/profile** – User dashboard (check-in, points, energy, social links, invite code, admin panel link)
+- **/apply** – Apply for Space form (KOL / Project / Developer) — article template + X post link
 - **/project/:id** – Project detail page
+- **/section/:slug** – Section page (15 sections, i18n labels/descriptions)
+- **/admin** – Admin Panel (applications, users, points & energy management)
+
+### Nav Structure (9+9)
+- Row 1: Testnet, IDO/Launchpad, Security, Integration, Airdrop, Events, Funding, Jobs, Nodes
+- Row 2: Showcase, Ecosystem, Partners, Hackathon, AMA, Bug Bounty, Community, KOL Collab, Developer
 
 ### Key UI Elements
-- Sticky top navbar with 19 navigation section links
+- Sticky top navbar with 9+9 navigation section links (2 rows)
 - Pink buttons (#FF69B4), green neon countdown (#00FF9F) for pinned items
-- Connect Wallet button (MetaMask, OKX, WalletConnect via @web3modal)
-- After wallet connect: shows avatar gradient + truncated address
+- Connect Wallet button (MetaMask, OKX, WalletConnect via @web3modal, projectId: b56e18a13c9a1b59cf6f6ee2765e3591)
+- After wallet connect: click-toggle dropdown with solid background, "个人仪表盘" + "退出登录" + Admin Panel for admins
+- Full i18n: 12 languages including dashboard/logout/section keys
+
+### Admin System
+- 15 admin wallets defined in `artifacts/web3hub/src/lib/admin.ts` (all lowercase)
+- Also duplicated in `artifacts/api-server/src/routes/admin.ts`
+- Constants: ADMIN_ENERGY = ADMIN_POINTS = 99999999999999, ADMIN_PIN_COUNT = 99999999
+- Admin wallets show ∞ for points/energy/pinCount in profile dashboard
+- Admin wallets see "Admin Panel" in dropdown (shield icon) + amber badge in dashboard
+- `/admin` routes: list users, list/approve/reject/batch applications, edit per-user energy/points/pinCount/ban, bulk all-users points ops, CSV export
 
 ### Database Tables
-- `users` – wallet, points, energy, space status, invite code
+- `users` – wallet, points, energy, space status, invite code, is_banned, pin_count
 - `projects` – name, logo, owner wallet, pinned status, status
 - `posts` – title, content, section, author info, likes, comments
-- `space_applications` – wallet, type (kol/project/developer), links
+- `space_applications` – wallet, type (kol/project/developer), links, status
 
 ### Energy System
 - KOL: 1000 energy on activation, 20 posts/day max

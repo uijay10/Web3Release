@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useWeb3Auth } from "@/lib/web3";
 import { useApplySpace } from "@workspace/api-client-react";
 import { ApplySpaceRequestType } from "@workspace/api-client-react";
-import { Building2, Code2, Megaphone, CheckCircle2 } from "lucide-react";
+import { Building2, Code2, Megaphone, CheckCircle2, Copy, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLang } from "@/lib/i18n";
 
@@ -28,9 +28,37 @@ function Field({ label, note, error, children }: {
   return (
     <div>
       <label className="block text-sm font-semibold mb-1.5 text-foreground">{label}</label>
-      {note && <p className="text-xs text-muted-foreground mb-2">{note}</p>}
+      {note && <p className="text-xs text-muted-foreground mb-2 leading-relaxed">{note}</p>}
       {children}
       {error && <p className="text-destructive text-xs mt-1">{error}</p>}
+    </div>
+  );
+}
+
+function ArticleTemplate({ template, xLinkLabel, register }: { template: string; xLinkLabel: string; register: any }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(template).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <div className="space-y-3">
+      <div className="relative bg-muted/60 dark:bg-slate-800/60 border border-border dark:border-slate-700 rounded-xl p-4 pr-10">
+        <p className="text-sm text-foreground dark:text-slate-200 leading-relaxed break-words">{template}</p>
+        <button type="button" onClick={copy}
+          className="absolute top-3 right-3 p-1.5 rounded-lg bg-background dark:bg-slate-700 hover:bg-muted dark:hover:bg-slate-600 border border-border/50 transition-colors"
+          title="Copy template">
+          {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
+        </button>
+      </div>
+      <input
+        {...register("tweetLink")}
+        className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
+        placeholder="https://x.com/..."
+      />
+      <p className="text-xs text-muted-foreground">← {xLinkLabel}</p>
     </div>
   );
 }
@@ -86,6 +114,10 @@ export default function ApplySpace() {
     { value: ApplySpaceRequestType.developer, icon: <Code2 className="w-8 h-8" />,     labelKey: "applyDeveloper" },
   ];
 
+  const articleTemplate = t("applyPostArticleTemplate");
+  const articleInstr = t("applyPostArticleInstr");
+  const xLinkLabel = t("applyPostXLink");
+
   return (
     <div className="max-w-2xl mx-auto py-8">
       <div className="mb-10 text-center">
@@ -95,7 +127,7 @@ export default function ApplySpace() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 bg-card p-8 rounded-3xl border border-border shadow-sm">
 
-        {/* Type Selection — all highlight green */}
+        {/* Type Selection */}
         <div className="space-y-3">
           <label className="text-sm font-semibold">{t("applyTypeLabel")}</label>
           <div className="grid grid-cols-3 gap-4">
@@ -134,11 +166,8 @@ export default function ApplySpace() {
               <Field label={`${t("applyPersonalTwitter")} *`}>
                 <input {...register("twitter")} className={inputCls} placeholder="@YourHandle" />
               </Field>
-              <Field label={t("applyPostArticle")} note={t("applyPostArticleDesc")}>
-                <textarea rows={3} className={inputCls} placeholder="粘贴文章内容..." />
-              </Field>
-              <Field label={`${t("applyPostLink")} *`}>
-                <input {...register("tweetLink")} className={inputCls} placeholder="https://x.com/..." />
+              <Field label={t("applyPostArticle")} note={articleInstr}>
+                <ArticleTemplate template={articleTemplate} xLinkLabel={xLinkLabel} register={register} />
               </Field>
               <Field label={t("applyDocs")}>
                 <input {...register("docsLink")} className={inputCls} placeholder="https://..." />
@@ -152,11 +181,8 @@ export default function ApplySpace() {
               <Field label={`${t("applyPersonalTwitter")} *`}>
                 <input {...register("twitter")} className={inputCls} placeholder="@YourHandle" />
               </Field>
-              <Field label={t("applyPostArticle")} note={t("applyPostArticleDesc")}>
-                <textarea rows={3} className={inputCls} placeholder="粘贴文章内容..." />
-              </Field>
-              <Field label={`${t("applyPostLink")} *`} error={errors.tweetLink?.message}>
-                <input {...register("tweetLink")} className={inputCls} placeholder="https://x.com/..." />
+              <Field label={t("applyPostArticle")} note={articleInstr} error={errors.tweetLink?.message}>
+                <ArticleTemplate template={articleTemplate} xLinkLabel={xLinkLabel} register={register} />
               </Field>
             </>
           )}
@@ -167,11 +193,8 @@ export default function ApplySpace() {
               <Field label={`${t("applyPersonalTwitter")} *`}>
                 <input {...register("twitter")} className={inputCls} placeholder="@YourHandle" />
               </Field>
-              <Field label={t("applyPostArticle")} note={t("applyPostArticleDesc")}>
-                <textarea rows={3} className={inputCls} placeholder="粘贴文章内容..." />
-              </Field>
-              <Field label={`${t("applyPostLink")} *`}>
-                <input {...register("tweetLink")} className={inputCls} placeholder="https://x.com/..." />
+              <Field label={t("applyPostArticle")} note={articleInstr}>
+                <ArticleTemplate template={articleTemplate} xLinkLabel={xLinkLabel} register={register} />
               </Field>
               <Field label={`${t("applyGithub")} *`} error={errors.github?.message}>
                 <input {...register("github")} className={inputCls} placeholder="https://github.com/..." />

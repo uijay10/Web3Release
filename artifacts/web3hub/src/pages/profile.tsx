@@ -4,11 +4,13 @@ import { generateGradient, truncateAddress } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import {
   Zap, Star, Copy, Check, AlertCircle, Gift, Clock, Edit2,
-  Twitter, Send, Hash, Pin, Trash2, Save
+  Twitter, Send, Hash, Pin, Trash2, Save, ShieldCheck
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useLang } from "@/lib/i18n";
+import { isAdmin, ADMIN_ENERGY, ADMIN_POINTS, ADMIN_PIN_COUNT } from "@/lib/admin";
+import { Link } from "wouter";
 
 function useCountdown(targetIso: string | null | undefined) {
   const [remaining, setRemaining] = useState("");
@@ -62,6 +64,7 @@ export default function Profile() {
   );
   const { t } = useLang();
   const fileRef = useRef<HTMLInputElement>(null);
+  const admin = isAdmin(address);
 
   const [twitter, setTwitter] = useState("");
   const [telegram, setTelegram] = useState("");
@@ -153,7 +156,14 @@ export default function Profile() {
     <div className="max-w-5xl mx-auto space-y-5">
       {/* ── Dashboard title + Save btn ─────────────── */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{t("myProfile")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold">{t("dashboard")}</h1>
+          {admin && (
+            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-bold">
+              <ShieldCheck className="w-3 h-3" /> Admin
+            </span>
+          )}
+        </div>
         <button
           onClick={handleSave}
           disabled={!dirty || saveStatus === "saving"}
@@ -208,17 +218,20 @@ export default function Profile() {
             <StatBox
               icon={<Star className="w-3.5 h-3.5 text-amber-400" />}
               label={t("points")}
-              value={user?.points ?? 0}
+              value={admin ? <span className="text-amber-500 font-extrabold">∞</span> : (user?.points ?? 0)}
+              sub={admin ? String(ADMIN_POINTS) : undefined}
             />
             <StatBox
               icon={<Zap className="w-3.5 h-3.5 text-primary" />}
               label={t("energy")}
-              value={user?.energy ?? 0}
+              value={admin ? <span className="text-blue-500 font-extrabold">∞</span> : (user?.energy ?? 0)}
+              sub={admin ? String(ADMIN_ENERGY) : undefined}
             />
             <StatBox
               icon={<Pin className="w-3.5 h-3.5 text-violet-500" />}
               label={t("pinCount")}
-              value={0}
+              value={admin ? <span className="text-violet-500 font-extrabold">∞</span> : ((user as any)?.pinCount ?? 0)}
+              sub={admin ? String(ADMIN_PIN_COUNT) : undefined}
             />
             <StatBox
               icon={<Hash className="w-3.5 h-3.5 text-green-500" />}
@@ -309,6 +322,27 @@ export default function Profile() {
             ))}
         </div>
       </div>
+
+      {/* ── Admin Panel Link ────────────────────────── */}
+      {admin && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h2 className="font-bold text-amber-800 dark:text-amber-200">Admin Control Panel</h2>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Manage users, applications, points and energy</p>
+              </div>
+            </div>
+            <Link href="/admin"
+              className="px-5 py-2 rounded-xl bg-amber-500 text-white font-semibold text-sm hover:bg-amber-600 transition-colors shadow-sm">
+              Open Panel →
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ── Posts ─────────────────────────────────────── */}
       <div className="bg-card border border-border rounded-2xl p-5">

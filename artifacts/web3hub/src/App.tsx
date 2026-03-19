@@ -12,6 +12,7 @@ import Profile from "@/pages/profile";
 import ApplySpace from "@/pages/apply";
 import ProjectDetail from "@/pages/project-detail";
 import SectionPage from "@/pages/section";
+import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/apply" component={ApplySpace} />
       <Route path="/project/:id" component={ProjectDetail} />
       <Route path="/section/:slug" component={SectionPage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

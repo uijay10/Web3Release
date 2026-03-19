@@ -18,6 +18,8 @@ export const usersTable = pgTable("users", {
   telegram: text("telegram"),
   discord: text("discord"),
   language: text("language").default("en"),
+  isBanned: boolean("is_banned").notNull().default(false),
+  pinCount: integer("pin_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

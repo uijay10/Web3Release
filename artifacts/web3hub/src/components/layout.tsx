@@ -2,9 +2,10 @@ import { Link, useLocation } from "wouter";
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { useWeb3Auth } from "@/lib/web3";
 import { useLang, type LangCode } from "@/lib/i18n";
-import { LogOut, User as UserIcon, Home, Mail, ChevronDown } from "lucide-react";
+import { isAdmin } from "@/lib/admin";
+import { LogOut, User as UserIcon, Home, Mail, ChevronDown, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { cn, truncateAddress, generateGradient } from "@/lib/utils";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const NAV_ROW1_KEYS = [
   { key: "nav_testnet",     href: "/section/testnet" },
@@ -16,10 +17,10 @@ const NAV_ROW1_KEYS = [
   { key: "nav_funding",     href: "/section/funding" },
   { key: "nav_jobs",        href: "/section/jobs" },
   { key: "nav_nodes",       href: "/section/nodes" },
-  { key: "nav_showcase",    href: "/showcase" },
 ];
 
 const NAV_ROW2_KEYS = [
+  { key: "nav_showcase",   href: "/showcase" },
   { key: "nav_ecosystem",  href: "/section/ecosystem" },
   { key: "nav_partners",   href: "/section/partners" },
   { key: "nav_hackathon",  href: "/section/hackathon" },
@@ -59,6 +60,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   });
   const { t, lang, setLang } = useLang();
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const admin = isAdmin(address);
 
   const toggleDarkMode = () => {
     setIsDark((prev: boolean) => {
@@ -81,6 +84,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const handleMouseLeave = () => {
     hideTimer.current = setTimeout(() => setIsDropdownOpen(false), 1000);
   };
+  const toggleDropdown = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    setIsDropdownOpen(v => !v);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const copyAddr = () => {
     navigator.clipboard.writeText(DONATE_ADDR).then(() => {
@@ -125,24 +142,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   {t("connect")}
                 </button>
               ) : (
-                <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  <button className="flex items-center gap-2 p-1 pr-3 rounded-full border border-border hover:border-primary/50 hover:bg-muted/30 transition-all">
+                <div className="relative" ref={dropdownRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  <button
+                    onClick={toggleDropdown}
+                    className="flex items-center gap-2 p-1 pr-3 rounded-full border border-border hover:border-primary/50 hover:bg-muted/30 transition-all"
+                  >
                     <div
                       className="w-7 h-7 rounded-full"
                       style={{ background: user?.avatar ? `url(${user.avatar}) center/cover` : generateGradient(address) }}
                     />
                     <span className="text-sm font-medium font-mono">{truncateAddress(address)}</span>
+                    {admin && <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />}
                   </button>
 
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-1 w-44 bg-card dark:bg-slate-800 rounded-xl shadow-xl border border-border/50 dark:border-slate-700 py-1 z-50">
+                    <div className="absolute right-0 mt-2 w-52 rounded-xl shadow-2xl border border-border dark:border-slate-700 py-1 z-50"
+                      style={{ background: "var(--card)", opacity: 1 }}>
                       <Link href="/profile" onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground dark:text-slate-100 hover:bg-muted dark:hover:bg-slate-700 cursor-pointer">
-                        <UserIcon className="w-4 h-4" /> {t("profile")}
+                        className="flex items-center gap-2.5 px-4 py-3 text-sm text-foreground dark:text-slate-100 hover:bg-muted dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                        <LayoutDashboard className="w-4 h-4 text-blue-500" /> {t("dashboard")}
                       </Link>
+                      {admin && (
+                        <Link href="/admin" onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors cursor-pointer">
+                          <ShieldCheck className="w-4 h-4" /> Admin Panel
+                        </Link>
+                      )}
+                      <div className="border-t border-border/40 dark:border-slate-700 my-1" />
                       <button onClick={() => { disconnect(); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-destructive dark:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-950/30 transition-colors text-left">
-                        <LogOut className="w-4 h-4" /> {t("disconnect")}
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-destructive dark:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-950/30 transition-colors text-left">
+                        <LogOut className="w-4 h-4" /> {t("logout")}
                       </button>
                     </div>
                   )}
