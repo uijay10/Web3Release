@@ -57,7 +57,17 @@ router.post("/applications/:id/approve", requireAdmin, async (req, res) => {
     const app = await db.select().from(spaceApplicationsTable).where(eq(spaceApplicationsTable.id, id)).limit(1);
     if (!app.length) return res.status(404).json({ error: "Not found" });
     await db.update(spaceApplicationsTable).set({ status: "approved" }).where(eq(spaceApplicationsTable.id, id));
-    await db.update(usersTable).set({ spaceStatus: "approved", spaceType: app[0].type }).where(eq(usersTable.wallet, app[0].wallet));
+    const approvedType = app[0].type as string;
+    const energyGrant = approvedType === "project" ? 50 : 1000;
+    const pinGrant = approvedType === "project" ? 3 : 0;
+    const existingUser = await db.select().from(usersTable).where(eq(usersTable.wallet, app[0].wallet)).limit(1);
+    const curEnergy = existingUser[0]?.energy ?? 0;
+    const curPin = existingUser[0]?.pinCount ?? 0;
+    await db.update(usersTable).set({
+      spaceStatus: "approved", spaceType: approvedType,
+      energy: curEnergy + energyGrant,
+      pinCount: curPin + pinGrant,
+    }).where(eq(usersTable.wallet, app[0].wallet));
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
@@ -86,7 +96,17 @@ router.post("/applications/batch", requireAdmin, async (req, res) => {
       if (app.length) {
         await db.update(spaceApplicationsTable).set({ status }).where(eq(spaceApplicationsTable.id, id));
         if (action === "approve") {
-          await db.update(usersTable).set({ spaceStatus: "approved", spaceType: app[0].type }).where(eq(usersTable.wallet, app[0].wallet));
+          const batchType = app[0].type as string;
+          const bEnergyGrant = batchType === "project" ? 50 : 1000;
+          const bPinGrant = batchType === "project" ? 3 : 0;
+          const bUser = await db.select().from(usersTable).where(eq(usersTable.wallet, app[0].wallet)).limit(1);
+          const bCurEnergy = bUser[0]?.energy ?? 0;
+          const bCurPin = bUser[0]?.pinCount ?? 0;
+          await db.update(usersTable).set({
+            spaceStatus: "approved", spaceType: batchType,
+            energy: bCurEnergy + bEnergyGrant,
+            pinCount: bCurPin + bPinGrant,
+          }).where(eq(usersTable.wallet, app[0].wallet));
         }
       }
     }

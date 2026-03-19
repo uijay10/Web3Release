@@ -63,8 +63,8 @@ export function ProjectCard({ project, isPinned, compact }: ProjectCardProps) {
   if (compact) {
     return (
       <div className={cn(
-        "relative bg-white border border-gray-200 rounded-xl p-4 transition-all duration-200",
-        "hover:scale-[1.02] hover:border-gray-400 hover:shadow-md"
+        "relative bg-card rounded-xl p-3 transition-colors duration-200",
+        "hover:bg-muted/50"
       )}>
         {isNew && (
           <span className="absolute -top-1.5 -right-1.5 bg-[#FF69B4] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full z-10">

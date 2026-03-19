@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useGetProjects, useGetPinnedProjects, useGetMe } from "@workspace/api-client-react";
 import { useWeb3Auth } from "@/lib/web3";
 import { ProjectCard } from "@/components/project-card";
-import { Search, Flame, PenSquare } from "lucide-react";
+import { Search, Flame, PenSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useLang } from "@/lib/i18n";
 import { generateGradient } from "@/lib/utils";
+
+const PAGE_SIZE = 20;
 
 export default function Home() {
   const { t } = useLang();
@@ -18,41 +20,24 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [allProjects, setAllProjects] = useState<any[]>([]);
-  const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
   }, [search]);
 
-  useEffect(() => { setPage(1); setAllProjects([]); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const { data: pinnedData } = useGetPinnedProjects();
   const { data: projectsData, isLoading } = useGetProjects({
-    search: debouncedSearch || undefined, page, limit: 30,
+    search: debouncedSearch || undefined, page, limit: PAGE_SIZE,
   });
   const { data: hotData } = useGetProjects({ page: 1, limit: 10 });
 
-  useEffect(() => {
-    if (projectsData?.projects) {
-      if (page === 1) setAllProjects(projectsData.projects);
-      else setAllProjects((prev) => [...prev, ...projectsData.projects]);
-    }
-  }, [projectsData, page]);
-
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    if (entries[0].isIntersecting && projectsData && page < projectsData.totalPages) setPage((p) => p + 1);
-  }, [projectsData, page]);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(handleObserver, { threshold: 0.1 });
-    if (loaderRef.current) obs.observe(loaderRef.current);
-    return () => obs.disconnect();
-  }, [handleObserver]);
-
+  const projects = projectsData?.projects ?? [];
+  const totalPages = projectsData?.totalPages ?? 1;
+  const total = projectsData?.total ?? 0;
   const hasPinned = pinnedData && pinnedData.length > 0;
-  const hasProjects = allProjects.length > 0;
   const hotProjects = hotData?.projects ?? [];
 
   return (
@@ -134,37 +119,74 @@ export default function Home() {
       <section className="pt-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("regular")}</h2>
-          {hasProjects && (
-            <span className="text-xs text-muted-foreground">{t("total")} {projectsData?.total ?? 0} {t("projects")}</span>
+          {total > 0 && (
+            <span className="text-xs text-muted-foreground">{t("total")} {total} {t("projects")}</span>
           )}
         </div>
 
         <div className="flex gap-4 items-start">
-          {/* ── Left: 2-col project grid ── */}
+          {/* ── Left: 2-col numbered project grid ── */}
           <div className="flex-1 min-w-0">
-            {!hasProjects && !isLoading ? (
-              <div className="grid grid-cols-2 gap-3">
-                {Array.from({ length: 30 }).map((_, i) => (
-                  <div key={i} className="h-24 rounded-xl border border-dashed border-border/40 bg-muted/10 shimmer-cell" />
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                  <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
+                ))}
+              </div>
+            ) : projects.length === 0 ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="h-20 rounded-xl border border-dashed border-border/40 bg-muted/10" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {isLoading && page === 1
-                  ? Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />
-                    ))
-                  : allProjects.map((project) => (
-                      <ProjectCard key={project.id} project={project} compact />
-                    ))
-                }
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                {projects.map((project, idx) => {
+                  const globalNum = (page - 1) * PAGE_SIZE + idx + 1;
+                  return (
+                    <div key={project.id} className="flex items-center gap-2 py-1 border-b border-border/20 last:border-0">
+                      <span className="text-xs font-bold text-muted-foreground w-6 shrink-0 text-right">{globalNum}</span>
+                      <div className="flex-1 min-w-0">
+                        <ProjectCard project={project} compact />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            <div ref={loaderRef} className="h-4" />
-            {isLoading && page > 1 && (
-              <div className="flex justify-center py-4">
-                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            {/* ── Pagination ── */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-6 pt-4 border-t border-border/30">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold bg-muted hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                    let p: number;
+                    if (totalPages <= 7) p = i + 1;
+                    else if (page <= 4) p = i + 1;
+                    else if (page >= totalPages - 3) p = totalPages - 6 + i;
+                    else p = page - 3 + i;
+                    return (
+                      <button key={p} onClick={() => setPage(p)}
+                        className={`w-8 h-8 rounded-full text-sm font-semibold transition-colors ${p === page ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80 text-foreground"}`}>
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold bg-muted hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             )}
           </div>

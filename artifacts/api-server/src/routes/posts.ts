@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, postsTable, usersTable } from "@workspace/db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, gte } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -71,7 +71,51 @@ router.post("/", async (req, res) => {
 
   const lw = authorWallet.toLowerCase();
   const users = await db.select().from(usersTable).where(eq(usersTable.wallet, lw)).limit(1);
-  const user = users[0];
+  let user = users[0];
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const spaceType = user.spaceType ?? "";
+  const isAdmin = (user.energy ?? 0) >= 99_000_000_000_000;
+
+  if (!isAdmin) {
+    // Check energy
+    if ((user.energy ?? 0) <= 0) {
+      return res.status(402).json({ error: "INSUFFICIENT_ENERGY" });
+    }
+
+    // KOL 48h inactivity penalty (check before daily limit so penalty applies first)
+    if (spaceType === "kol") {
+      const lastPostRows = await db.select({ createdAt: postsTable.createdAt })
+        .from(postsTable).where(eq(postsTable.authorWallet, lw)).orderBy(desc(postsTable.createdAt)).limit(1);
+      if (lastPostRows.length > 0) {
+        const hoursSinceLast = (Date.now() - new Date(lastPostRows[0].createdAt).getTime()) / 3_600_000;
+        if (hoursSinceLast > 48) {
+          const penalty = Math.min(user.energy ?? 0, 100);
+          const penaltyEnergy = (user.energy ?? 0) - penalty;
+          await db.update(usersTable).set({ energy: penaltyEnergy }).where(eq(usersTable.wallet, lw));
+          user = { ...user, energy: penaltyEnergy };
+          if (penaltyEnergy <= 0) {
+            return res.status(402).json({ error: "INSUFFICIENT_ENERGY", penaltyApplied: penalty });
+          }
+        }
+      }
+    }
+
+    // Daily post limit (KOL: 20, developer: 10, project: unlimited)
+    const dailyLimit = spaceType === "kol" ? 20 : spaceType === "developer" ? 10 : 0;
+    if (dailyLimit > 0) {
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      const todayRows = await db.select({ count: sql<number>`count(*)` })
+        .from(postsTable).where(and(eq(postsTable.authorWallet, lw), gte(postsTable.createdAt, todayStart)));
+      const todayCount = Number(todayRows[0]?.count ?? 0);
+      if (todayCount >= dailyLimit) {
+        return res.status(429).json({ error: "DAILY_LIMIT", limit: dailyLimit });
+      }
+    }
+
+    // Deduct 1 energy
+    await db.update(usersTable).set({ energy: (user.energy ?? 1) - 1 }).where(eq(usersTable.wallet, lw));
+  }
 
   const inserted = await db.insert(postsTable).values({
     title,

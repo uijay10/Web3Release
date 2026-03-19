@@ -6,7 +6,6 @@ import { useWeb3Auth } from "@/lib/web3";
 import { useApplySpace } from "@workspace/api-client-react";
 import { ApplySpaceRequestType } from "@workspace/api-client-react";
 import { Building2, Code2, Megaphone, CheckCircle2, Copy, Check } from "lucide-react";
-import { useLocation } from "wouter";
 import { useLang } from "@/lib/i18n";
 
 const schema = z.object({
@@ -67,7 +66,6 @@ export default function ApplySpace() {
   const { address, isConnected } = useWeb3Auth();
   const applyMutation = useApplySpace();
   const [success, setSuccess] = useState(false);
-  const [_, setLocation] = useLocation();
   const { t } = useLang();
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
@@ -80,10 +78,7 @@ export default function ApplySpace() {
   const onSubmit = (data: FormValues) => {
     if (!address) return alert(t("applyNeedWallet"));
     applyMutation.mutate({ data: { wallet: address, ...data } }, {
-      onSuccess: () => {
-        setSuccess(true);
-        setTimeout(() => setLocation("/"), 3000);
-      }
+      onSuccess: () => setSuccess(true),
     });
   };
 
