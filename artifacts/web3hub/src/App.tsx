@@ -1,8 +1,8 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { Web3Provider } from "@/lib/web3";
+import { LanguageProvider } from "@/lib/i18n";
 import { Layout } from "@/components/layout";
 
-// Pages
 import Home from "@/pages/home";
 import Showcase from "@/pages/showcase";
 import KOLZone from "@/pages/kol";
@@ -34,11 +34,13 @@ function Router() {
 function App() {
   return (
     <Web3Provider>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Layout>
-          <Router />
-        </Layout>
-      </WouterRouter>
+      <LanguageProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <Layout>
+            <Router />
+          </Layout>
+        </WouterRouter>
+      </LanguageProvider>
     </Web3Provider>
   );
 }

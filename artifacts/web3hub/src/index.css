@@ -94,3 +94,22 @@
 .animate-fade-out {
   animation: fade-out 5s ease-out forwards;
 }
+
+/* Shimmer / glow border for pinned cells */
+@keyframes shimmer-border {
+  0%   { box-shadow: 0 0 4px 1px rgba(0,255,159,0.3), 0 0 8px 2px rgba(0,255,159,0.15); border-color: rgba(0,255,159,0.4); }
+  25%  { box-shadow: 0 0 8px 3px rgba(255,105,180,0.4), 0 0 16px 4px rgba(255,105,180,0.2); border-color: rgba(255,105,180,0.5); }
+  50%  { box-shadow: 0 0 8px 3px rgba(100,160,255,0.4), 0 0 16px 4px rgba(100,160,255,0.2); border-color: rgba(100,160,255,0.5); }
+  75%  { box-shadow: 0 0 8px 3px rgba(255,200,60,0.4),  0 0 16px 4px rgba(255,200,60,0.2);  border-color: rgba(255,200,60,0.5); }
+  100% { box-shadow: 0 0 4px 1px rgba(0,255,159,0.3),  0 0 8px 2px rgba(0,255,159,0.15);   border-color: rgba(0,255,159,0.4); }
+}
+
+.shimmer-cell {
+  border: 1.5px solid rgba(0,255,159,0.4);
+  animation: shimmer-border 3s ease-in-out infinite;
+}
+
+.pinned-card {
+  border: 1.5px solid rgba(0,255,159,0.4);
+  animation: shimmer-border 3s ease-in-out infinite;
+}
