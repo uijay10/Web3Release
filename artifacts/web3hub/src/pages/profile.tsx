@@ -380,8 +380,7 @@ export default function Profile() {
 
       {/* ── 我的资料 Card ── */}
       <div className="bg-card border border-border rounded-2xl p-5">
-        <h2 className="text-base font-bold mb-1 text-foreground">{t("myProfile")}</h2>
-        <p className="text-xs text-muted-foreground mb-4">Web3Hub {t("dashboard")}</p>
+        <h2 className="text-base font-bold mb-1 text-foreground">{t("dashboard")}</h2>
 
         {/* 1. 空间用户 */}
         <InfoRow label={t("spaceLabel")}>

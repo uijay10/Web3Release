@@ -148,11 +148,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold bg-red-500 hover:bg-red-600 text-white shadow-sm transition-all">
                   <PenSquare className="w-4 h-4" /> {t("postNow")}
                 </Link>
-              ) : isConnected && meLoading ? null : (
-                <Link href="/apply" className="hidden sm:flex items-center gap-1 text-sm font-medium text-muted-foreground dark:text-slate-400 hover:text-foreground dark:hover:text-slate-200 transition-colors">
-                  {t("apply")}
-                </Link>
-              )}
+              ) : null}
 
               {!isConnected ? (
                 <button

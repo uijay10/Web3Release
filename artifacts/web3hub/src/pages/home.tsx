@@ -11,7 +11,10 @@ export default function Home() {
   const { t } = useLang();
   const { address, isConnected } = useWeb3Auth();
   const { data: meData } = useGetMe({ wallet: address ?? "" }, { query: { enabled: !!address && isConnected } });
-  const isSpaceOwner = meData?.user?.spaceStatus === "approved" || meData?.user?.spaceStatus === "active";
+  const spaceStatus = meData?.user?.spaceStatus;
+  const isSpaceOwner = spaceStatus === "approved" || spaceStatus === "active";
+  const hasJoined = isSpaceOwner;
+  const isPending = spaceStatus === "pending";
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -60,10 +63,14 @@ export default function Home() {
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground">Web3Hub</h1>
           <p className="text-muted-foreground text-sm mt-1">{t("tagline")}</p>
         </div>
-        {isSpaceOwner ? (
-          <Link href="/post/new" className="shrink-0 inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-bold bg-[#FF69B4] text-white hover:bg-[#ff4fa8] shadow-sm hover:shadow transition-all">
-            <PenSquare className="w-4 h-4" /> {t("postNow")}
-          </Link>
+        {hasJoined ? (
+          <span className="shrink-0 inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-bold bg-muted text-muted-foreground border border-border cursor-default select-none">
+            ✓ {t("alreadyJoined")}
+          </span>
+        ) : isPending ? (
+          <span className="shrink-0 inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40 cursor-default select-none">
+            {t("spacePending")}
+          </span>
         ) : (
           <Link href="/apply" className="shrink-0 inline-flex items-center gap-1 px-5 py-2 rounded-full text-sm font-bold bg-[#FF69B4] text-white hover:bg-[#ff4fa8] shadow-sm hover:shadow transition-all">
             {t("register")}
