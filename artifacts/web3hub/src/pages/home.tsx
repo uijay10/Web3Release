@@ -57,7 +57,7 @@ export default function Home() {
       {/* ── Header row ─────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pt-2">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight text-foreground">Web3Hub</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground">Web3Hub</h1>
           <p className="text-muted-foreground text-sm mt-1">{t("tagline")}</p>
         </div>
         {isSpaceOwner ? (

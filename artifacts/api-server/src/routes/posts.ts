@@ -88,7 +88,11 @@ router.post("/", async (req, res) => {
     isPinned: false,
   }).returning();
 
-  res.status(201).json(formatPost(inserted[0]));
+  res.status(201).json(formatPost({
+    ...inserted[0],
+    authorNameLive: user?.username ?? null,
+    authorAvatarLive: user?.avatar ?? null,
+  }));
 });
 
 router.post("/:id/like", async (req, res) => {

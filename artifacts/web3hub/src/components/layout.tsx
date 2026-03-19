@@ -4,7 +4,7 @@ import { useWeb3Auth } from "@/lib/web3";
 import { useGetMe } from "@workspace/api-client-react";
 import { useLang, type LangCode } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
-import { LogOut, User as UserIcon, Home, Mail, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare } from "lucide-react";
+import { LogOut, Home, Mail, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare } from "lucide-react";
 import { cn, truncateAddress, generateGradient } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
@@ -17,6 +17,7 @@ const NAV_ROW1_KEYS = [
   { key: "nav_events",      href: "/section/events" },
   { key: "nav_funding",     href: "/section/funding" },
   { key: "nav_jobs",        href: "/section/jobs" },
+  { key: "nav_nodes",       href: "/section/nodes" },
 ];
 
 const NAV_ROW2_KEYS = [
@@ -27,7 +28,6 @@ const NAV_ROW2_KEYS = [
   { key: "nav_ama",        href: "/section/ama" },
   { key: "nav_bugbounty",  href: "/section/bugbounty" },
   { key: "nav_community",  href: "/community" },
-  { key: "nav_nodes",      href: "/section/nodes" },
   { key: "nav_kol",        href: "/kol" },
   { key: "nav_developer",  href: "/developer" },
 ];
@@ -35,16 +35,12 @@ const NAV_ROW2_KEYS = [
 const LANGUAGES: { value: LangCode; label: string }[] = [
   { value: "en",    label: "English" },
   { value: "zh-CN", label: "中文简体" },
-  { value: "zh-TW", label: "中文繁體" },
-  { value: "ja",    label: "日語" },
-  { value: "ko",    label: "한국어" },
-  { value: "hi",    label: "हिन्दी" },
-  { value: "fr",    label: "Français" },
-  { value: "es",    label: "Español" },
-  { value: "it",    label: "Italiano" },
-  { value: "vi",    label: "Tiếng Việt" },
+  { value: "de",    label: "Deutsch" },
   { value: "ru",    label: "Русский" },
-  { value: "ar",    label: "العربية" },
+  { value: "fr",    label: "Français" },
+  { value: "ja",    label: "日本語" },
+  { value: "ko",    label: "한국어" },
+  { value: "vi",    label: "Tiếng Việt" },
 ];
 
 const DONATE_ADDR = "0xbe4548c1458be01838f1faafd69d335f0567399a";
@@ -56,7 +52,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [addrCopied, setAddrCopied] = useState(false);
-  const [spaceDialog, setSpaceDialog] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem("web3hub_dark");
     return saved !== null ? JSON.parse(saved) : false;
@@ -64,7 +59,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { t, lang, setLang } = useLang();
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const spaceDialogRef = useRef<HTMLDivElement>(null);
   const admin = isAdmin(address);
   const isSpaceOwner = meData?.user?.spaceStatus === "approved" || meData?.user?.spaceStatus === "active";
 
@@ -123,23 +117,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* ── Top Navbar ──────────────────────────────── */}
       <header className="sticky top-0 z-50 w-full glass-panel border-b border-border/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            {/* Logo — blue */}
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-blue-600/15 flex items-center justify-center group-hover:bg-blue-600/25 transition-colors">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-blue-600">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo — 1.5× bigger */}
+            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-blue-600/15 flex items-center justify-center group-hover:bg-blue-600/25 transition-colors">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 fill-blue-600">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" className="stroke-blue-600" />
                 </svg>
               </div>
-              <span className="font-display font-bold text-lg tracking-tight text-blue-600">Web3Hub</span>
+              <span className="font-display font-bold text-2xl tracking-tight text-blue-600">Web3Hub</span>
             </Link>
 
             <div className="flex items-center gap-3 ml-auto">
+              {/* Space owner → red Post button; else Apply link */}
               {isConnected && isSpaceOwner ? (
-                <button onClick={() => setSpaceDialog(true)}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800/40 transition-colors border border-green-200 dark:border-green-800">
-                  <span className="text-green-500">✓</span> {t("spaceOwner")}
-                </button>
+                <Link href="/post/new"
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold bg-red-500 hover:bg-red-600 text-white shadow-sm transition-all">
+                  <PenSquare className="w-4 h-4" /> {t("postNow")}
+                </Link>
               ) : (
                 <Link href="/apply" className="hidden sm:flex items-center gap-1 text-sm font-medium text-muted-foreground dark:text-slate-400 hover:text-foreground dark:hover:text-slate-200 transition-colors">
                   {t("apply")}
@@ -196,24 +191,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* ── Nav rows ── */}
         <div className="border-t border-border/30 bg-muted/20">
           <div className="max-w-7xl mx-auto px-2 py-1.5 space-y-1">
-            {/* Row 1: Home (red+big) + Language picker + 10 nav items */}
-            <div className="flex items-center gap-0.5 justify-center flex-nowrap overflow-x-auto scrollbar-none">
-              {/* Home button — blue square */}
-              <Link
-                href="/"
-                className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-lg font-extrabold transition-all shrink-0 mr-2",
-                  location === "/"
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-300"
-                    : "bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60"
-                )}
-                title={t("home")}
-              >
-                <Home className="w-5 h-5" />
-              </Link>
-
-              {/* Language selector + Dark mode toggle */}
-              <div className="flex items-center gap-2 shrink-0 mr-2">
+            {/* Row 1: left controls + 9 nav items right-aligned */}
+            <div className="flex items-center gap-2">
+              {/* Left controls: Home + Language + Dark */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Link
+                  href="/"
+                  className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-lg font-extrabold transition-all shrink-0",
+                    location === "/"
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-300"
+                      : "bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60"
+                  )}
+                  title={t("home")}
+                >
+                  <Home className="w-5 h-5" />
+                </Link>
                 <div className="relative">
                   <select
                     value={lang}
@@ -235,18 +228,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              {NAV_ROW1_KEYS.map(({ key, href }) => (
-                <Link key={key} href={href} className={navLinkClass(href)}>
-                  {location !== href && (
-                    <span className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/8 group-hover:scale-105 transition-all duration-200 origin-center" />
-                  )}
-                  <span className="relative z-10">{t(key)}</span>
-                </Link>
-              ))}
+              {/* Right: 9 nav items right-aligned */}
+              <div className="flex-1 flex items-center gap-0.5 justify-end overflow-x-auto scrollbar-none">
+                {NAV_ROW1_KEYS.map(({ key, href }) => (
+                  <Link key={key} href={href} className={navLinkClass(href)}>
+                    {location !== href && (
+                      <span className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/8 group-hover:scale-105 transition-all duration-200 origin-center" />
+                    )}
+                    <span className="relative z-10">{t(key)}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
 
-            {/* Row 2: 10 nav items, nodes below jobs */}
-            <div className="flex items-center gap-0.5 justify-start flex-nowrap overflow-x-auto scrollbar-none pl-12">
+            {/* Row 2: 9 nav items right-aligned (aligns with row 1 right edge) */}
+            <div className="flex items-center gap-0.5 justify-end overflow-x-auto scrollbar-none">
               {NAV_ROW2_KEYS.map(({ key, href }) => (
                 <Link key={key} href={href} className={navLinkClass(href)}>
                   {location !== href && (
@@ -263,31 +259,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-44">
         {children}
       </main>
-
-      {/* ── Space Owner Post Dialog ──────────────────── */}
-      {spaceDialog && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setSpaceDialog(false)}>
-          <div className="bg-card border border-border rounded-2xl p-7 max-w-sm w-full mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-                <PenSquare className="w-7 h-7 text-green-600 dark:text-green-400" />
-              </div>
-              <h2 className="text-xl font-bold mb-2">{t("spaceOwner")}</h2>
-              <p className="text-muted-foreground text-sm leading-relaxed">{t("spaceOwnerMsg")}</p>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setSpaceDialog(false)}
-                className="flex-1 py-3 rounded-xl border border-border font-semibold text-sm hover:bg-muted transition-colors">
-                {t("adminCancel")}
-              </button>
-              <Link href="/post/new" onClick={() => setSpaceDialog(false)}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm text-center hover:bg-primary/90 transition-colors">
-                {t("adminConfirm")}
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Fixed Bottom Footer ──────────────────────── */}
       <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-border/50 dark:border-slate-800 shadow-[0_-2px_16px_rgba(0,0,0,0.06)]">
