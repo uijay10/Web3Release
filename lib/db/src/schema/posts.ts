@@ -17,6 +17,8 @@ export const postsTable = pgTable("posts", {
   kolCommentPoints: integer("kol_comment_points").notNull().default(0),
   isPinned: boolean("is_pinned").notNull().default(false),
   pinnedUntil: timestamp("pinned_until"),
+  pinQueued: boolean("pin_queued").notNull().default(false),
+  pinQueuedAt: timestamp("pin_queued_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

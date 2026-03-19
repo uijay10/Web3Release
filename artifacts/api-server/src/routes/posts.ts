@@ -1,8 +1,10 @@
 import { Router, type IRouter } from "express";
 import { db, postsTable, usersTable } from "@workspace/db";
-import { eq, and, desc, sql, gte } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte } from "drizzle-orm";
 
 const router: IRouter = Router();
+
+const PIN_SLOTS = 14; // max simultaneous pinned posts on homepage
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -24,8 +26,40 @@ function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: strin
     kolCommentPoints: p.kolCommentPoints,
     isPinned: p.isPinned,
     pinnedUntil: p.pinnedUntil ? p.pinnedUntil.toISOString() : null,
+    pinQueued: p.pinQueued,
+    pinQueuedAt: p.pinQueuedAt ? p.pinQueuedAt.toISOString() : null,
     createdAt: p.createdAt.toISOString(),
   };
+}
+
+/** Auto-expire pinned posts and promote queued posts */
+async function expireAndPromote() {
+  // 1. Expire posts whose pinnedUntil has passed
+  await db.update(postsTable)
+    .set({ isPinned: false, pinnedUntil: null })
+    .where(and(eq(postsTable.isPinned, true), sql`${postsTable.pinnedUntil} < now()`));
+
+  // 2. Count currently pinned project posts
+  const pinnedCount = await db.select({ count: sql<number>`count(*)` })
+    .from(postsTable)
+    .where(and(eq(postsTable.isPinned, true), eq(postsTable.authorType, "project")));
+  const activeCount = Number(pinnedCount[0]?.count ?? 0);
+  const slotsAvailable = PIN_SLOTS - activeCount;
+
+  // 3. Promote queued posts (FIFO) to fill available slots
+  if (slotsAvailable > 0) {
+    const queued = await db.select().from(postsTable)
+      .where(and(eq(postsTable.pinQueued, true), eq(postsTable.authorType, "project")))
+      .orderBy(asc(postsTable.pinQueuedAt))
+      .limit(slotsAvailable);
+
+    for (const qp of queued) {
+      const pinnedUntil = new Date(Date.now() + 72 * 3600_000);
+      await db.update(postsTable)
+        .set({ isPinned: true, pinnedUntil, pinQueued: false, pinQueuedAt: null })
+        .where(eq(postsTable.id, qp.id));
+    }
+  }
 }
 
 router.get("/", async (req, res) => {
@@ -33,25 +67,27 @@ router.get("/", async (req, res) => {
   const authorType = req.query.authorType as string | undefined;
   const authorWallet = req.query.authorWallet as string | undefined;
   const pinnedOnly = req.query.pinned === "1" || req.query.pinned === "true";
+  // home=1 means filter by project-type only (home page both zones)
+  const homeMode = req.query.home === "1";
   const page = Math.max(1, parseInt(req.query.page as string ?? "1"));
   const limit = Math.min(50, parseInt(req.query.limit as string ?? "20"));
   const offset = (page - 1) * limit;
 
-  // Auto-expire pinned posts (pinnedUntil has passed)
-  await db.update(postsTable)
-    .set({ isPinned: false, pinnedUntil: null })
-    .where(and(eq(postsTable.isPinned, true), sql`${postsTable.pinnedUntil} < now()`));
+  await expireAndPromote();
 
   const conditions = [];
   if (section) conditions.push(eq(postsTable.section, section));
   if (authorType) conditions.push(eq(postsTable.authorType, authorType));
+  if (homeMode) conditions.push(eq(postsTable.authorType, "project"));
   if (authorWallet) conditions.push(eq(postsTable.authorWallet, authorWallet.toLowerCase()));
   if (pinnedOnly) conditions.push(eq(postsTable.isPinned, true));
 
-  const all = await db.select().from(postsTable).where(conditions.length ? and(...conditions) : undefined);
+  const where = conditions.length ? and(...conditions) : undefined;
+
+  const all = await db.select({ count: sql<number>`count(*)` }).from(postsTable).where(where);
   const posts = await db.select().from(postsTable)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(postsTable.isPinned), desc(postsTable.createdAt))
+    .where(where)
+    .orderBy(desc(postsTable.createdAt))
     .limit(limit)
     .offset(offset);
 
@@ -64,9 +100,9 @@ router.get("/", async (req, res) => {
 
   res.json({
     posts: posts.map(p => formatPost({ ...p, authorNameLive: userMap[p.authorWallet]?.username ?? null, authorAvatarLive: userMap[p.authorWallet]?.avatar ?? null })),
-    total: all.length,
+    total: Number(all[0]?.count ?? 0),
     page,
-    totalPages: Math.ceil(all.length / limit),
+    totalPages: Math.ceil(Number(all[0]?.count ?? 0) / limit),
   });
 });
 
@@ -85,12 +121,11 @@ router.post("/", async (req, res) => {
   const isAdmin = (user.energy ?? 0) >= 99_000_000_000_000;
 
   if (!isAdmin) {
-    // Check energy
     if ((user.energy ?? 0) <= 0) {
       return res.status(402).json({ error: "INSUFFICIENT_ENERGY" });
     }
 
-    // KOL 48h inactivity penalty (check before daily limit so penalty applies first)
+    // KOL 48h inactivity penalty
     if (spaceType === "kol") {
       const lastPostRows = await db.select({ createdAt: postsTable.createdAt })
         .from(postsTable).where(eq(postsTable.authorWallet, lw)).orderBy(desc(postsTable.createdAt)).limit(1);
@@ -108,7 +143,7 @@ router.post("/", async (req, res) => {
       }
     }
 
-    // Daily post limit (KOL: 20, developer: 10, project: unlimited)
+    // Daily post limit
     const dailyLimit = spaceType === "kol" ? 20 : spaceType === "developer" ? 10 : 0;
     if (dailyLimit > 0) {
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
@@ -120,7 +155,6 @@ router.post("/", async (req, res) => {
       }
     }
 
-    // Deduct 1 energy
     await db.update(usersTable).set({ energy: (user.energy ?? 1) - 1 }).where(eq(usersTable.wallet, lw));
   }
 
@@ -137,6 +171,7 @@ router.post("/", async (req, res) => {
     kolLikePoints: 0,
     kolCommentPoints: 0,
     isPinned: false,
+    pinQueued: false,
   }).returning();
 
   res.status(201).json(formatPost({
@@ -269,7 +304,7 @@ router.post("/:id/pin", async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
-  const { wallet, hours } = req.body;
+  const { wallet } = req.body;
   if (!wallet) return res.status(400).json({ error: "wallet required" });
 
   const lw = wallet.toLowerCase();
@@ -278,11 +313,43 @@ router.post("/:id/pin", async (req, res) => {
   if (!user) return res.status(404).json({ error: "User not found" });
   if ((user.pinCount ?? 0) <= 0) return res.status(403).json({ error: "No pin credits" });
 
-  const pinnedUntil = new Date(Date.now() + 72 * 3600_000);
-  await db.update(postsTable).set({ isPinned: true, pinnedUntil }).where(eq(postsTable.id, id));
+  // Check post belongs to a project-type user
+  const postRows = await db.select().from(postsTable).where(eq(postsTable.id, id)).limit(1);
+  if (!postRows.length) return res.status(404).json({ error: "Post not found" });
+  const post = postRows[0];
+  if (post.authorType !== "project") {
+    return res.status(403).json({ error: "Only project posts can be pinned to homepage" });
+  }
+
+  // Deduct pinCount immediately (whether pinned or queued)
   await db.update(usersTable).set({ pinCount: (user.pinCount ?? 0) - 1 }).where(eq(usersTable.wallet, lw));
 
-  res.json({ ok: true, pinnedUntil: pinnedUntil.toISOString() });
+  // Count active pinned project posts
+  const activeRows = await db.select({ count: sql<number>`count(*)` })
+    .from(postsTable)
+    .where(and(eq(postsTable.isPinned, true), eq(postsTable.authorType, "project")));
+  const activeCount = Number(activeRows[0]?.count ?? 0);
+
+  if (activeCount < PIN_SLOTS) {
+    // Slot available → pin immediately
+    const pinnedUntil = new Date(Date.now() + 72 * 3600_000);
+    await db.update(postsTable)
+      .set({ isPinned: true, pinnedUntil, pinQueued: false, pinQueuedAt: null })
+      .where(eq(postsTable.id, id));
+    return res.json({ ok: true, queued: false, pinnedUntil: pinnedUntil.toISOString() });
+  } else {
+    // All 14 slots full → join queue
+    await db.update(postsTable)
+      .set({ pinQueued: true, pinQueuedAt: new Date() })
+      .where(eq(postsTable.id, id));
+    // Calculate estimated wait: find the earliest-expiring pinned post
+    const earliest = await db.select({ pinnedUntil: postsTable.pinnedUntil })
+      .from(postsTable)
+      .where(and(eq(postsTable.isPinned, true), eq(postsTable.authorType, "project")))
+      .orderBy(asc(postsTable.pinnedUntil))
+      .limit(1);
+    return res.json({ ok: true, queued: true, estimatedAt: earliest[0]?.pinnedUntil?.toISOString() ?? null });
+  }
 });
 
 router.delete("/:id", async (req, res) => {

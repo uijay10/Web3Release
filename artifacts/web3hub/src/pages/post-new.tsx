@@ -70,6 +70,8 @@ export default function PostNew() {
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
   const [showRecharge, setShowRecharge] = useState(false);
+  const [pinQueued, setPinQueued] = useState(false);
+  const [pinQueuedEstimate, setPinQueuedEstimate] = useState<string | null>(null);
 
   const availableSections = getSections(spaceType);
   const inputCls = "w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground";
@@ -91,11 +93,16 @@ export default function PostNew() {
 
   const pinPost = async (postId: number) => {
     const apiBase = getApiBase();
-    await fetch(`${apiBase}/posts/${postId}/pin`, {
+    const res = await fetch(`${apiBase}/posts/${postId}/pin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ wallet: address }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (data.queued) {
+      setPinQueued(true);
+      setPinQueuedEstimate(data.estimatedAt ?? null);
+    }
   };
 
   const handleConfirmedPost = () => {
@@ -140,10 +147,29 @@ export default function PostNew() {
 
   if (step === "done") {
     return (
-      <div className="py-32 text-center max-w-md mx-auto animate-in zoom-in">
-        <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-6" />
-        <h2 className="text-3xl font-bold mb-3">{t("postSuccess")}</h2>
-        <p className="text-muted-foreground">正在跳回首页...</p>
+      <div className="py-24 text-center max-w-md mx-auto animate-in zoom-in space-y-6">
+        <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto" />
+        <div>
+          <h2 className="text-3xl font-bold mb-2">{t("postSuccess")}</h2>
+          {pinQueued ? (
+            <div className="mt-4 px-5 py-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/50 text-left space-y-1.5">
+              <p className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                <Pin className="w-4 h-4" /> 置顶排队中
+              </p>
+              <p className="text-sm text-amber-600 dark:text-amber-400/80 leading-relaxed">
+                当前14个置顶位均已占满，您的帖子已加入排队，待有空位时将自动上架置顶区。
+              </p>
+              {pinQueuedEstimate && (
+                <p className="text-xs text-muted-foreground">
+                  预计最早空位时间：{new Date(pinQueuedEstimate).toLocaleString("zh-CN")}
+                </p>
+              )}
+            </div>
+          ) : wantToPin ? (
+            <p className="text-green-600 text-sm mt-1 font-semibold">✓ 帖子已成功置顶3天</p>
+          ) : null}
+          <p className="text-muted-foreground text-sm mt-4">正在跳回首页...</p>
+        </div>
       </div>
     );
   }

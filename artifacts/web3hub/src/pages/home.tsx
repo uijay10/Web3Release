@@ -8,6 +8,7 @@ import { useLang } from "@/lib/i18n";
 import { generateGradient } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
+const PIN_SLOTS = 14;
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -27,48 +28,65 @@ function countdown(until: string) {
   return `${mins}m`;
 }
 
-function AuthorAvatar({ post, size = "sm" }: { post: any; size?: "sm" | "md" }) {
-  const initials = ((post.authorName ?? post.authorWallet ?? "??").slice(0, 2)).toUpperCase();
-  const cls = size === "md"
-    ? "w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden"
-    : "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden";
+function AuthorAvatar({ wallet, name, avatar, size = "sm" }: { wallet: string; name?: string | null; avatar?: string | null; size?: "sm" | "md" | "lg" }) {
+  const initials = ((name ?? wallet ?? "?").slice(0, 2)).toUpperCase();
+  const cls = {
+    sm: "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden",
+    md: "w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden",
+    lg: "w-12 h-12 rounded-xl shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden",
+  }[size];
   return (
-    <div className={cls} style={{ background: generateGradient(post.authorWallet ?? "0") }}>
-      {post.authorAvatar
-        ? <img src={post.authorAvatar} className="w-full h-full object-cover" alt="" />
-        : initials}
+    <div className={cls} style={{ background: generateGradient(wallet ?? "0") }}>
+      {avatar ? <img src={avatar} className="w-full h-full object-cover" alt="" /> : initials}
     </div>
   );
 }
 
+// ── Pinned zone card (project posts only) ─────────────────
 function PostPinnedCard({ post }: { post: any }) {
   const cd = post.pinnedUntil ? countdown(post.pinnedUntil) : "";
   return (
     <Link href={`/post/${post.id}`}
-      className="relative aspect-square rounded-xl bg-card border border-amber-200 dark:border-amber-700/50 overflow-hidden flex flex-col items-center justify-center p-2.5 text-center hover:border-primary hover:shadow-md transition-all group">
-      <Pin className="absolute top-1.5 right-1.5 w-2.5 h-2.5 text-amber-400" />
-      <AuthorAvatar post={post} size="md" />
-      <p className="text-[9px] text-muted-foreground truncate w-full mt-1">{post.authorName ?? post.authorWallet?.slice(0, 6)}</p>
-      <p className="text-[10px] font-semibold line-clamp-2 leading-snug text-foreground mt-0.5">{post.title}</p>
-      {cd && <span className="text-[9px] text-amber-500 font-bold mt-1 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded-full">{cd}</span>}
+      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-3 hover:shadow-md hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer">
+      <Pin className="absolute top-2 right-2 w-3 h-3 text-red-400" />
+      <div className="flex items-center gap-2 mb-2">
+        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="md" />
+        <p className="text-xs font-semibold text-foreground truncate flex-1">{post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`}</p>
+      </div>
+      <p className="text-[11px] font-bold text-foreground line-clamp-2 leading-snug flex-1">{post.title}</p>
+      {post.content && (
+        <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1 leading-snug">{post.content.slice(0, 50)}</p>
+      )}
+      {cd && (
+        <span className="mt-2 self-start text-[9px] text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded-full">{cd}</span>
+      )}
     </Link>
   );
 }
 
-function PostRegularCard({ post }: { post: any }) {
+// Empty pinned slot placeholder
+function PinnedSlotEmpty() {
+  return (
+    <div className="rounded-xl border-2 border-dashed border-border/30 bg-muted/5 flex items-center justify-center min-h-[90px]">
+      <Pin className="w-4 h-4 text-border/40" />
+    </div>
+  );
+}
+
+// ── Regular zone card (project posts only) ────────────────
+function PostRegularCard({ post, num }: { post: any; num: number }) {
   return (
     <Link href={`/post/${post.id}`}
-      className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors group">
-      <AuthorAvatar post={post} />
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border/30 bg-card hover:border-primary/40 hover:shadow-sm transition-all group cursor-pointer">
+      <span className={`text-xs font-bold w-5 shrink-0 text-center ${num <= 3 ? "text-red-500" : "text-muted-foreground"}`}>{num}</span>
+      <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="sm" />
       <div className="flex-1 min-w-0">
         <p className="text-[10px] text-muted-foreground truncate leading-none mb-0.5">
           {post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`}
         </p>
-        <p className="text-sm font-semibold text-foreground truncate leading-tight">{post.title}</p>
+        <p className="text-sm font-semibold text-foreground truncate leading-snug">{post.title}</p>
         {post.content && (
-          <p className="text-[10px] text-muted-foreground truncate leading-none mt-0.5">
-            {post.content.slice(0, 60)}
-          </p>
+          <p className="text-[10px] text-muted-foreground truncate leading-none mt-0.5">{post.content.slice(0, 60)}</p>
         )}
       </div>
       <span className="shrink-0 flex items-center gap-0.5 text-xs text-primary font-semibold group-hover:underline whitespace-nowrap">
@@ -97,21 +115,28 @@ export default function Home() {
 
   useEffect(() => { setPage(1); }, [debouncedSearch]);
 
-  // Pinned posts (direct fetch since `pinned` param not in generated types)
+  // ── Pinned posts: project-type only, pinned=1 ──────────────
   const { data: pinnedData } = useQuery({
-    queryKey: ["/api/posts", "pinned"],
+    queryKey: ["/api/posts", "pinned-home"],
     queryFn: async () => {
-      const res = await fetch(`${getApiBase()}/posts?pinned=1&limit=14`);
+      const res = await fetch(`${getApiBase()}/posts?pinned=1&authorType=project&limit=${PIN_SLOTS}`);
       return res.json() as Promise<{ posts: any[] }>;
     },
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
 
-  // Regular posts
-  const { data: postsData, isLoading } = useGetPosts({ page, limit: PAGE_SIZE });
+  // ── Regular posts: project-type only ────────────────────
+  const { data: postsData, isLoading } = useQuery({
+    queryKey: ["/api/posts", "home-regular", page],
+    queryFn: async () => {
+      const res = await fetch(`${getApiBase()}/posts?authorType=project&page=${page}&limit=${PAGE_SIZE}`);
+      return res.json() as Promise<{ posts: any[]; total: number; totalPages: number; page: number }>;
+    },
+    staleTime: 30_000,
+  });
 
-  // Hot rank posts (top 10 most recent, for now)
+  // ── Hot rank: project-type, most likes (recent for now) ──
   const { data: hotData } = useGetPosts({ page: 1, limit: 10 });
 
   const pinnedPosts = pinnedData?.posts ?? [];
@@ -119,6 +144,9 @@ export default function Home() {
   const totalPages = postsData?.totalPages ?? 1;
   const total = postsData?.total ?? 0;
   const hotPosts = hotData?.posts ?? [];
+
+  // Build fixed 14-slot grid (filled + empty)
+  const pinnedSlots = Array.from({ length: PIN_SLOTS }, (_, i) => pinnedPosts[i] ?? null);
 
   return (
     <div className="space-y-6 pb-4">
@@ -178,59 +206,59 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Pinned Zone ─────────────────────────────────── */}
+      {/* ── Pinned Zone (14 fixed slots, project posts only) ─── */}
       <section className="pt-6">
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("pinned")}</h2>
           <span className="w-2 h-2 rounded-full bg-[#00FF9F] shadow-[0_0_8px_#00FF9F] animate-pulse" />
-          <span className="text-xs text-muted-foreground ml-1">置顶帖子（3天倒计时）</span>
+          <span className="text-xs text-muted-foreground ml-1">
+            置顶区（项目方专属 · {pinnedPosts.length}/{PIN_SLOTS} 已占用 · 3天倒计时）
+          </span>
         </div>
+        {/* Always render exactly 14 slots in a 7-column grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-          {pinnedPosts.length > 0
-            ? pinnedPosts.map(post => <PostPinnedCard key={post.id} post={post} />)
-            : Array.from({ length: 14 }).map((_, i) => (
-                <div key={i} className="aspect-square rounded-xl border border-dashed border-border/40 bg-muted/10" />
-              ))
-          }
+          {pinnedSlots.map((post, i) =>
+            post
+              ? <PostPinnedCard key={post.id} post={post} />
+              : <PinnedSlotEmpty key={`empty-${i}`} />
+          )}
         </div>
       </section>
 
-      {/* ── Regular Zone + Hot Rank sidebar ─────────────── */}
+      {/* ── Regular Zone + Hot Rank (project posts only) ─────── */}
       <section className="pt-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("regular")}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("regular")}</h2>
+            <span className="text-xs text-muted-foreground">（项目方帖子 · 最新优先）</span>
+          </div>
           {total > 0 && (
-            <span className="text-xs text-muted-foreground">{t("total")} {total} {t("projects")}</span>
+            <span className="text-xs text-muted-foreground">{t("total")} {total} 条</span>
           )}
         </div>
 
         <div className="flex gap-4 items-start">
-          {/* ── Left: 2-col numbered post list ── */}
+          {/* ── Left: 2-col post list ── */}
           <div className="flex-1 min-w-0">
             {isLoading ? (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                  <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+              <div className="grid grid-cols-2 gap-3">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="h-16 rounded-xl bg-muted animate-pulse" />
                 ))}
               </div>
             ) : posts.length === 0 ? (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              <div className="grid grid-cols-2 gap-3">
                 {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="h-16 rounded-lg border border-dashed border-border/40 bg-muted/10" />
+                  <div key={i} className="h-16 rounded-xl border-2 border-dashed border-border/30 bg-muted/5 flex items-center justify-center">
+                    <span className="text-xs text-border/40">暂无帖子</span>
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-x-3 gap-y-0">
+              <div className="grid grid-cols-2 gap-3">
                 {posts.map((post, idx) => {
                   const globalNum = (page - 1) * PAGE_SIZE + idx + 1;
-                  return (
-                    <div key={post.id} className="flex items-start gap-1.5 border-b border-border/20 last:border-0">
-                      <span className="text-xs font-bold text-muted-foreground w-5 shrink-0 text-right pt-2.5">{globalNum}</span>
-                      <div className="flex-1 min-w-0 py-1">
-                        <PostRegularCard post={post} />
-                      </div>
-                    </div>
-                  );
+                  return <PostRegularCard key={post.id} post={post} num={globalNum} />;
                 })}
               </div>
             )}
@@ -286,7 +314,7 @@ export default function Home() {
                         <span className={`text-xs font-bold w-5 shrink-0 text-center ${idx < 3 ? "text-orange-600 dark:text-orange-400 font-extrabold" : "text-muted-foreground"}`}>
                           {idx + 1}
                         </span>
-                        <AuthorAvatar post={post} />
+                        <AuthorAvatar wallet={post.authorWallet ?? ""} name={post.authorName} avatar={post.authorAvatar} size="sm" />
                         <div className="min-w-0 flex-1">
                           <p className="text-[10px] text-muted-foreground truncate">{post.authorName ?? post.authorWallet?.slice(0, 8)}</p>
                           <p className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
