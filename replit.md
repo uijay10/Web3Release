@@ -1,4 +1,4 @@
-# Workspace
+# Web3Hub Workspace
 
 ## Overview
 
@@ -48,7 +48,7 @@ artifacts-monorepo/
 - **/kol** – KOL Zone (leaderboard + timeline, gold/purple borders)
 - **/developer** – Developer Column (timeline, green borders)
 - **/community** – Community Chat (timeline with KOL/project tags)
-- **/profile** – User dashboard (check-in, points, energy, social links, invite code, admin panel link)
+- **/profile** – Full 10-section user dashboard (space status, check-in, points, energy, X link, website, wallet, invite code+invited list, post button, my posts w/ delete+pin); Admin view: avatar + post btn + admin panel link
 - **/apply** – Apply for Space form (KOL / Project / Developer) — article template + X post link
 - **/project/:id** – Project detail page
 - **/section/:slug** – Section page (15 sections, i18n labels/descriptions)
@@ -74,7 +74,7 @@ artifacts-monorepo/
 - `/admin` routes: list users, list/approve/reject/batch applications, edit per-user energy/points/pinCount/ban, bulk all-users points ops, CSV export
 
 ### Database Tables
-- `users` – wallet, points, energy, space status, invite code, is_banned, pin_count
+- `users` – wallet, points, energy, space status, invite code, is_banned, pin_count, website, spaceRejectedAt, invitedBy
 - `projects` – name, logo, owner wallet, pinned status, status
 - `posts` – title, content, section, author info, likes, comments
 - `space_applications` – wallet, type (kol/project/developer), links, status
