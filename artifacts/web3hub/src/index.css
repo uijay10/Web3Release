@@ -106,10 +106,10 @@
 
 .shimmer-cell {
   border: 1.5px solid rgba(0,255,159,0.4);
-  animation: shimmer-border 3s ease-in-out infinite;
+  animation: shimmer-border 8s ease-in-out infinite;
 }
 
 .pinned-card {
   border: 1.5px solid rgba(0,255,159,0.4);
-  animation: shimmer-border 3s ease-in-out infinite;
+  animation: shimmer-border 8s ease-in-out infinite;
 }

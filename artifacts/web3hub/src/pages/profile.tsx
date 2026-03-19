@@ -4,26 +4,11 @@ import { generateGradient, truncateAddress } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import {
   Zap, Star, Copy, Check, AlertCircle, Gift, Clock, Edit2,
-  Twitter, Send, Hash, Pin, Trash2, ChevronDown, Save
+  Twitter, Send, Hash, Pin, Trash2, Save
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { useLang, type LangCode } from "@/lib/i18n";
-
-const LANGUAGES: { value: LangCode; label: string }[] = [
-  { value: "ja",    label: "日語" },
-  { value: "ko",    label: "한국어" },
-  { value: "hi",    label: "हिन्दी" },
-  { value: "en",    label: "English" },
-  { value: "fr",    label: "Français" },
-  { value: "es",    label: "Español" },
-  { value: "it",    label: "Italiano" },
-  { value: "vi",    label: "Tiếng Việt" },
-  { value: "ru",    label: "Русский" },
-  { value: "ar",    label: "العربية" },
-  { value: "zh-CN", label: "中文简体" },
-  { value: "zh-TW", label: "中文繁體" },
-];
+import { useLang } from "@/lib/i18n";
 
 function useCountdown(targetIso: string | null | undefined) {
   const [remaining, setRemaining] = useState("");
@@ -75,13 +60,12 @@ export default function Profile() {
     { authorType: address ?? "" },
     { query: { enabled: !!address } }
   );
-  const { t, lang, setLang } = useLang();
+  const { t } = useLang();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [twitter, setTwitter] = useState("");
   const [telegram, setTelegram] = useState("");
   const [discord, setDiscord] = useState("");
-  const [language, setLanguage] = useState<LangCode>("en");
   const [dirty, setDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
@@ -96,10 +80,7 @@ export default function Profile() {
       setTwitter(user.twitter ?? "");
       setTelegram(user.telegram ?? "");
       setDiscord(user.discord ?? "");
-      const savedLang = (user.language ?? lang) as LangCode;
-      setLanguage(savedLang);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const markDirty = (fn: () => void) => () => { fn(); setDirty(true); };
@@ -108,11 +89,10 @@ export default function Profile() {
     if (!address || !dirty) return;
     setSaveStatus("saving");
     upsertMutation.mutate(
-      { data: { wallet: address, twitter, telegram, discord, language } },
+      { data: { wallet: address, twitter, telegram, discord } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
-          setLang(language);
           setDirty(false);
           setSaveStatus("saved");
           setTimeout(() => setSaveStatus("idle"), 2500);
@@ -302,52 +282,31 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* ── Social links + Language ────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Social links */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5">
-          <h2 className="text-sm font-bold mb-4">{t("social")}</h2>
-          <div className="space-y-3">
-            {([
-              { icon: <Twitter className="w-4 h-4 text-sky-500" />, label: "X / Twitter", value: twitter, onChange: markDirty((v) => setTwitter(v as string)), placeholder: "https://x.com/yourhandle" },
-              { icon: <Send className="w-4 h-4 text-blue-500" />, label: "Telegram", value: telegram, onChange: markDirty((v) => setTelegram(v as string)), placeholder: "https://t.me/yourhandle" },
-              { icon: <Hash className="w-4 h-4 text-indigo-500" />, label: "Discord", value: discord, onChange: markDirty((v) => setDiscord(v as string)), placeholder: "https://discord.gg/yourlink" },
-            ] as Array<{ icon: React.ReactNode; label: string; value: string; onChange: (v: string) => void; placeholder: string }>)
-              .map(({ icon, label, value, onChange, placeholder }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="w-7 flex justify-center shrink-0">{icon}</div>
-                  <span className="w-24 text-xs text-muted-foreground shrink-0">{label}</span>
-                  <input
-                    type="url"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className="flex-1 text-sm bg-muted/40 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 min-w-0"
-                  />
-                  {value && (
-                    <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline shrink-0">↗</a>
-                  )}
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* Language */}
-        <div className="bg-card border border-border rounded-2xl p-5">
-          <h2 className="text-sm font-bold mb-4">{t("language")}</h2>
-          <div className="relative">
-            <select
-              value={language}
-              onChange={(e) => { setLanguage(e.target.value as LangCode); setDirty(true); }}
-              className="w-full appearance-none bg-muted/40 border border-border rounded-xl px-4 py-2.5 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l.value} value={l.value}>{l.label}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">修改后点击右上角「{t("save")}」按钮生效</p>
+      {/* ── Social links ──────────────────────────────── */}
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h2 className="text-sm font-bold mb-4">{t("social")}</h2>
+        <div className="space-y-3">
+          {([
+            { icon: <Twitter className="w-4 h-4 text-sky-500" />, label: "X / Twitter", value: twitter, onChange: markDirty((v) => setTwitter(v as string)), placeholder: "https://x.com/yourhandle" },
+            { icon: <Send className="w-4 h-4 text-blue-500" />, label: "Telegram", value: telegram, onChange: markDirty((v) => setTelegram(v as string)), placeholder: "https://t.me/yourhandle" },
+            { icon: <Hash className="w-4 h-4 text-indigo-500" />, label: "Discord", value: discord, onChange: markDirty((v) => setDiscord(v as string)), placeholder: "https://discord.gg/yourlink" },
+          ] as Array<{ icon: React.ReactNode; label: string; value: string; onChange: (v: string) => void; placeholder: string }>)
+            .map(({ icon, label, value, onChange, placeholder }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className="w-7 flex justify-center shrink-0">{icon}</div>
+                <span className="w-24 text-xs text-muted-foreground shrink-0">{label}</span>
+                <input
+                  type="url"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  placeholder={placeholder}
+                  className="flex-1 text-sm bg-muted/40 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 min-w-0"
+                />
+                {value && (
+                  <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline shrink-0">↗</a>
+                )}
+              </div>
+            ))}
         </div>
       </div>
 
