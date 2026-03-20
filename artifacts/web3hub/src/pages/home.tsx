@@ -255,7 +255,7 @@ export default function Home() {
           </span>
         </div>
         {/* 4 cols on md+, 2 on mobile — always 16 equal slots, ~3x larger than before */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {pinnedSlots.map((post, i) => (
             <div key={post ? `post-${post.id}` : `empty-${i}`} className="aspect-[3/2]">
               {post ? <PostPinnedCard post={post} /> : <PinnedSlotEmpty />}
