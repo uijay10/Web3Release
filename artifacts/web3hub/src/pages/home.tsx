@@ -35,10 +35,12 @@ function countdown(until: string) {
 }
 
 function AuthorAvatar({ wallet, name, avatar, size = "sm" }: {
-  wallet: string; name?: string | null; avatar?: string | null; size?: "sm" | "md" | "lg";
+  wallet: string; name?: string | null; avatar?: string | null; size?: "sm" | "md" | "lg" | "xl";
 }) {
   const initials = ((name ?? wallet ?? "?").slice(0, 2)).toUpperCase();
-  const cls = size === "lg"
+  const cls = size === "xl"
+    ? "w-20 h-20 rounded-full shrink-0 flex items-center justify-center text-base font-bold text-white overflow-hidden"
+    : size === "lg"
     ? "w-14 h-14 rounded-full shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden"
     : size === "md"
     ? "w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden"
@@ -70,28 +72,28 @@ function PostPinnedCard({ post }: { post: any }) {
     <Link href={`/section/${post.section}`}
       className="relative rounded-2xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-5 hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
       <span className="absolute inset-0 rounded-2xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
-      {/* Row 1: big avatar top-left + name (full) + section + time */}
-      <div className="flex items-start gap-3 mb-3">
-        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
+      {/* Row 1: xl avatar top-left + name (full) + section + time */}
+      <div className="flex items-start gap-4 mb-4">
+        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="xl" />
         <div className="flex-1 min-w-0">
-          <p className="text-base font-bold text-foreground leading-snug break-words">{displayName}</p>
-          <div className="flex flex-wrap items-center gap-2 mt-1">
-            <span className="text-xs text-primary font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
-            <span className="text-xs text-muted-foreground shrink-0">{timeAgo}</span>
+          <p className="text-xl font-bold text-foreground leading-snug break-words">{displayName}</p>
+          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+            <span className="text-sm text-primary font-semibold px-3 py-1 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
+            <span className="text-sm text-muted-foreground shrink-0">{timeAgo}</span>
           </div>
         </div>
       </div>
       {/* Title */}
-      <p className="text-base font-bold text-foreground line-clamp-1 leading-snug mb-1">{post.title}</p>
+      <p className="text-xl font-bold text-foreground line-clamp-1 leading-snug mb-2">{post.title}</p>
       {/* Content fills remaining space */}
       {post.content && (
-        <p className="text-sm text-muted-foreground line-clamp-2 leading-snug">{post.content}</p>
+        <p className="text-base text-muted-foreground line-clamp-2 leading-snug">{post.content}</p>
       )}
       {/* Spacer pushes countdown to bottom-left */}
       <div className="flex-1" />
       {/* Countdown — bottom-left */}
       {cd && (
-        <span className="self-start text-sm text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-3 py-1 rounded-full">{cd}</span>
+        <span className="self-start text-base text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-4 py-1.5 rounded-full">{cd}</span>
       )}
     </Link>
   );
@@ -253,7 +255,7 @@ export default function Home() {
           </span>
         </div>
         {/* 4 cols on md+, 2 on mobile — always 16 equal slots, ~3x larger than before */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {pinnedSlots.map((post, i) => (
             <div key={post ? `post-${post.id}` : `empty-${i}`} className="aspect-[3/2]">
               {post ? <PostPinnedCard post={post} /> : <PinnedSlotEmpty />}
