@@ -144,7 +144,7 @@ router.post("/", async (req, res) => {
     }
 
     // Daily post limit
-    const dailyLimit = spaceType === "kol" ? 20 : spaceType === "developer" ? 10 : 0;
+    const dailyLimit = spaceType === "project" ? 20 : spaceType === "kol" ? 20 : spaceType === "developer" ? 20 : 0;
     if (dailyLimit > 0) {
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
       const todayRows = await db.select({ count: sql<number>`count(*)` })
@@ -179,6 +179,21 @@ router.post("/", async (req, res) => {
     authorNameLive: user?.username ?? null,
     authorAvatarLive: user?.avatar ?? null,
   }));
+});
+
+router.get("/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+  const posts = await db.select().from(postsTable).where(eq(postsTable.id, id)).limit(1);
+  if (!posts.length) return res.status(404).json({ error: "Post not found" });
+
+  const p = posts[0];
+  const users = await db.select({ wallet: usersTable.wallet, username: usersTable.username, avatar: usersTable.avatar })
+    .from(usersTable).where(eq(usersTable.wallet, p.authorWallet)).limit(1);
+  const u = users[0];
+
+  res.json(formatPost({ ...p, authorNameLive: u?.username ?? null, authorAvatarLive: u?.avatar ?? null }));
 });
 
 router.post("/:id/like", async (req, res) => {

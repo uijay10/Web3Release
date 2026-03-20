@@ -12,6 +12,7 @@ import Profile from "@/pages/profile";
 import PublicProfile from "@/pages/profile-public";
 import ApplySpace from "@/pages/apply";
 import PostNew from "@/pages/post-new";
+import PostDetail from "@/pages/post-detail";
 import ProjectDetail from "@/pages/project-detail";
 import SectionPage from "@/pages/section";
 import AdminPage from "@/pages/admin";
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/profile/:wallet" component={PublicProfile} />
       <Route path="/apply" component={ApplySpace} />
       <Route path="/post/new" component={PostNew} />
+      <Route path="/post/:id" component={PostDetail} />
       <Route path="/project/:id" component={ProjectDetail} />
       <Route path="/section/:slug" component={SectionPage} />
       <Route path="/admin" component={AdminPage} />

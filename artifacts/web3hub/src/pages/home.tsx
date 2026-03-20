@@ -139,9 +139,9 @@ export default function Home() {
   const totalPages = postsData?.totalPages ?? 1;
   const total = postsData?.total ?? 0;
 
-  // Rule: same user's posts must NOT appear in both zones
-  const pinnedWallets = new Set(pinnedPosts.map((p: any) => p.authorWallet?.toLowerCase()));
-  const posts = allPosts.filter((p: any) => !pinnedWallets.has(p.authorWallet?.toLowerCase()));
+  // Only hide the exact posts already shown in pinned zone (not ALL posts from same user)
+  const pinnedIds = new Set(pinnedPosts.map((p: any) => p.id));
+  const posts = allPosts.filter((p: any) => !pinnedIds.has(p.id));
 
   // Build fixed 16-slot grid
   const pinnedSlots = Array.from({ length: PIN_SLOTS }, (_, i) => pinnedPosts[i] ?? null);
