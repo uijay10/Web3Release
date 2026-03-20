@@ -15,6 +15,7 @@ import PostNew from "@/pages/post-new";
 import ProjectDetail from "@/pages/project-detail";
 import SectionPage from "@/pages/section";
 import AdminPage from "@/pages/admin";
+import MembersPage from "@/pages/members";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/project/:id" component={ProjectDetail} />
       <Route path="/section/:slug" component={SectionPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/members" component={MembersPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useGetPosts, useGetMe } from "@workspace/api-client-react";
 import { useQuery } from "@tanstack/react-query";
 import { useWeb3Auth } from "@/lib/web3";
-import { Search, PenSquare, ChevronLeft, ChevronRight, CheckCircle2, Pin, Eye } from "lucide-react";
+import { Search, PenSquare, ChevronLeft, ChevronRight, CheckCircle2, Eye } from "lucide-react";
 import { Link } from "wouter";
 import { useLang } from "@/lib/i18n";
 import { generateGradient } from "@/lib/utils";
@@ -47,8 +47,8 @@ function PostPinnedCard({ post }: { post: any }) {
   const cd = post.pinnedUntil ? countdown(post.pinnedUntil) : "";
   return (
     <Link href={`/post/${post.id}`}
-      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-4 hover:shadow-md hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full">
-      <Pin className="absolute top-2.5 right-2.5 w-4 h-4 text-red-400 shrink-0" />
+      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-4 hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
+      <span className="absolute inset-0 rounded-xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
       <div className="flex items-center gap-2.5 mb-2">
         <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="md" />
         <p className="text-xs font-semibold text-foreground truncate flex-1 pr-5">{post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`}</p>
@@ -64,12 +64,9 @@ function PostPinnedCard({ post }: { post: any }) {
   );
 }
 
-function PinnedSlotEmpty({ idx }: { idx: number }) {
+function PinnedSlotEmpty() {
   return (
-    <div className="rounded-xl border-2 border-dashed border-border/25 bg-muted/5 flex flex-col items-center justify-center gap-1.5 h-full">
-      <Pin className="w-5 h-5 text-border/30" />
-      <span className="text-xs text-border/30 font-mono">{idx + 1}</span>
-    </div>
+    <div className="rounded-xl border border-rose-200/40 dark:border-rose-800/20 bg-rose-50/20 dark:bg-rose-950/5 h-full" />
   );
 }
 
@@ -173,7 +170,7 @@ export default function Home() {
 
       {/* Encouragement + Search */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-900/50 rounded-2xl px-6 py-5 space-y-4">
-        <p className="text-xl sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400 leading-snug">
+        <p className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400 leading-snug">
           {t("encouragement")}
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -219,14 +216,14 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {pinnedSlots.map((post, i) => (
             <div key={post ? `post-${post.id}` : `empty-${i}`} className="aspect-[2/1]">
-              {post ? <PostPinnedCard post={post} /> : <PinnedSlotEmpty idx={i} />}
+              {post ? <PostPinnedCard post={post} /> : <PinnedSlotEmpty />}
             </div>
           ))}
         </div>
       </section>
 
       {/* ── Regular Zone: 20/page, no cap ── */}
-      <section className="pt-8">
+      <section className="pt-24">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("regular")}</h2>
@@ -240,23 +237,32 @@ export default function Home() {
         <div className="space-y-4">
           {isLoading ? (
             <div className="grid grid-cols-2 gap-3">
-              {Array.from({ length: 10 }).map((_, i) => (
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                 <div key={i} className="h-16 rounded-xl bg-muted animate-pulse" />
               ))}
             </div>
           ) : posts.length === 0 ? (
             <div className="grid grid-cols-2 gap-3">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-16 rounded-xl border-2 border-dashed border-border/30 bg-muted/5 flex items-center justify-center">
-                  <span className="text-xs text-border/40">暂无帖子</span>
-                </div>
-              ))}
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => {
+                const num = (page - 1) * PAGE_SIZE + i + 1;
+                return (
+                  <div key={i} className="h-16 rounded-xl border border-border/40 bg-muted/5 flex items-center px-4">
+                    <span className="text-xs text-border/40 font-mono font-bold">{num}</span>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {posts.map((post, idx) => {
-                const globalNum = (page - 1) * PAGE_SIZE + idx + 1;
-                return <PostRegularCard key={post.id} post={post} num={globalNum} />;
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => {
+                const post = posts[i];
+                const globalNum = (page - 1) * PAGE_SIZE + i + 1;
+                if (post) return <PostRegularCard key={post.id} post={post} num={globalNum} />;
+                return (
+                  <div key={`empty-${i}`} className="h-16 rounded-xl border border-border/40 bg-muted/5 flex items-center px-4">
+                    <span className="text-xs text-border/40 font-mono font-bold">{globalNum}</span>
+                  </div>
+                );
               })}
             </div>
           )}

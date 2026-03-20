@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-export type LangCode = "zh-CN" | "en" | "de" | "ru" | "fr" | "ja" | "ko" | "vi";
+export type LangCode = "en" | "zh-CN" | "de" | "ru" | "fr" | "ja" | "ko" | "vi";
 
 type Dict = Record<string, string>;
 
@@ -8,7 +8,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   "zh-CN": {
     home: "首页", profile: "个人资料", connect: "连接钱包", disconnect: "退出登录",
     dashboard: "个人仪表盘", logout: "退出登录",
-    apply: "申请创建空间", pinned: "置顶专区", regular: "普通项目区",
+    apply: "申请创建空间", pinned: "置顶专区", regular: "优质团队",
     view: "查看", new: "新", hotRank: "热度榜 TOP",
     checkin: "签到 +1000积分", points: "积分", energy: "剩余能量",
     pinCount: "置顶次数", inviteCode: "邀请码", wallet: "钱包地址",
@@ -22,12 +22,12 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     invited: "已邀", people: "人", tagline: "Web3 项目方一站式需求发布与匹配平台",
     register: "+ 加入公会", joinNow: "立即加入", noLatest: "暂无动态",
     alreadyJoined: "已加入",
-    encouragement: "成为 Web3Hub 首批项目方，立即发布需求，让全网开发者与投资者第一时间看到你！",
+    encouragement: "Web3Hub一站式需求发布与匹配平台，立即发布需求，让区块链用户第一时间看到你",
     total: "共", projects: "个项目",
     nav_testnet: "测试网", nav_ido: "IDO/Launchpad", nav_security: "安全审计",
     nav_integration: "集成公告", nav_airdrop: "空投计划", nav_events: "活动奖励",
     nav_funding: "融资公告", nav_jobs: "招聘人才", nav_nodes: "节点招募",
-    nav_showcase: "项目展示", nav_ecosystem: "生态系统", nav_partners: "伙伴招募",
+    nav_showcase: "会员展示", nav_ecosystem: "生态系统", nav_partners: "伙伴招募",
     nav_hackathon: "黑客松", nav_ama: "AMA", nav_bugbounty: "漏洞赏金",
     nav_community: "社区聊天", nav_kol: "KOL 合作", nav_developer: "开发者",
     searchPlaceholder: "搜索项目名称、关键词...",
@@ -79,7 +79,9 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseEmpty: "暂无项目展示动态",
     navHome: "主页",
     xLink: "X / Twitter", websiteLink: "网站链接",
-    postBtnActive: "我要发帖", activateFirst: "需激活空间后方可发帖",
+    postBtnActive: "我要发帖", activateFirst: "加入公会方可发帖",
+    membersTitle: "会员展示", membersDesc: "公会成员一览，发现优质区块链团队、KOL与开发者",
+    membersEmpty: "暂无成员", membersSearch: "搜索用户名...",
     deletePost: "删除", confirmDelete: "确认删除这条帖子吗？",
     pointsDesc: "点赞100pt·评论100pt·各5次/日 = 1000pt上限",
     reapplyIn: "可重申：", invitedLabel: "已邀请",
@@ -96,7 +98,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
     dashboard: "My Dashboard", logout: "Log Out",
-    apply: "Apply for Space", pinned: "Pinned Zone", regular: "Projects Zone",
+    apply: "Apply for Space", pinned: "Pinned Zone", regular: "Elite Teams",
     view: "View", new: "New", hotRank: "Hot Rank TOP",
     checkin: "Check-in +1000 pts", points: "Points", energy: "Energy",
     pinCount: "Pin Count", inviteCode: "Invite Code", wallet: "Wallet Address",
@@ -110,12 +112,12 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     invited: "Invited", people: "users", tagline: "One-stop Web3 project demand & matching platform",
     register: "+ Join Guild", joinNow: "Join Now", noLatest: "No updates",
     alreadyJoined: "Joined",
-    encouragement: "Be the first Web3 project on Web3Hub — publish your needs now and get seen by developers & investors worldwide!",
+    encouragement: "Web3Hub — One-stop demand publishing & matching platform. Publish your needs and let blockchain users find you instantly!",
     total: "Total", projects: "projects",
     nav_testnet: "Testnet", nav_ido: "IDO/Launchpad", nav_security: "Security",
     nav_integration: "Integration", nav_airdrop: "Airdrop", nav_events: "Events",
     nav_funding: "Funding", nav_jobs: "Jobs", nav_nodes: "Nodes",
-    nav_showcase: "Showcase", nav_ecosystem: "Ecosystem", nav_partners: "Partners",
+    nav_showcase: "Members", nav_ecosystem: "Ecosystem", nav_partners: "Partners",
     nav_hackathon: "Hackathon", nav_ama: "AMA", nav_bugbounty: "Bug Bounty",
     nav_community: "Community", nav_kol: "KOL Collab", nav_developer: "Developer",
     searchPlaceholder: "Search projects by name, keyword...",
@@ -168,7 +170,9 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseEmpty: "No showcase posts yet.",
     navHome: "Home",
     xLink: "X / Twitter", websiteLink: "Website",
-    postBtnActive: "Post Now", activateFirst: "Activate your space to post",
+    postBtnActive: "Post Now", activateFirst: "Join the Guild to post",
+    membersTitle: "Members", membersDesc: "Discover guild members — blockchain teams, KOLs & developers",
+    membersEmpty: "No members yet", membersSearch: "Search by username...",
     deletePost: "Delete", confirmDelete: "Confirm delete this post?",
     pointsDesc: "Like 100pt·Comment 100pt·5x/day each = 1000pt/day max",
     reapplyIn: "Reapply in:", invitedLabel: "Invited",

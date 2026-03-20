@@ -1,6 +1,7 @@
 import { useWeb3Auth } from "@/lib/web3";
 import { useCheckin, useUpsertUser, useGetPosts, useGetMe } from "@workspace/api-client-react";
 import { generateGradient, truncateAddress } from "@/lib/utils";
+import { RoleBadge } from "@/components/role-badge";
 import { useState, useEffect, useRef } from "react";
 import {
   Zap, Star, Copy, Check, AlertCircle, Gift, Clock, Edit2,
@@ -351,18 +352,14 @@ export default function Profile() {
               <button onClick={() => setEditingName(false)} className="text-muted-foreground hover:text-foreground p-1">✕</button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 mb-1 group">
+            <div className="flex items-center gap-2 mb-1 group flex-wrap">
               <span className="font-bold text-lg truncate">{displayUsername}</span>
+              <RoleBadge spaceType={isSpaceOwner ? spaceType : null} size="sm" />
               <button onClick={() => setEditingName(true)}
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary">
                 <Edit2 className="w-3.5 h-3.5" />
               </button>
             </div>
-          )}
-          {spaceType && (
-            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase mb-1">
-              {spaceType}
-            </span>
           )}
           <p className="text-xs text-muted-foreground font-mono truncate">{address}</p>
         </div>

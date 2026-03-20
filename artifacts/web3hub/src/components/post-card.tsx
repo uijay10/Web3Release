@@ -13,6 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useLikePost } from "@workspace/api-client-react";
 import { useWeb3Auth } from "@/lib/web3";
 import { generateGradient, truncateAddress } from "@/lib/utils";
+import { RoleBadge } from "@/components/role-badge";
 import { useLang } from "@/lib/i18n";
 import { Link } from "wouter";
 import { isAdmin } from "@/lib/admin";
@@ -135,9 +136,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
               <Link href={authorHref} className="text-xs font-semibold text-foreground hover:text-primary transition-colors">{displayName}</Link>
-              {post.authorType && (
-                <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">{post.authorType}</span>
-              )}
+              <RoleBadge spaceType={post.authorType} size="xs" />
               <span className="text-[10px] text-muted-foreground ml-auto">{formatDistanceToNow(new Date(post.createdAt))} ago</span>
             </div>
             <p className="font-semibold text-sm text-foreground line-clamp-1">{post.title}</p>
@@ -202,9 +201,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <Link href={authorHref} className="font-semibold text-sm hover:text-primary transition-colors">{displayName}</Link>
-            {post.authorType && (
-              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase">{post.authorType}</span>
-            )}
+            <RoleBadge spaceType={post.authorType} size="xs" />
             <span className="text-xs text-primary/70 bg-primary/8 px-2 py-0.5 rounded-full ml-auto">#{t(SECTION_KEY_MAP[post.section] ?? post.section) || post.section}</span>
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">{formatDistanceToNow(new Date(post.createdAt))} ago</div>

@@ -21,14 +21,13 @@ const NAV_ROW1_KEYS = [
 ];
 
 const NAV_ROW2_KEYS = [
-  { key: "nav_showcase",   href: "/showcase" },
+  { key: "nav_showcase",   href: "/members" },
   { key: "nav_ecosystem",  href: "/section/ecosystem" },
   { key: "nav_partners",   href: "/section/partners" },
   { key: "nav_hackathon",  href: "/section/hackathon" },
   { key: "nav_ama",        href: "/section/ama" },
   { key: "nav_bugbounty",  href: "/section/bugbounty" },
   { key: "nav_community",  href: "/community" },
-  { key: "nav_kol",        href: "/kol" },
   { key: "nav_developer",  href: "/developer" },
 ];
 
@@ -107,7 +106,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navLinkClass = (href: string) => cn(
-    "relative px-3 py-1.5 rounded-full text-[15px] font-semibold whitespace-nowrap transition-all duration-200 group",
+    "relative px-3.5 py-1.5 rounded-full text-base font-semibold whitespace-nowrap transition-all duration-200 group",
     location === href
       ? "text-primary bg-primary/10"
       : "text-muted-foreground hover:text-primary"
@@ -223,8 +222,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </button>
             </div>
 
-            {/* Row 1: 9 nav items left-aligned */}
-            <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
+            {/* Row 1 */}
+            <div className="flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-none">
               {NAV_ROW1_KEYS.map(({ key, href }) => (
                 <Link key={key} href={href} className={navLinkClass(href)}>
                   {location !== href && (
@@ -235,8 +234,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </div>
 
-            {/* Row 2: 9 nav items left-aligned */}
-            <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
+            {/* Row 2 */}
+            <div className="flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-none">
               {NAV_ROW2_KEYS.map(({ key, href }) => (
                 <Link key={key} href={href} className={navLinkClass(href)}>
                   {location !== href && (
