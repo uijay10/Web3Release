@@ -255,9 +255,7 @@ export default function Home() {
         {/* Column header */}
         <div className="flex items-center gap-0 px-3 py-1.5 mb-1">
           <span className="w-6 shrink-0" />
-          <div className="w-20 shrink-0 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">LOGO</span>
-          </div>
+          <div className="w-20 shrink-0" />
           <div className="w-36 shrink-0 pr-3">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">名字</span>
           </div>
