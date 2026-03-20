@@ -68,24 +68,30 @@ function PostPinnedCard({ post }: { post: any }) {
   const displayName = post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`;
   return (
     <Link href={`/section/${post.section}`}
-      className="relative rounded-2xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col gap-3 p-6 hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
+      className="relative rounded-2xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col p-5 hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
       <span className="absolute inset-0 rounded-2xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
-      {/* Row 1: avatar + name | section | time */}
-      <div className="flex items-center gap-3 min-w-0">
-        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="md" />
-        <span className="text-base font-bold text-foreground truncate flex-1">{displayName}</span>
-        <span className="text-sm text-primary font-semibold px-3 py-1 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
-        <span className="text-sm text-muted-foreground shrink-0">{timeAgo}</span>
+      {/* Row 1: big avatar top-left + name (full) + section + time */}
+      <div className="flex items-start gap-3 mb-3">
+        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-bold text-foreground leading-snug break-words">{displayName}</p>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <span className="text-xs text-primary font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
+            <span className="text-xs text-muted-foreground shrink-0">{timeAgo}</span>
+          </div>
+        </div>
       </div>
-      {/* Row 2: title */}
-      <p className="text-base font-bold text-foreground line-clamp-1 leading-snug">{post.title}</p>
-      {/* Row 3: content */}
+      {/* Title */}
+      <p className="text-base font-bold text-foreground line-clamp-1 leading-snug mb-1">{post.title}</p>
+      {/* Content fills remaining space */}
       {post.content && (
-        <p className="text-sm text-muted-foreground line-clamp-2 leading-snug flex-1">{post.content}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2 leading-snug">{post.content}</p>
       )}
-      {/* Row 4: countdown */}
+      {/* Spacer pushes countdown to bottom-left */}
+      <div className="flex-1" />
+      {/* Countdown — bottom-left */}
       {cd && (
-        <span className="mt-auto self-start text-sm text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-3 py-1 rounded-full">{cd}</span>
+        <span className="self-start text-sm text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-3 py-1 rounded-full">{cd}</span>
       )}
     </Link>
   );
