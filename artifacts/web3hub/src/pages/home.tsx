@@ -7,6 +7,11 @@ import { Link } from "wouter";
 import { useLang } from "@/lib/i18n";
 import { generateGradient } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, zhCN, de, ru, fr, ja, ko, vi } from "date-fns/locale";
+
+const DATE_LOCALES: Record<string, Locale> = {
+  "en": enUS, "zh-CN": zhCN, "de": de, "ru": ru, "fr": fr, "ja": ja, "ko": ko, "vi": vi,
+};
 
 const PAGE_SIZE = 20;
 const PIN_SLOTS = 16;
@@ -53,20 +58,22 @@ const SECTION_LABELS: Record<string, string> = {
 
 // ── Pinned card: structured layout ───────────────────────
 function PostPinnedCard({ post }: { post: any }) {
+  const { t, lang } = useLang();
   const cd = post.pinnedUntil ? countdown(post.pinnedUntil) : "";
-  const sectionLabel = SECTION_LABELS[post.section] ?? post.section;
-  const timeAgo = post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: false }) : "";
+  const sectionLabel = t(`nav_${post.section}` as any) || post.section;
+  const dateLocale = DATE_LOCALES[lang] ?? enUS;
+  const timeAgo = post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: false, locale: dateLocale }) : "";
   const displayName = post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`;
   return (
     <Link href={`/section/${post.section}`}
-      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col gap-1.5 p-4 hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
+      className="relative rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col gap-2 p-4 hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
       <span className="absolute inset-0 rounded-xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
       {/* Row 1: avatar + name | section | time */}
       <div className="flex items-center gap-2 min-w-0">
         <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="sm" />
-        <span className="text-xs font-semibold text-foreground truncate flex-1">{displayName}</span>
-        <span className="text-[10px] text-primary font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
-        <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+        <span className="text-sm font-bold text-foreground truncate flex-1">{displayName}</span>
+        <span className="text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
+        <span className="text-xs text-muted-foreground shrink-0">{timeAgo}</span>
       </div>
       {/* Row 2: title */}
       <p className="text-sm font-bold text-foreground line-clamp-1 leading-snug">{post.title}</p>
@@ -90,8 +97,9 @@ function PinnedSlotEmpty() {
 
 // ── Regular post card (2-col split layout) ───────────────
 function PostRegularCard({ post, num }: { post: any; num: number }) {
+  const { t } = useLang();
   const displayName = post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`;
-  const sectionLabel = SECTION_LABELS[post.section] ?? post.section;
+  const sectionLabel = t(`nav_${post.section}` as any) || post.section;
   return (
     <Link href={`/section/${post.section}`}
       className="flex items-center gap-2 px-4 py-4 rounded-xl border border-border/30 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all group cursor-pointer">
@@ -114,7 +122,7 @@ function PostRegularCard({ post, num }: { post: any; num: number }) {
       <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">{sectionLabel}</span>
       {/* 查看 */}
       <span className="shrink-0 flex items-center gap-0.5 text-sm text-primary font-semibold group-hover:underline whitespace-nowrap">
-        <Eye className="w-3.5 h-3.5" /> 查看
+        <Eye className="w-3.5 h-3.5" /> {t("view")}
       </span>
     </Link>
   );
