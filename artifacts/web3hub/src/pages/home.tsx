@@ -148,11 +148,7 @@ export default function Home() {
   return (
     <div className="space-y-6 pb-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pt-2">
-        <div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-foreground">Web3Hub</h1>
-          <p className="text-muted-foreground text-sm mt-1">{t("tagline")}</p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-end gap-3 pt-2">
         {hasJoined ? (
           <span className="shrink-0 inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700/60 cursor-default select-none pointer-events-none">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />{t("alreadyJoined")}
