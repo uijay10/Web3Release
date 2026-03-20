@@ -137,21 +137,20 @@
   animation: fade-out 5s ease-out forwards;
 }
 
-/* Shimmer / glow border for pinned cells */
+/* Subtle glow border for pinned zone — soft rose/violet/blue cycle */
 @keyframes shimmer-border {
-  0%   { box-shadow: 0 0 4px 1px rgba(0,255,159,0.3), 0 0 8px 2px rgba(0,255,159,0.15); border-color: rgba(0,255,159,0.4); }
-  25%  { box-shadow: 0 0 8px 3px rgba(255,105,180,0.4), 0 0 16px 4px rgba(255,105,180,0.2); border-color: rgba(255,105,180,0.5); }
-  50%  { box-shadow: 0 0 8px 3px rgba(100,160,255,0.4), 0 0 16px 4px rgba(100,160,255,0.2); border-color: rgba(100,160,255,0.5); }
-  75%  { box-shadow: 0 0 8px 3px rgba(255,200,60,0.4),  0 0 16px 4px rgba(255,200,60,0.2);  border-color: rgba(255,200,60,0.5); }
-  100% { box-shadow: 0 0 4px 1px rgba(0,255,159,0.3),  0 0 8px 2px rgba(0,255,159,0.15);   border-color: rgba(0,255,159,0.4); }
+  0%   { box-shadow: 0 0 5px 1px rgba(244,114,182,0.25), 0 0 10px 2px rgba(244,114,182,0.10); border-color: rgba(244,114,182,0.45); }
+  33%  { box-shadow: 0 0 5px 1px rgba(139,92,246,0.25),  0 0 10px 2px rgba(139,92,246,0.10);  border-color: rgba(139,92,246,0.45); }
+  66%  { box-shadow: 0 0 5px 1px rgba(99,179,237,0.25),  0 0 10px 2px rgba(99,179,237,0.10);  border-color: rgba(99,179,237,0.40); }
+  100% { box-shadow: 0 0 5px 1px rgba(244,114,182,0.25), 0 0 10px 2px rgba(244,114,182,0.10); border-color: rgba(244,114,182,0.45); }
 }
 
 .shimmer-cell {
-  border: 1.5px solid rgba(0,255,159,0.4);
-  animation: shimmer-border 8s ease-in-out infinite;
+  border: 1.5px solid rgba(244,114,182,0.35);
+  animation: shimmer-border 10s ease-in-out infinite;
 }
 
 .pinned-card {
-  border: 1.5px solid rgba(0,255,159,0.4);
-  animation: shimmer-border 8s ease-in-out infinite;
+  border: 1.5px solid rgba(244,114,182,0.35);
+  animation: shimmer-border 10s ease-in-out infinite;
 }

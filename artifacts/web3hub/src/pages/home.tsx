@@ -23,15 +23,27 @@ function getApiBase() {
   return parts.join("/") + "/api";
 }
 
-function countdown(until: string) {
+function getCountdown(until: string) {
   const ms = new Date(until).getTime() - Date.now();
   if (ms <= 0) return "已到期";
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor((ms % 86400000) / 3600000);
   const mins = Math.floor((ms % 3600000) / 60000);
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
+  const secs = Math.floor((ms % 60000) / 1000);
+  const ss = String(secs).padStart(2, "0");
+  if (days > 0) return `${days}d ${hours}h ${mins}m ${ss}s`;
+  if (hours > 0) return `${hours}h ${mins}m ${ss}s`;
+  return `${mins}m ${ss}s`;
+}
+
+function useCountdownStr(until: string | null | undefined) {
+  const [cd, setCd] = useState(() => until ? getCountdown(until) : "");
+  useEffect(() => {
+    if (!until) return;
+    const id = setInterval(() => setCd(getCountdown(until)), 1000);
+    return () => clearInterval(id);
+  }, [until]);
+  return cd;
 }
 
 function AuthorAvatar({ wallet, name, avatar, size = "sm" }: {
@@ -61,17 +73,18 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 // ── Pinned card: structured layout ───────────────────────
-function PostPinnedCard({ post }: { post: any }) {
+function PostPinnedCard({ post, idx = 0 }: { post: any; idx?: number }) {
   const { t, lang } = useLang();
-  const cd = post.pinnedUntil ? countdown(post.pinnedUntil) : "";
+  const cd = useCountdownStr(post.pinnedUntil);
   const sectionLabel = t(`nav_${post.section}` as any) || post.section;
   const dateLocale = DATE_LOCALES[lang] ?? enUS;
   const timeAgo = post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: false, locale: dateLocale }) : "";
   const displayName = post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`;
   return (
     <Link href={`/section/${post.section}`}
-      className="relative rounded-2xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
-      <span className="absolute inset-0 rounded-2xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
+      className="pinned-card relative rounded-2xl bg-white dark:bg-slate-800 overflow-hidden flex flex-col hover:scale-[1.02] transition-transform group cursor-pointer h-full"
+      style={{ animationDelay: `${(idx % 8) * 1}s` }}>
+      <span className="absolute inset-0 rounded-2xl pointer-events-none" />
 
       {/* Row 1: 时间 only — top-right */}
       <div className="flex justify-end px-3 pt-2 mb-1">
@@ -101,9 +114,12 @@ function PostPinnedCard({ post }: { post: any }) {
   );
 }
 
-function PinnedSlotEmpty() {
+function PinnedSlotEmpty({ idx = 0 }: { idx?: number }) {
   return (
-    <div className="rounded-xl border border-rose-200/40 dark:border-rose-800/20 bg-rose-50/20 dark:bg-rose-950/5 h-full" />
+    <div
+      className="shimmer-cell rounded-xl bg-white/30 dark:bg-slate-800/30 h-full"
+      style={{ animationDelay: `${(idx % 8) * 1}s`, opacity: 0.4 }}
+    />
   );
 }
 
@@ -260,7 +276,7 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {pinnedSlots.map((post, i) => (
             <div key={post ? `post-${post.id}` : `empty-${i}`} className="aspect-[3/2]">
-              {post ? <PostPinnedCard post={post} /> : <PinnedSlotEmpty />}
+              {post ? <PostPinnedCard post={post} idx={i} /> : <PinnedSlotEmpty idx={i} />}
             </div>
           ))}
         </div>
