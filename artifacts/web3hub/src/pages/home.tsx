@@ -91,8 +91,8 @@ function PostPinnedCard({ post, idx = 0 }: { post: any; idx?: number }) {
         <span className="text-xs text-muted-foreground">{timeAgo}</span>
       </div>
 
-      {/* Row 2: LOGO flush-left | 名字 (left) | 分区 (right) */}
-      <div className="flex items-center mb-2">
+      {/* Row 2: LOGO | 名字 (left) | 分区 (right) */}
+      <div className="flex items-center mb-2 pl-3">
         <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
         <p className="ml-2 text-sm font-bold text-foreground leading-snug truncate flex-1">{displayName}</p>
         <span className="text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0 mr-2">{sectionLabel}</span>
