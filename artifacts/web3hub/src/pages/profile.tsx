@@ -152,9 +152,7 @@ export default function Profile() {
 
   const isSpaceOwner = me?.spaceStatus === "approved" || me?.spaceStatus === "active";
   const spaceType = me?.spaceType;
-  const isDevOrProject = spaceType === "developer" || spaceType === "project";
-  const isKol = spaceType === "kol";
-  const canCheckin = !isDevOrProject && !isKol;
+  const canCheckin = true;
 
   const nextCheckin = me?.lastCheckin
     ? new Date(new Date(me.lastCheckin).getTime() + 86_400_000).toISOString()
