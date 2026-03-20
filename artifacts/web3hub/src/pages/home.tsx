@@ -73,21 +73,23 @@ function PostPinnedCard({ post }: { post: any }) {
       className="relative rounded-2xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
       <span className="absolute inset-0 rounded-2xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
 
-      {/* Row 1: 名字 (left) + 时间 (right) */}
-      <div className="flex items-center justify-between px-3 pt-2 mb-1">
-        <p className="text-sm font-bold text-foreground leading-snug break-words">{displayName}</p>
-        <span className="text-xs text-muted-foreground shrink-0 ml-2">{timeAgo}</span>
+      {/* Row 1: 时间 only — top-right */}
+      <div className="flex justify-end px-3 pt-2 mb-1">
+        <span className="text-xs text-muted-foreground">{timeAgo}</span>
       </div>
 
       {/* Row 2: LOGO flush-left + 分区 right */}
       <div className="flex items-center mb-2">
-        {/* LOGO touches the left border of the card */}
         <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
         <span className="ml-3 text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
       </div>
 
-      {/* 标题 */}
-      <p className="text-sm font-bold text-foreground line-clamp-1 leading-snug px-3 mb-1">{post.title}</p>
+      {/* Row 3: 名字 (left) + 标题 (right) — same row */}
+      <div className="flex items-center justify-between gap-2 px-3 mb-1">
+        <p className="text-sm font-bold text-foreground leading-snug truncate">{displayName}</p>
+        <p className="text-xs font-semibold text-foreground line-clamp-1 shrink-0 text-right max-w-[45%]">{post.title}</p>
+      </div>
+
       {/* 内容 */}
       <p className="text-xs text-muted-foreground line-clamp-2 leading-snug px-3 flex-1">{post.content || ""}</p>
 
