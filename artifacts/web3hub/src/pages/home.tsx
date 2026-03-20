@@ -73,31 +73,28 @@ function PostPinnedCard({ post }: { post: any }) {
       className="relative rounded-2xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-rose-100 dark:hover:shadow-rose-950/30 hover:border-red-400 dark:hover:border-red-600 transition-all group cursor-pointer h-full shadow-sm shadow-rose-100/50 dark:shadow-rose-950/20">
       <span className="absolute inset-0 rounded-2xl ring-1 ring-rose-300/30 dark:ring-rose-700/20 pointer-events-none" />
 
-      {/* LOGO — flush top-left corner */}
-      <div className="absolute top-0 left-0">
-        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="xl" />
+      {/* Row 1: 名字 (left) + 时间 (right) */}
+      <div className="flex items-center justify-between px-3 pt-2 mb-1">
+        <p className="text-sm font-bold text-foreground leading-snug break-words">{displayName}</p>
+        <span className="text-xs text-muted-foreground shrink-0 ml-2">{timeAgo}</span>
       </div>
 
-      {/* All text content — left-padded to clear the LOGO */}
-      <div className="flex flex-col h-full pl-[84px] pr-3 pt-2 pb-3">
-        {/* 时间 — top-right */}
-        <div className="flex justify-end mb-1">
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
-        </div>
-        {/* 名字 + 分区 — same row */}
-        <div className="flex items-center gap-2 flex-wrap mb-2">
-          <p className="text-sm font-bold text-foreground leading-snug break-words">{displayName}</p>
-          <span className="text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
-        </div>
-        {/* 标题 */}
-        <p className="text-sm font-bold text-foreground line-clamp-1 leading-snug mb-1">{post.title}</p>
-        {/* 内容 */}
-        <p className="text-xs text-muted-foreground line-clamp-2 leading-snug flex-1">{post.content || ""}</p>
-        {/* 倒计时 — bottom-left */}
-        {cd && (
-          <span className="self-start mt-2 text-xs text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2.5 py-0.5 rounded-full">{cd}</span>
-        )}
+      {/* Row 2: LOGO flush-left + 分区 right */}
+      <div className="flex items-center mb-2">
+        {/* LOGO touches the left border of the card */}
+        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="xl" />
+        <span className="ml-3 text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
       </div>
+
+      {/* 标题 */}
+      <p className="text-sm font-bold text-foreground line-clamp-1 leading-snug px-3 mb-1">{post.title}</p>
+      {/* 内容 */}
+      <p className="text-xs text-muted-foreground line-clamp-2 leading-snug px-3 flex-1">{post.content || ""}</p>
+
+      {/* 倒计时 — bottom-left */}
+      {cd && (
+        <span className="self-start mt-auto mx-3 mb-2 text-xs text-red-500 font-bold bg-red-50 dark:bg-red-950/30 px-2.5 py-0.5 rounded-full">{cd}</span>
+      )}
     </Link>
   );
 }
