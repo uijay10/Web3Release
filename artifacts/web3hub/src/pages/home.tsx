@@ -82,7 +82,7 @@ function PostPinnedCard({ post }: { post: any }) {
       {/* Row 2: LOGO flush-left + 分区 right */}
       <div className="flex items-center mb-2">
         {/* LOGO touches the left border of the card */}
-        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="xl" />
+        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
         <span className="ml-3 text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
       </div>
 
