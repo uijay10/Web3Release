@@ -94,6 +94,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     adminPostBtn: "发帖", adminReviewBtn: "进入审核",
     checkinNA: "此身份无签到",
     pinLabel: "置顶次数",
+    pinnedExclusive: "项目方专属", slotsUsed: "已占用", threeDayCountdown: "3天倒计时",
+    regularDesc: "项目方帖子 · 最新优先", itemUnit: "条",
+    roleProject: "区块链团队", roleDeveloper: "开发者", roleMember: "平台会员",
+    memberTabProject: "项目方", memberTabKol: "KOL", memberTabDev: "开发者",
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
@@ -185,6 +189,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     adminPostBtn: "Create Post", adminReviewBtn: "Open Review Panel",
     checkinNA: "Check-in not available for this role",
     pinLabel: "Pin Count",
+    pinnedExclusive: "Project-only", slotsUsed: "occupied", threeDayCountdown: "3-day countdown",
+    regularDesc: "Project posts · Latest first", itemUnit: "",
+    roleProject: "Blockchain Team", roleDeveloper: "Developer", roleMember: "Member",
+    memberTabProject: "Projects", memberTabKol: "KOL", memberTabDev: "Developers",
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
@@ -259,6 +267,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseTitle: "Showcase", showcaseDesc: "Entdecken Sie die neuesten Web3-Projekt-Updates und Meilensteine.",
     showcaseEmpty: "Noch keine Showcase-Beiträge.",
     navHome: "Startseite",
+    pinnedExclusive: "Nur Projekte", slotsUsed: "belegt", threeDayCountdown: "3-Tage-Countdown",
+    regularDesc: "Projektbeiträge · Neueste zuerst", itemUnit: "",
+    roleProject: "Blockchain-Team", roleDeveloper: "Entwickler", roleMember: "Mitglied",
+    memberTabProject: "Projekte", memberTabKol: "KOL", memberTabDev: "Entwickler",
   },
   "ru": {
     home: "Главная", profile: "Профиль", connect: "Подключить кошелёк", disconnect: "Отключить",
@@ -333,6 +345,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseTitle: "Витрина", showcaseDesc: "Откройте для себя последние обновления проектов Web3.",
     showcaseEmpty: "Нет постов в витрине.",
     navHome: "Главная",
+    pinnedExclusive: "Только проекты", slotsUsed: "занято", threeDayCountdown: "3-дневный отсчёт",
+    regularDesc: "Проекты · Новые сначала", itemUnit: "",
+    roleProject: "Блокчейн-команда", roleDeveloper: "Разработчик", roleMember: "Участник",
+    memberTabProject: "Проекты", memberTabKol: "KOL", memberTabDev: "Разработчики",
   },
   "fr": {
     home: "Accueil", profile: "Profil", connect: "Connecter le wallet", disconnect: "Déconnecter",
@@ -407,6 +423,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseTitle: "Vitrine", showcaseDesc: "Découvrez les dernières mises à jour de projets Web3.",
     showcaseEmpty: "Aucun post de vitrine pour l'instant.",
     navHome: "Accueil",
+    pinnedExclusive: "Projets uniquement", slotsUsed: "occupés", threeDayCountdown: "Compte à rebours 3j",
+    regularDesc: "Posts projets · Les plus récents", itemUnit: "",
+    roleProject: "Équipe Blockchain", roleDeveloper: "Développeur", roleMember: "Membre",
+    memberTabProject: "Projets", memberTabKol: "KOL", memberTabDev: "Développeurs",
   },
   "ja": {
     home: "ホーム", profile: "プロフィール", connect: "ウォレット接続", disconnect: "切断",
@@ -481,6 +501,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseTitle: "ショーケース", showcaseDesc: "最新の Web3 プロジェクト更新情報を発見しましょう。",
     showcaseEmpty: "ショーケースの投稿はまだありません。",
     navHome: "ホーム",
+    pinnedExclusive: "プロジェクト限定", slotsUsed: "使用中", threeDayCountdown: "3日間カウントダウン",
+    regularDesc: "プロジェクト投稿 · 最新順", itemUnit: "件",
+    roleProject: "ブロックチェーンチーム", roleDeveloper: "開発者", roleMember: "メンバー",
+    memberTabProject: "プロジェクト", memberTabKol: "KOL", memberTabDev: "開発者",
   },
   "ko": {
     home: "홈", profile: "프로필", connect: "지갑 연결", disconnect: "연결 해제",
@@ -555,6 +579,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseTitle: "쇼케이스", showcaseDesc: "최신 Web3 프로젝트 업데이트를 발견하세요.",
     showcaseEmpty: "아직 쇼케이스 게시물이 없습니다.",
     navHome: "홈",
+    pinnedExclusive: "프로젝트 전용", slotsUsed: "사용 중", threeDayCountdown: "3일 카운트다운",
+    regularDesc: "프로젝트 게시물 · 최신순", itemUnit: "개",
+    roleProject: "블록체인 팀", roleDeveloper: "개발자", roleMember: "회원",
+    memberTabProject: "프로젝트", memberTabKol: "KOL", memberTabDev: "개발자",
   },
   "vi": {
     home: "Trang chủ", profile: "Hồ sơ", connect: "Kết nối ví", disconnect: "Ngắt kết nối",
@@ -629,6 +657,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     showcaseTitle: "Giới thiệu dự án", showcaseDesc: "Khám phá các cập nhật dự án Web3 mới nhất.",
     showcaseEmpty: "Chưa có bài viết giới thiệu.",
     navHome: "Trang chủ",
+    pinnedExclusive: "Chỉ dự án", slotsUsed: "đã dùng", threeDayCountdown: "Đếm ngược 3 ngày",
+    regularDesc: "Bài dự án · Mới nhất trước", itemUnit: "",
+    roleProject: "Đội Blockchain", roleDeveloper: "Lập trình viên", roleMember: "Thành viên",
+    memberTabProject: "Dự án", memberTabKol: "KOL", memberTabDev: "Lập trình viên",
   },
 };
 

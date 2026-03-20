@@ -267,7 +267,7 @@ export default function Home() {
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("pinned")}</h2>
           <span className="w-2 h-2 rounded-full bg-[#00FF9F] shadow-[0_0_8px_#00FF9F] animate-pulse" />
           <span className="text-xs text-muted-foreground ml-1">
-            置顶区（项目方专属 · {pinnedPosts.length}/{PIN_SLOTS} 已占用 · 3天倒计时）
+            （{t("pinnedExclusive")} · {pinnedPosts.length}/{PIN_SLOTS} {t("slotsUsed")} · {t("threeDayCountdown")}）
           </span>
         </div>
         {/* 4 cols on md+, 2 on mobile — always 16 equal slots, ~3x larger than before */}
@@ -285,10 +285,10 @@ export default function Home() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("regular")}</h2>
-            <span className="text-xs text-muted-foreground">（项目方帖子 · 最新优先）</span>
+            <span className="text-xs text-muted-foreground">（{t("regularDesc")}）</span>
           </div>
           {total > 0 && (
-            <span className="text-xs text-muted-foreground">{t("total")} {total} 条</span>
+            <span className="text-xs text-muted-foreground">{t("total")} {total}{t("itemUnit") ? " " + t("itemUnit") : ""}</span>
           )}
         </div>
 

@@ -24,10 +24,10 @@ interface Member {
   createdAt: string;
 }
 
-const TAB_TYPES: { key: MemberType; zhLabel: string; enLabel: string }[] = [
-  { key: "project",   zhLabel: "项目方",   enLabel: "Projects"   },
-  { key: "kol",       zhLabel: "KOL",      enLabel: "KOL"        },
-  { key: "developer", zhLabel: "开发者",   enLabel: "Developers" },
+const TAB_TYPES: { key: MemberType; tKey: string }[] = [
+  { key: "project",   tKey: "memberTabProject" },
+  { key: "kol",       tKey: "memberTabKol"     },
+  { key: "developer", tKey: "memberTabDev"     },
 ];
 
 function MemberCard({ member }: { member: Member }) {
@@ -96,7 +96,6 @@ export default function MembersPage() {
       .finally(() => setLoading(false));
   }, [activeTab, debouncedSearch]);
 
-  const isZh = lang === "zh-CN";
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -118,7 +117,7 @@ export default function MembersPage() {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {isZh ? tab.zhLabel : tab.enLabel}
+              {t(tab.tKey)}
             </button>
           ))}
         </div>

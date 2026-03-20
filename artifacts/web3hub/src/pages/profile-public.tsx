@@ -43,6 +43,10 @@ export default function PublicProfile() {
   const displayName = user?.username || truncateAddress(wallet);
   const spaceType = user?.spaceType ?? null;
   const spaceStatus = user?.spaceStatus ?? null;
+  const roleLabel = spaceType === "project" ? t("roleProject")
+    : spaceType === "developer" ? t("roleDeveloper")
+    : spaceType === "kol" ? "KOL"
+    : spaceType;
 
   const avatarBg = user?.avatar ? `url(${user.avatar}) center/cover` : generateGradient(wallet);
 
@@ -68,8 +72,8 @@ export default function PublicProfile() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl font-bold truncate">{displayName}</h1>
                   {spaceType && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold uppercase ${ROLE_COLORS[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
-                      {spaceType}
+                    <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
+                      {roleLabel}
                     </span>
                   )}
                   {spaceStatus === "approved" && (
