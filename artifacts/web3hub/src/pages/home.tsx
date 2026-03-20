@@ -97,7 +97,8 @@ export default function Home() {
   const { t } = useLang();
   const { address, isConnected } = useWeb3Auth();
   const { data: meData } = useGetMe({ wallet: address ?? "" }, { query: { enabled: !!address && isConnected } });
-  const spaceStatus = meData?.user?.spaceStatus;
+  const me = (meData as any)?.user ?? meData;
+  const spaceStatus = me?.spaceStatus;
   const isSpaceOwner = spaceStatus === "approved" || spaceStatus === "active";
   const hasJoined = isSpaceOwner;
   const isPending = spaceStatus === "pending";
