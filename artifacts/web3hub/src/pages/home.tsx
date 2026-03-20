@@ -86,24 +86,22 @@ function PostPinnedCard({ post, idx = 0 }: { post: any; idx?: number }) {
       style={{ animationDelay: `${(idx % 8) * 1}s` }}>
       <span className="absolute inset-0 rounded-2xl pointer-events-none" />
 
-      {/* Row 1: 时间 only — top-right */}
+      {/* Row 1: 时间 — top-right only */}
       <div className="flex justify-end px-3 pt-2 mb-1">
         <span className="text-xs text-muted-foreground">{timeAgo}</span>
       </div>
 
-      {/* Row 2: LOGO flush-left + 分区 right */}
+      {/* Row 2: LOGO flush-left | 名字 (left) | 分区 (right) */}
       <div className="flex items-center mb-2">
         <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
-        <span className="ml-3 text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{sectionLabel}</span>
+        <p className="ml-2 text-sm font-bold text-foreground leading-snug truncate flex-1">{displayName}</p>
+        <span className="text-xs text-primary font-semibold px-2 py-0.5 rounded-full bg-primary/10 shrink-0 mr-2">{sectionLabel}</span>
       </div>
 
-      {/* Row 3: 名字 (left) + 标题 (right) — same row */}
-      <div className="flex items-center justify-between gap-2 px-3 mb-1">
-        <p className="text-sm font-bold text-foreground leading-snug truncate">{displayName}</p>
-        <p className="text-xs font-semibold text-foreground line-clamp-1 shrink-0 text-right max-w-[45%]">{post.title}</p>
-      </div>
+      {/* Row 3: 主题 (post title) */}
+      <p className="text-sm font-bold text-foreground line-clamp-1 leading-snug px-3 mb-1">{post.title}</p>
 
-      {/* 内容 */}
+      {/* Row 4: 内容 */}
       <p className="text-xs text-muted-foreground line-clamp-2 leading-snug px-3 flex-1">{post.content || ""}</p>
 
       {/* 倒计时 — bottom-left */}
