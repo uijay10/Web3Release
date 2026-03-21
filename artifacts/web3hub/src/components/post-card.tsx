@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Heart, MessageCircle, Copy, Check, Pin, User } from "lucide-react";
 
 const SECTION_KEY_MAP: Record<string, string> = {
@@ -198,19 +199,26 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             )}
           </div>
         </div>
-        {/* Pin confirm dialog – compact */}
-        {pinConfirmOpen && (
-          <div className="mt-2 p-3 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800">
-            <p className="text-xs text-violet-800 dark:text-violet-200 mb-2">置顶此帖将消耗 1 次置顶次数，确认操作？</p>
-            <div className="flex gap-2">
-              <button onClick={() => setPinConfirmOpen(false)}
-                className="flex-1 py-1 rounded-lg text-xs bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">取消</button>
-              <button onClick={doPin} disabled={pinning}
-                className="flex-1 py-1 rounded-lg text-xs bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50">
-                {pinning ? "..." : "确定"}
-              </button>
+        {/* Pin confirm modal – rendered via portal so it's never clipped */}
+        {pinConfirmOpen && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setPinConfirmOpen(false)}>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-80 mx-4 border border-violet-200 dark:border-violet-800" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2 mb-3">
+                <Pin className="w-4 h-4 text-violet-500 shrink-0" />
+                <p className="text-sm font-semibold text-foreground">确认置顶</p>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">置顶此帖将消耗 <strong className="text-violet-600">1 次</strong>置顶次数，确认操作？</p>
+              <div className="flex gap-3">
+                <button onClick={() => setPinConfirmOpen(false)}
+                  className="flex-1 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">取消</button>
+                <button onClick={doPin} disabled={pinning}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50">
+                  {pinning ? "处理中..." : "确定置顶"}
+                </button>
+              </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
         {pinMsg && !pinConfirmOpen && (
           <p className="text-xs mt-2 text-violet-500 font-medium">{pinMsg}</p>
@@ -293,19 +301,26 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
         </div>
       </div>
 
-      {/* Pin confirm dialog – full */}
-      {pinConfirmOpen && (
-        <div className="mt-3 p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800">
-          <p className="text-sm text-violet-800 dark:text-violet-200 mb-3">置顶此帖将消耗 1 次置顶次数，确认操作？</p>
-          <div className="flex gap-2">
-            <button onClick={() => setPinConfirmOpen(false)}
-              className="flex-1 py-1.5 rounded-lg text-sm bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">取消</button>
-            <button onClick={doPin} disabled={pinning}
-              className="flex-1 py-1.5 rounded-lg text-sm bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50">
-              {pinning ? "..." : "确定"}
-            </button>
+      {/* Pin confirm modal – portal */}
+      {pinConfirmOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setPinConfirmOpen(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-80 mx-4 border border-violet-200 dark:border-violet-800" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-3">
+              <Pin className="w-4 h-4 text-violet-500 shrink-0" />
+              <p className="text-sm font-semibold text-foreground">确认置顶</p>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">置顶此帖将消耗 <strong className="text-violet-600">1 次</strong>置顶次数，确认操作？</p>
+            <div className="flex gap-3">
+              <button onClick={() => setPinConfirmOpen(false)}
+                className="flex-1 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">取消</button>
+              <button onClick={doPin} disabled={pinning}
+                className="flex-1 py-2 rounded-xl text-sm font-semibold bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50">
+                {pinning ? "处理中..." : "确定置顶"}
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {pinMsg && !pinConfirmOpen && (
         <p className="text-sm mt-2 text-violet-500 font-medium">{pinMsg}</p>

@@ -303,12 +303,14 @@ export default function Profile() {
           ) : (
             <div className="space-y-3">
               {(userPosts.posts as any[]).map((post: any) => (
-                <div key={post.id} className="relative">
-                  <PostCard post={post} onRefresh={refetchPosts} showPin compact />
+                <div key={post.id} className="flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <PostCard post={post} onRefresh={refetchPosts} showPin compact />
+                  </div>
                   <button
                     onClick={() => handleDeletePost(post.id)}
                     disabled={deletingId === post.id}
-                    className="absolute top-3 right-3 p-1.5 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                    className="shrink-0 mt-1 p-1.5 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
                     title={t("deletePost")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -561,16 +563,17 @@ export default function Profile() {
         ) : (
           <div className="space-y-3">
             {(userPosts.posts as any[]).map((post: any) => (
-              <div key={post.id} className="relative">
-                <PostCard post={post} onRefresh={refetchPosts} showPin compact />
+              <div key={post.id} className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <PostCard post={post} onRefresh={refetchPosts} showPin compact />
+                </div>
                 <button
                   onClick={() => handleDeletePost(post.id)}
                   disabled={deletingId === post.id}
-                  className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors text-xs font-medium border border-red-200 dark:border-red-800/50"
+                  className="shrink-0 mt-1 p-1.5 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors border border-red-200 dark:border-red-800/50"
                   title={t("deletePost")}
                 >
-                  <Trash2 className="w-3 h-3" />
-                  {t("deletePost")}
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}

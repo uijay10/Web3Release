@@ -127,7 +127,7 @@ function PostRegularCard({ post, num }: { post: any; num: number }) {
   const displayName = post.authorName ?? `${post.authorWallet?.slice(0, 6)}...`;
   const sectionLabel = t(`nav_${post.section}` as any) || post.section;
   return (
-    <Link href={`/section/${post.section}`}
+    <Link href={`/post/${post.id}`}
       className="flex items-center gap-3 px-5 py-5 rounded-2xl border border-border/30 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all group cursor-pointer">
       {/* 序号 */}
       <span className={`text-base font-bold w-9 shrink-0 text-center ${num <= 3 ? "text-red-500" : "text-muted-foreground/50"}`}>{num}</span>
@@ -146,7 +146,7 @@ function PostRegularCard({ post, num }: { post: any; num: number }) {
       </div>
       {/* 区域 */}
       <span className="shrink-0 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-primary/10 text-primary">{sectionLabel}</span>
-      {/* 查看 */}
+      {/* 查看帖子详情 */}
       <span className="shrink-0 flex items-center gap-1 text-base text-primary font-semibold group-hover:underline whitespace-nowrap">
         <Eye className="w-4 h-4" /> {t("view")}
       </span>
