@@ -137,6 +137,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-3 ml-auto">
+              {/* Language selector */}
+              <div className="relative hidden sm:block">
+                <select
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as LangCode)}
+                  className="appearance-none bg-white dark:bg-slate-800 border border-border dark:border-slate-700 rounded-full pl-3 pr-7 py-1.5 text-sm font-semibold text-muted-foreground dark:text-slate-200 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground dark:text-slate-400 pointer-events-none" />
+              </div>
+              {/* Dark mode toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className="px-3 py-1.5 rounded-full bg-muted dark:bg-slate-700 border border-border dark:border-slate-600 text-muted-foreground dark:text-slate-300 hover:bg-muted/80 dark:hover:bg-slate-600 transition-all font-semibold text-sm"
+                title="Toggle dark mode"
+              >
+                {isDark ? "☀️" : "🌙"}
+              </button>
+
               {/* Space owner → red Post button; loading → hide; not owner → Apply link */}
               {isConnected && isSpaceOwner ? (
                 <Link href="/post/new"
@@ -195,29 +217,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* ── Nav rows ── */}
         <div className="border-t border-border/30 bg-muted/20">
           <div className="max-w-7xl mx-auto px-2 py-1.5 space-y-1">
-            {/* Controls row: Language + Dark on left */}
-            <div className="flex items-center gap-1.5 mb-1">
-              <div className="relative">
-                <select
-                  value={lang}
-                  onChange={(e) => setLang(e.target.value as LangCode)}
-                  className="appearance-none bg-white dark:bg-slate-800 border border-border dark:border-slate-700 rounded-full pl-3 pr-7 py-1.5 text-sm font-semibold text-muted-foreground dark:text-slate-200 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
-                >
-                  {LANGUAGES.map((l) => (
-                    <option key={l.value} value={l.value}>{l.label}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground dark:text-slate-400 pointer-events-none" />
-              </div>
-              <button
-                onClick={toggleDarkMode}
-                className="px-3 py-1.5 rounded-full bg-muted dark:bg-slate-700 border border-border dark:border-slate-600 text-muted-foreground dark:text-slate-300 hover:bg-muted/80 dark:hover:bg-slate-600 transition-all font-semibold text-sm"
-                title="Toggle dark mode"
-              >
-                {isDark ? "☀️" : "🌙"}
-              </button>
-            </div>
-
             {/* Row 1 */}
             <div className="flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-none">
               {NAV_ROW1_KEYS.map(({ key, href }) => (
