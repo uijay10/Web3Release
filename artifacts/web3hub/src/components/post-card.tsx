@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { filterContent, filterErrorMessage } from "@/lib/content-filter";
 import { Heart, MessageCircle, Copy, Check, Pin, User, Eye } from "lucide-react";
 
 const SECTION_KEY_MAP: Record<string, string> = {
@@ -87,6 +88,8 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
 
   const handleComment = async () => {
     if (!isConnected || !commentText.trim()) return;
+    const filterResult = filterContent(commentText.trim());
+    if (!filterResult.ok) { setCommentError(filterErrorMessage(filterResult)); return; }
     setCommenting(true);
     setCommentError("");
     try {

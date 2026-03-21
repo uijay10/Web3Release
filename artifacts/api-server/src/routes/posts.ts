@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, postsTable, usersTable } from "@workspace/db";
 import { eq, and, desc, asc, sql, gte } from "drizzle-orm";
+import { checkContent, filterErrorMessage } from "../content-filter";
 
 const router: IRouter = Router();
 
@@ -147,6 +148,11 @@ router.post("/", async (req, res) => {
   if (!title || !content || !section || !authorWallet) {
     return res.status(400).json({ error: "title, content, section, authorWallet required" });
   }
+
+  const titleFilter = checkContent(String(title));
+  if (titleFilter) return res.status(422).json({ error: "CONTENT_FILTER", reason: titleFilter, message: filterErrorMessage(titleFilter) });
+  const contentFilter = checkContent(String(content));
+  if (contentFilter) return res.status(422).json({ error: "CONTENT_FILTER", reason: contentFilter, message: filterErrorMessage(contentFilter) });
 
   const lw = authorWallet.toLowerCase();
   const users = await db.select().from(usersTable).where(eq(usersTable.wallet, lw)).limit(1);
@@ -307,6 +313,9 @@ router.post("/:id/comment", async (req, res) => {
 
   const { wallet, content } = req.body;
   if (!content) return res.status(400).json({ error: "content required" });
+
+  const commentFilter = checkContent(String(content));
+  if (commentFilter) return res.status(422).json({ error: "CONTENT_FILTER", reason: commentFilter, message: filterErrorMessage(commentFilter) });
 
   // Check ban status before any writes
   if (wallet) {

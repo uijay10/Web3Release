@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { filterContent, filterErrorMessage } from "@/lib/content-filter";
 import { useWeb3Auth } from "@/lib/web3";
 import { useCreatePost, useGetMe } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -81,6 +82,10 @@ export default function PostNew() {
     if (!content.trim()) { setError("内容不能为空"); return false; }
     if (!section) { setError("请选择分区"); return false; }
     if (!availableSections.includes(section)) { setError("您没有权限在此分区发帖"); return false; }
+    const titleCheck = filterContent(title.trim());
+    if (!titleCheck.ok) { setError(filterErrorMessage(titleCheck)); return false; }
+    const contentCheck = filterContent(content.trim());
+    if (!contentCheck.ok) { setError(filterErrorMessage(contentCheck)); return false; }
     setError(""); return true;
   };
 
@@ -129,6 +134,8 @@ export default function PostNew() {
             setStep("form"); setShowRecharge(true);
           } else if (errCode === "DAILY_LIMIT") {
             setStep("form"); setError(`今日发帖已达上限（${body?.limit ?? ""}条/天）`);
+          } else if (errCode === "CONTENT_FILTER") {
+            setStep("form"); setError(body?.message || "包含敏感内容，请重新编辑再提交");
           } else {
             setStep("form"); setError(errCode || "发布失败，请重试");
           }

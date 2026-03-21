@@ -1,6 +1,7 @@
 import { useRoute, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, MessageCircle, ArrowLeft, Pin, Clock, User, Eye } from "lucide-react";
+import { filterContent, filterErrorMessage } from "@/lib/content-filter";
 import { useState } from "react";
 import { useWeb3Auth } from "@/lib/web3";
 import { generateGradient, truncateAddress } from "@/lib/utils";
@@ -71,6 +72,8 @@ export default function PostDetail() {
 
   const handleComment = async () => {
     if (!isConnected || !commentText.trim() || !post) return;
+    const filterResult = filterContent(commentText.trim());
+    if (!filterResult.ok) { setCommentError(filterErrorMessage(filterResult)); return; }
     setCommenting(true);
     setCommentError("");
     try {
