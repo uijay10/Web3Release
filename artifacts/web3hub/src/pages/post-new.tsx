@@ -193,34 +193,35 @@ export default function PostNew() {
       {step === "confirm" && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setStep("form")} />
-          <div className="relative w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl p-6 space-y-5">
-            <button onClick={() => setStep("form")} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors">
+          <div className="relative w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-2xl p-6 space-y-5">
+            <button onClick={() => setStep("form")} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
               <X className="w-4 h-4" />
             </button>
             <div className="flex flex-col items-center text-center gap-2">
               <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-1">
                 <Zap className="w-7 h-7 text-amber-500" />
               </div>
-              <h3 className="text-lg font-bold">确认发帖</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-lg font-bold text-gray-900">确认发帖</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">
                 {isAdminUser
                   ? "管理员发帖不消耗能量，直接确认。"
                   : `这将消耗 1 能量${wantToPin && pinCount > 0 ? " + 1 置顶次数" : ""}。当前剩余：${energy} 能量 / ${pinCount} 置顶次数`}
               </p>
             </div>
-            <div className="bg-muted/50 rounded-xl p-4 space-y-1.5 text-left">
-              <p className="text-xs text-muted-foreground">分区：<span className="font-semibold text-foreground">{t(SECTION_LABEL_KEYS[section] ?? section)}</span>
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-1.5 text-left">
+              <p className="text-xs text-gray-400">分区：<span className="font-semibold text-gray-700">{t(SECTION_LABEL_KEYS[section] ?? section)}</span>
                 {wantToPin && pinCount > 0 && <span className="ml-2 text-amber-500 font-bold">📌 置顶3天</span>}
               </p>
-              <p className="text-sm font-bold text-foreground line-clamp-2">{title}</p>
-              <p className="text-xs text-muted-foreground line-clamp-2">{content}</p>
+              <p className="text-sm font-bold text-gray-900 line-clamp-2">{title}</p>
+              <p className="text-xs text-gray-500 line-clamp-2">{content}</p>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setStep("form")} className="flex-1 py-3 rounded-xl border border-border font-semibold text-sm hover:bg-muted transition-colors">
+              <button onClick={() => setStep("form")}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-colors">
                 取消
               </button>
               <button onClick={handleConfirmedPost} disabled={createPost.isPending}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-60 shadow-lg shadow-primary/20">
+                className="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-sm transition-all disabled:opacity-60 shadow-lg shadow-green-500/20">
                 {createPost.isPending ? "发布中..." : "确认发布"}
               </button>
             </div>
