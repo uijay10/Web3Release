@@ -29,7 +29,7 @@ export default function PublicProfile() {
     { query: { enabled: !!wallet } }
   );
 
-  const user = userData?.user;
+  const user = userData as any;
   const posts = postsData?.posts ?? [];
 
   if (!wallet) {
