@@ -126,7 +126,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" className="stroke-blue-600" />
                   </svg>
                 </div>
-                <span className="font-display font-bold text-2xl tracking-tight text-blue-600">Web3Hub</span>
+                <span className="font-display font-bold text-2xl tracking-tight text-blue-600">Web3 Release</span>
               </Link>
               <Link href="/"
                 className={cn(
