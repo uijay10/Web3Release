@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-sans: 'Space Grotesk', 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --color-background: 0 0% 100%;
@@ -105,17 +105,47 @@
   
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.005em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display;
+    font-feature-settings: "kern" 1, "liga" 1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  /* Crypto-style nav links */
+  header nav a,
+  header a {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  /* Monospace for wallet addresses, hashes, numbers */
+  .font-mono,
+  [class*="font-mono"] {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0em;
+  }
+
+  /* Numbers and stats */
+  [class*="text-"] span.mono,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
+
 
 @layer utilities {
   .text-neon {
     color: #00FF9F;
-    text-shadow: 0 0 5px rgba(0, 255, 159, 0.5), 0 0 10px rgba(0, 255, 159, 0.3);
+    text-shadow: 0 0 8px rgba(0, 255, 159, 0.65), 0 0 20px rgba(0, 255, 159, 0.3);
   }
   
   .glass-panel {
@@ -124,6 +154,40 @@
   
   .pink-btn {
     @apply bg-[#FF69B4] text-white hover:bg-[#FF69B4]/90 shadow-md shadow-[#FF69B4]/20 transition-all duration-200 active:scale-95 font-medium;
+  }
+
+  /* ── Crypto / DeFi badge style ── */
+  .badge-crypto {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Section nav link style (nav bar rows) ── */
+  .crypto-nav-link {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    transition: color 0.15s, opacity 0.15s;
+  }
+
+  /* ── Gradient headline text ── */
+  .text-gradient-crypto {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Data / number monospace display ── */
+  .data-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
 }
 
