@@ -121,11 +121,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Logo — 1.5× bigger */}
             <div className="flex items-center gap-3 shrink-0">
               <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="w-12 h-12 rounded-xl bg-blue-600/15 flex items-center justify-center group-hover:bg-blue-600/25 transition-colors">
-                  <svg viewBox="0 0 24 24" className="w-7 h-7 fill-blue-600">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" className="stroke-blue-600" />
-                  </svg>
-                </div>
+                <img src="/logo.png" alt="Web3 Release" className="w-10 h-10 rounded-xl object-cover" />
                 <span className="font-display font-bold text-2xl tracking-tight text-blue-600">Web3 Release</span>
               </Link>
               <Link href="/"
