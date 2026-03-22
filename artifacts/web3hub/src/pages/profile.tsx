@@ -386,45 +386,49 @@ export default function Profile() {
           <SpaceStatusBadge status={me?.spaceStatus} rejectedAt={me?.spaceRejectedAt} />
         </InfoRow>
 
-        {/* 2. 我的签到 */}
-        <InfoRow label={t("checkinLabel")}>
-          {canCheckin ? (
-            <div className="flex items-center gap-3 flex-wrap">
-              <button
-                onClick={handleCheckin}
-                disabled={!checkinReady || checkinMutation.isPending}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                  checkinReady ? "bg-pink-500 text-white hover:bg-pink-600" : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                {checkinMutation.isPending ? t("saving") : t("checkin")}
-              </button>
-              {!checkinReady && checkinCountdown && (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" /> {t("nextCheckin")} <span className="font-mono font-bold text-foreground">{checkinCountdown}</span>
-                </span>
-              )}
-              {checkinReady && <span className="text-xs text-green-600 font-medium">{t("canCheckin")}</span>}
-              {checkinMutation.data && (
-                <span className={`text-xs font-medium ${checkinMutation.data.success ? "text-green-600" : "text-amber-600"}`}>
-                  {checkinMutation.data.message}
-                </span>
-              )}
-            </div>
-          ) : (
-            <span className="text-sm text-muted-foreground italic">{t("checkinNA")}</span>
-          )}
-        </InfoRow>
+        {/* 2. 我的签到 – KOL 专属，团队/开发者不显示 */}
+        {spaceType !== "project" && spaceType !== "developer" && (
+          <InfoRow label={t("checkinLabel")}>
+            {canCheckin ? (
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={handleCheckin}
+                  disabled={!checkinReady || checkinMutation.isPending}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                    checkinReady ? "bg-pink-500 text-white hover:bg-pink-600" : "bg-muted text-muted-foreground cursor-not-allowed"
+                  }`}
+                >
+                  {checkinMutation.isPending ? t("saving") : t("checkin")}
+                </button>
+                {!checkinReady && checkinCountdown && (
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="w-3 h-3" /> {t("nextCheckin")} <span className="font-mono font-bold text-foreground">{checkinCountdown}</span>
+                  </span>
+                )}
+                {checkinReady && <span className="text-xs text-green-600 font-medium">{t("canCheckin")}</span>}
+                {checkinMutation.data && (
+                  <span className={`text-xs font-medium ${checkinMutation.data.success ? "text-green-600" : "text-amber-600"}`}>
+                    {checkinMutation.data.message}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span className="text-sm text-muted-foreground italic">{t("checkinNA")}</span>
+            )}
+          </InfoRow>
+        )}
 
-        {/* 3. 我的积分 */}
-        <InfoRow label={t("pointsLabel")}>
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="flex items-center gap-1.5 text-xl font-bold text-amber-500">
-              <Star className="w-4 h-4" /> {points.toLocaleString()}
-            </span>
-            <span className="text-xs text-muted-foreground">{t("pointsDesc")}</span>
-          </div>
-        </InfoRow>
+        {/* 3. 我的积分 – KOL 专属，团队/开发者不显示 */}
+        {spaceType !== "project" && spaceType !== "developer" && (
+          <InfoRow label={t("pointsLabel")}>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="flex items-center gap-1.5 text-xl font-bold text-amber-500">
+                <Star className="w-4 h-4" /> {points.toLocaleString()}
+              </span>
+              <span className="text-xs text-muted-foreground">{t("pointsDesc")}</span>
+            </div>
+          </InfoRow>
+        )}
 
         {/* 4. 我的能量 + 置顶次数 */}
         <InfoRow label={t("energyLabel")}>
