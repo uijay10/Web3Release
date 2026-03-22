@@ -42,7 +42,7 @@ const SECTION_LABEL_KEYS: Record<string, string> = {
 function getSections(spaceType: string): string[] {
   if (spaceType === "kol") return KOL_SECTIONS as unknown as string[];
   if (spaceType === "developer") return DEV_SECTIONS as unknown as string[];
-  return ALL_SECTIONS as unknown as string[]; // project / admin
+  return ALL_SECTIONS as unknown as string[];
 }
 
 type Step = "form" | "confirm" | "done";
@@ -77,11 +77,13 @@ export default function PostNew() {
   const availableSections = getSections(spaceType);
   const inputCls = "w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground";
 
+  const withPin = wantToPin && pinCount > 0;
+
   const validateForm = () => {
-    if (!title.trim()) { setError("标题不能为空"); return false; }
-    if (!content.trim()) { setError("内容不能为空"); return false; }
-    if (!section) { setError("请选择分区"); return false; }
-    if (!availableSections.includes(section)) { setError("您没有权限在此分区发帖"); return false; }
+    if (!title.trim()) { setError(t("postErrNoTitle")); return false; }
+    if (!content.trim()) { setError(t("postErrNoContent")); return false; }
+    if (!section) { setError(t("postErrNoSection")); return false; }
+    if (!availableSections.includes(section)) { setError(t("postErrNoPermission")); return false; }
     const titleCheck = filterContent(title.trim());
     if (!titleCheck.ok) { setError(filterErrorMessage(titleCheck)); return false; }
     const contentCheck = filterContent(content.trim());
@@ -133,11 +135,11 @@ export default function PostNew() {
           } else if (errCode === "INSUFFICIENT_ENERGY") {
             setStep("form"); setShowRecharge(true);
           } else if (errCode === "DAILY_LIMIT") {
-            setStep("form"); setError(`今日发帖已达上限（${body?.limit ?? ""}条/天）`);
+            setStep("form"); setError(t("postErrDailyLimit").replace("{n}", String(body?.limit ?? "")));
           } else if (errCode === "CONTENT_FILTER") {
-            setStep("form"); setError(body?.message || "包含敏感内容，请重新编辑再提交");
+            setStep("form"); setError(body?.message || t("postErrContentFilter"));
           } else {
-            setStep("form"); setError(errCode || "发布失败，请重试");
+            setStep("form"); setError(errCode || t("postErrGeneral"));
           }
         },
       }
@@ -149,7 +151,7 @@ export default function PostNew() {
       <div className="py-32 text-center max-w-sm mx-auto">
         <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-2">{t("connect")}</h2>
-        <p className="text-muted-foreground text-sm">请先连接钱包才能发帖。</p>
+        <p className="text-muted-foreground text-sm">{t("postConnectWalletHint")}</p>
       </div>
     );
   }
@@ -163,25 +165,31 @@ export default function PostNew() {
           {pinQueued ? (
             <div className="mt-4 px-5 py-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/50 text-left space-y-1.5">
               <p className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-2">
-                <Pin className="w-4 h-4" /> 置顶排队中
+                <Pin className="w-4 h-4" /> {t("postPinQueued")}
               </p>
               <p className="text-sm text-amber-600 dark:text-amber-400/80 leading-relaxed">
-                当前14个置顶位均已占满，您的帖子已加入排队，待有空位时将自动上架置顶区。
+                {t("postPinQueuedDesc")}
               </p>
               {pinQueuedEstimate && (
                 <p className="text-xs text-muted-foreground">
-                  预计最早空位时间：{new Date(pinQueuedEstimate).toLocaleString("zh-CN")}
+                  {t("postPinQueuedEta")} {new Date(pinQueuedEstimate).toLocaleString()}
                 </p>
               )}
             </div>
           ) : wantToPin ? (
-            <p className="text-green-600 text-sm mt-1 font-semibold">✓ 帖子已成功置顶3天</p>
+            <p className="text-green-600 text-sm mt-1 font-semibold">{t("postPinned3Days")}</p>
           ) : null}
-          <p className="text-muted-foreground text-sm mt-4">正在跳回首页...</p>
+          <p className="text-muted-foreground text-sm mt-4">{t("postRedirecting")}</p>
         </div>
       </div>
     );
   }
+
+  const confirmEnergyText = isAdminUser
+    ? t("postConfirmAdmin")
+    : (withPin
+        ? t("postConfirmEnergyPin").replace("{energy}", String(energy)).replace("{pin}", String(pinCount))
+        : t("postConfirmEnergy").replace("{energy}", String(energy)).replace("{pin}", String(pinCount)));
 
   return (
     <>
@@ -201,16 +209,13 @@ export default function PostNew() {
               <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-1">
                 <Zap className="w-7 h-7 text-amber-500" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">确认发帖</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {isAdminUser
-                  ? "管理员发帖不消耗能量，直接确认。"
-                  : `这将消耗 1 能量${wantToPin && pinCount > 0 ? " + 1 置顶次数" : ""}。当前剩余：${energy} 能量 / ${pinCount} 置顶次数`}
-              </p>
+              <h3 className="text-lg font-bold text-gray-900">{t("postConfirmTitle")}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">{confirmEnergyText}</p>
             </div>
             <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-1.5 text-left">
-              <p className="text-xs text-gray-400">分区：<span className="font-semibold text-gray-700">{t(SECTION_LABEL_KEYS[section] ?? section)}</span>
-                {wantToPin && pinCount > 0 && <span className="ml-2 text-amber-500 font-bold">📌 置顶3天</span>}
+              <p className="text-xs text-gray-400">
+                {t("postConfirmSectionLabel")} <span className="font-semibold text-gray-700">{t(SECTION_LABEL_KEYS[section] ?? section)}</span>
+                {withPin && <span className="ml-2 text-amber-500 font-bold">{t("postPin3Days")}</span>}
               </p>
               <p className="text-sm font-bold text-gray-900 line-clamp-2">{title}</p>
               <p className="text-xs text-gray-500 line-clamp-2">{content}</p>
@@ -218,11 +223,11 @@ export default function PostNew() {
             <div className="flex gap-3">
               <button onClick={() => setStep("form")}
                 className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-colors">
-                取消
+                {t("cancel")}
               </button>
               <button onClick={handleConfirmedPost} disabled={createPost.isPending}
                 className="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-sm transition-all disabled:opacity-60 shadow-lg shadow-green-500/20">
-                {createPost.isPending ? "发布中..." : "确认发布"}
+                {createPost.isPending ? t("postFormSubmitting") : t("postConfirmPublish")}
               </button>
             </div>
           </div>
@@ -243,15 +248,15 @@ export default function PostNew() {
                 energy <= 0 ? "bg-red-100 dark:bg-red-950/30 text-red-600" :
                 energy <= 5 ? "bg-amber-100 dark:bg-amber-950/30 text-amber-600" :
                 "bg-green-100 dark:bg-green-950/30 text-green-600"}`}>
-                <Zap className="w-3.5 h-3.5" />{energy} 能量
+                <Zap className="w-3.5 h-3.5" />{energy} {t("energyUnit")}
               </div>
               {pinCount > 0 && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-violet-100 dark:bg-violet-950/30 text-violet-600">
-                  <Pin className="w-3.5 h-3.5" />{pinCount} 置顶
+                  <Pin className="w-3.5 h-3.5" />{pinCount} {t("pinUnit")}
                 </div>
               )}
               {energy <= 0 && (
-                <button onClick={() => setShowRecharge(true)} className="text-xs text-primary hover:underline font-semibold">充值</button>
+                <button onClick={() => setShowRecharge(true)} className="text-xs text-primary hover:underline font-semibold">{t("recharge")}</button>
               )}
             </div>
           )}
@@ -268,10 +273,10 @@ export default function PostNew() {
               ))}
             </select>
             {spaceType === "kol" && (
-              <p className="text-xs text-muted-foreground mt-1">KOL 可选分区（8个）</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("postKolSectionNote")}</p>
             )}
             {spaceType === "developer" && (
-              <p className="text-xs text-muted-foreground mt-1">开发者可选分区（7个）</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("postDevSectionNote")}</p>
             )}
           </div>
 
@@ -300,8 +305,8 @@ export default function PostNew() {
                 className="w-4 h-4 accent-amber-500" />
               <Pin className="w-4 h-4 text-amber-500 shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-semibold">置顶此帖（消耗 1 次置顶次数）</p>
-                <p className="text-xs text-muted-foreground">发布后自动置顶3天，显示倒计时。当前剩余：{pinCount} 次</p>
+                <p className="text-sm font-semibold">{t("postPinLabel")}</p>
+                <p className="text-xs text-muted-foreground">{t("postPinDesc").replace("{n}", String(pinCount))}</p>
               </div>
             </label>
           )}
@@ -313,7 +318,7 @@ export default function PostNew() {
           {!isAdminUser && energy > 0 && (
             <p className="text-xs text-muted-foreground flex items-center gap-1.5">
               <Zap className="w-3 h-3 text-amber-400" />
-              提交后将消耗 1 能量{wantToPin && pinCount > 0 ? " + 1 置顶次数" : ""}，当前剩余 {energy} 能量
+              {(withPin ? t("postEnergyNotePin") : t("postEnergyNote")).replace("{energy}", String(energy))}
             </p>
           )}
 
