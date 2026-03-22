@@ -109,7 +109,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     "relative px-3.5 py-1.5 rounded-full text-base font-semibold whitespace-nowrap transition-all duration-200 group",
     location === href
       ? "text-white bg-white/15"
-      : "text-white/70 hover:text-white"
+      : "text-white/90 hover:text-white"
   );
 
   return (
