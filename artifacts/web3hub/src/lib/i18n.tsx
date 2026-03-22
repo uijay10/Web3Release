@@ -192,7 +192,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     pinnedExclusive: "Project-only", slotsUsed: "occupied", threeDayCountdown: "3-day countdown",
     regularDesc: "Project posts · Latest first", itemUnit: "",
     roleProject: "Blockchain Team", roleDeveloper: "Developer", roleMember: "Member",
-    memberTabProject: "Projects", memberTabKol: "KOL", memberTabDev: "Developers",
+    memberTabProject: "Team", memberTabKol: "KOL", memberTabDev: "Developers",
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
