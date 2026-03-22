@@ -8,7 +8,7 @@ import { useWeb3Auth } from "@/lib/web3";
 import { generateGradient, truncateAddress } from "@/lib/utils";
 import { RoleBadge } from "@/components/role-badge";
 import { formatDistanceToNow, format } from "date-fns";
-import { zhCN, enUS } from "date-fns/locale";
+import { zhCN, enUS, de, ru, fr, ja, ko, vi } from "date-fns/locale";
 import { useLang } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { AdminPinModal } from "@/components/post-card";
@@ -29,13 +29,28 @@ const SECTION_KEY_MAP: Record<string, string> = {
   community: "nav_community", developer: "nav_developer",
 };
 
+const DATE_LOCALES: Record<string, Locale> = {
+  "zh-CN": zhCN, "en": enUS, "de": de, "ru": ru, "fr": fr, "ja": ja, "ko": ko, "vi": vi,
+};
+
+const DATE_FORMATS: Record<string, string> = {
+  "zh-CN": "yyyy年M月d日 HH:mm",
+  "ja": "yyyy年M月d日 HH:mm",
+  "ko": "yyyy년 M월 d일 HH:mm",
+  "de": "d. MMMM yyyy, HH:mm 'Uhr'",
+  "ru": "d MMMM yyyy, HH:mm",
+  "fr": "d MMMM yyyy 'à' HH:mm",
+  "vi": "HH:mm, d MMMM yyyy",
+  "en": "h:mm a · MMM d, yyyy",
+};
+
 export default function PostDetail() {
   const [, params] = useRoute("/post/:id");
   const postId = Number(params?.id);
   const { address, isConnected } = useWeb3Auth();
   const { t, lang } = useLang();
   const apiBase = getApiBase();
-  const dateLocale = lang === "zh-CN" ? zhCN : enUS;
+  const dateLocale = DATE_LOCALES[lang] ?? enUS;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/posts", postId],
@@ -119,7 +134,7 @@ export default function PostDetail() {
       });
       const d = await res.json();
       if (!res.ok) {
-        setPinMsg(d.error === "No pin credits" ? "❌ 置顶次数不足" : `❌ ${d.error}`);
+        setPinMsg(d.error === "No pin credits" ? t("pinNoCredits") : `❌ ${d.error}`);
         return;
       }
       if (d.queued) {
@@ -128,11 +143,13 @@ export default function PostDetail() {
           const ms = Math.max(0, new Date(d.estimatedAt).getTime() - Date.now());
           const h = Math.floor(ms / 3_600_000);
           const m = Math.floor((ms % 3_600_000) / 60_000);
-          waitStr = h > 0 ? ` · 等待约 ${h}小时${m}分` : ` · 等待约 ${m}分钟`;
+          waitStr = h > 0
+            ? " " + t("pinWaitHM").replace("{h}", String(h)).replace("{m}", String(m))
+            : " " + t("pinWaitM").replace("{m}", String(m));
         }
-        setPinMsg(`置顶排队中${waitStr}`);
+        setPinMsg(t("pinQueuedMsg") + waitStr);
       } else {
-        setPinMsg("✅ 置顶成功！");
+        setPinMsg(t("pinSuccess"));
       }
     } finally {
       setPinning(false);
@@ -157,7 +174,9 @@ export default function PostDetail() {
         setPinMsg(`❌ ${d.error}`);
         return;
       }
-      setPinMsg(`✅ 管理员置顶成功！有效期 ${hours >= 24 ? Math.round(hours / 24) + " 天" : hours + " 小时"}`);
+      const successKey = hours >= 24 ? "adminPinSuccessD" : "adminPinSuccessH";
+      const n = hours >= 24 ? Math.round(hours / 24) : hours;
+      setPinMsg(t(successKey).replace("{n}", String(n)));
     } finally {
       setPinning(false);
     }
@@ -173,12 +192,10 @@ export default function PostDetail() {
   if (isLoading) {
     return (
       <div className="max-w-[620px] mx-auto">
-        {/* Top bar skeleton */}
         <div className="flex items-center gap-4 px-4 py-3 border-b border-border/30">
           <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
           <div className="h-5 w-16 bg-muted rounded animate-pulse" />
         </div>
-        {/* Author skeleton */}
         <div className="flex items-center gap-3 px-4 py-4">
           <div className="w-11 h-11 rounded-full bg-muted animate-pulse shrink-0" />
           <div className="space-y-2 flex-1">
@@ -199,12 +216,10 @@ export default function PostDetail() {
   if (error || !post) {
     return (
       <div className="max-w-[620px] mx-auto py-16 text-center">
-        <p className="text-2xl font-semibold mb-3">{lang === "zh-CN" ? "帖子不存在" : "Post not found"}</p>
-        <p className="text-muted-foreground mb-6 text-sm">
-          {lang === "zh-CN" ? "该帖子可能已被删除或链接无效。" : "This post may have been deleted or the link is invalid."}
-        </p>
+        <p className="text-2xl font-semibold mb-3">{t("postDetailNotFound")}</p>
+        <p className="text-muted-foreground mb-6 text-sm">{t("postDetailNotFoundDesc")}</p>
         <Link href="/" className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> {lang === "zh-CN" ? "返回首页" : "Back to Home"}
+          <ArrowLeft className="w-4 h-4" /> {t("postDetailBackHome")}
         </Link>
       </div>
     );
@@ -214,19 +229,20 @@ export default function PostDetail() {
   const authorHref = `/profile/${post.authorWallet}`;
   const sectionLabel = t(SECTION_KEY_MAP[post.section] ?? post.section) || post.section;
   const postDate = new Date(post.createdAt);
+  const isSelfPost = address?.toLowerCase() === post.authorWallet?.toLowerCase();
 
   return (
     <div className="max-w-[620px] mx-auto">
 
-      {/* ── Top bar: Back + title ── */}
+      {/* ── Top bar ── */}
       <div className="flex items-center gap-5 px-4 py-3 sticky top-0 z-10 bg-background/90 backdrop-blur-md border-b border-border/30">
         <Link href="/"
           className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-muted transition-colors text-foreground"
-          title={lang === "zh-CN" ? "返回" : "Back"}
+          title={t("back") || "Back"}
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <span className="text-lg font-semibold">{lang === "zh-CN" ? "帖子" : "Post"}</span>
+        <span className="text-lg font-semibold">{t("postDetailTitle")}</span>
       </div>
 
       {/* ── Admin pin banner ── */}
@@ -239,13 +255,13 @@ export default function PostDetail() {
             <div className="flex items-center justify-between flex-1 min-w-0">
               <div className="min-w-0">
                 <span className="text-sm text-violet-700 dark:text-violet-300 font-medium">
-                  {post.isPinned ? "重新设置置顶时长" : "管理员置顶此帖"}
+                  {post.isPinned ? t("pinBannerAdminReset") : t("pinBannerAdminNew")}
                 </span>
-                <span className="ml-2 text-[10px] text-violet-400 bg-violet-100 dark:bg-violet-900/40 px-1.5 py-0.5 rounded-full">免费</span>
+                <span className="ml-2 text-[10px] text-violet-400 bg-violet-100 dark:bg-violet-900/40 px-1.5 py-0.5 rounded-full">{t("pinBannerFree")}</span>
               </div>
               <button onClick={() => { setPinMsg(""); setAdminPinHours(72); setAdminPinCustom(false); setAdminPinOpen(true); }} disabled={pinning}
                 className="ml-3 px-4 py-1.5 rounded-lg text-xs bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50 shrink-0">
-                {pinning ? "处理中..." : "置顶"}
+                {pinning ? t("pinBannerProcessing") : t("pinBannerPin")}
               </button>
             </div>
           )}
@@ -261,29 +277,25 @@ export default function PostDetail() {
           ) : pinConfirmOpen ? (
             <div className="flex-1">
               <p className="text-sm text-violet-800 dark:text-violet-200 mb-2.5">
-                {address?.toLowerCase() === post.authorWallet?.toLowerCase()
-                  ? "你要置顶此帖吗？将消耗 1 次置顶次数"
-                  : "你要帮助此帖置顶吗？将消耗 1 次置顶次数"}
+                {isSelfPost ? t("pinConfirmSelf") : t("pinConfirmOther")}
               </p>
               <div className="flex gap-2">
                 <button onClick={() => setPinConfirmOpen(false)}
-                  className="px-4 py-1.5 rounded-lg text-xs bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">取消</button>
+                  className="px-4 py-1.5 rounded-lg text-xs bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">{t("cancel")}</button>
                 <button onClick={doPin} disabled={pinning}
                   className="px-4 py-1.5 rounded-lg text-xs bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50">
-                  {pinning ? "处理中..." : "确定"}
+                  {pinning ? t("pinBannerProcessing") : t("pinOk")}
                 </button>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-between flex-1">
               <span className="text-sm text-violet-700 dark:text-violet-300">
-                {address?.toLowerCase() === post.authorWallet?.toLowerCase()
-                  ? "置顶你的帖子到首页精华区"
-                  : "帮助此帖置顶到首页精华区"}
+                {isSelfPost ? t("pinBannerSelfText") : t("pinBannerOtherText")}
               </span>
               <button onClick={() => { setPinMsg(""); setPinConfirmOpen(true); }} disabled={pinning}
                 className="ml-3 px-4 py-1.5 rounded-lg text-xs bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50 shrink-0">
-                置顶
+                {t("pinBannerPin")}
               </button>
             </div>
           )}
@@ -319,7 +331,7 @@ export default function PostDetail() {
         <Link href={authorHref}
           className="shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-border text-xs font-medium hover:bg-muted transition-colors">
           <User className="w-3.5 h-3.5" />
-          {lang === "zh-CN" ? "主页" : "Profile"}
+          {t("postDetailProfile")}
         </Link>
       </div>
 
@@ -329,10 +341,10 @@ export default function PostDetail() {
         {post.isPinned && (
           <div className="flex items-center gap-1.5 text-violet-500 text-xs mb-3">
             <Pin className="w-3.5 h-3.5" />
-            <span>{lang === "zh-CN" ? "置顶中" : "Pinned"}</span>
+            <span>{t("postDetailPinned")}</span>
             {post.pinnedUntil && (
               <span className="text-muted-foreground">
-                · {lang === "zh-CN" ? "到期" : "expires"} {formatDistanceToNow(new Date(post.pinnedUntil), { locale: dateLocale })} {lang === "zh-CN" ? "后" : ""}
+                · {t("postDetailExpires")} {formatDistanceToNow(new Date(post.pinnedUntil), { locale: dateLocale })}{t("postDetailExpiresSuffix") ? " " + t("postDetailExpiresSuffix") : ""}
               </span>
             )}
           </div>
@@ -356,7 +368,7 @@ export default function PostDetail() {
       {/* ── Timestamp ── */}
       <div className="px-4 py-3 border-t border-border/30">
         <span className="text-sm text-muted-foreground">
-          {format(postDate, lang === "zh-CN" ? "yyyy年M月d日 HH:mm" : "h:mm a · MMM d, yyyy", { locale: dateLocale })}
+          {format(postDate, DATE_FORMATS[lang] ?? DATE_FORMATS["en"], { locale: dateLocale })}
         </span>
       </div>
 
@@ -364,15 +376,15 @@ export default function PostDetail() {
       <div className="flex items-center gap-5 px-4 py-3 border-t border-border/30">
         <div className="flex items-center gap-1.5 text-sm">
           <span className="font-semibold">{commentCount.toLocaleString()}</span>
-          <span className="text-muted-foreground">{lang === "zh-CN" ? "评论" : "Comments"}</span>
+          <span className="text-muted-foreground">{t("postDetailCommentCount")}</span>
         </div>
         <div className="flex items-center gap-1.5 text-sm">
           <span className="font-semibold">{likeCount.toLocaleString()}</span>
-          <span className="text-muted-foreground">{lang === "zh-CN" ? "点赞" : "Likes"}</span>
+          <span className="text-muted-foreground">{t("postDetailLikeCount")}</span>
         </div>
         <div className="flex items-center gap-1.5 text-sm">
           <span className="font-semibold">{viewCount.toLocaleString()}</span>
-          <span className="text-muted-foreground">{lang === "zh-CN" ? "浏览" : "Views"}</span>
+          <span className="text-muted-foreground">{t("postDetailViewCount")}</span>
         </div>
       </div>
 
@@ -380,7 +392,7 @@ export default function PostDetail() {
       <div className="flex items-center justify-around px-4 py-1 border-t border-b border-border/30">
         <button
           onClick={() => isConnected && setCommentOpen(v => !v)}
-          title={lang === "zh-CN" ? "评论" : "Reply"}
+          title={t("postDetailCommentCount")}
           className={`flex items-center gap-2 px-5 py-3 rounded-full text-sm transition-colors group ${
             commentOpen ? "text-blue-500" : "text-muted-foreground hover:text-blue-500 hover:bg-blue-500/8"
           }`}
@@ -390,7 +402,7 @@ export default function PostDetail() {
         <button
           onClick={handleLike}
           disabled={liked || !isConnected}
-          title={lang === "zh-CN" ? "点赞" : "Like"}
+          title={t("postDetailLikeCount")}
           className={`flex items-center gap-2 px-5 py-3 rounded-full text-sm transition-colors group ${
             liked ? "text-pink-500" : "text-muted-foreground hover:text-pink-500 hover:bg-pink-500/8"
           } disabled:cursor-default`}
@@ -399,11 +411,11 @@ export default function PostDetail() {
         </button>
         <button
           onClick={handleCopyLink}
-          title={lang === "zh-CN" ? "复制链接" : "Copy link"}
+          title={t("copiedLink")}
           className="flex items-center gap-2 px-5 py-3 rounded-full text-sm text-muted-foreground hover:text-green-500 hover:bg-green-500/8 transition-colors"
         >
           {copied
-            ? <span className="text-xs text-green-500">{lang === "zh-CN" ? "已复制" : "Copied!"}</span>
+            ? <span className="text-xs text-green-500">{t("copiedLink")}</span>
             : <Share2 className="w-5 h-5" />
           }
         </button>
@@ -426,7 +438,7 @@ export default function PostDetail() {
                 <textarea
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
-                  placeholder={t("commentPlaceholder") || (lang === "zh-CN" ? "发表你的评论…" : "Post your reply…")}
+                  placeholder={t("commentPlaceholder")}
                   rows={3}
                   className="w-full text-sm px-3 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                 />
@@ -436,14 +448,14 @@ export default function PostDetail() {
                     disabled={commenting || !commentText.trim()}
                     className="px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors"
                   >
-                    {commenting ? "…" : (t("commentSubmit") || (lang === "zh-CN" ? "发送" : "Reply"))}
+                    {commenting ? "…" : t("commentSubmit")}
                   </button>
                 </div>
               </div>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-2">
-              {lang === "zh-CN" ? "连接钱包后可评论" : "Connect wallet to reply"}
+              {t("commentConnect")}
             </p>
           )}
         </div>
