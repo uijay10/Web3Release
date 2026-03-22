@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: 'Space Grotesk', 'Inter', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
+  --font-sans: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --font-display: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --color-background: 0 0% 100%;
@@ -105,23 +105,29 @@
   
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    font-family: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: 0.005em;
+    letter-spacing: 0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
+    font-family: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
     font-weight: 700;
   }
 
-  /* Crypto-style nav links */
+  /* Ensure ALL text elements use DM Sans */
+  p, span, a, button, input, select, textarea, label, li, td, th, div {
+    font-family: inherit;
+  }
+
+  /* Nav links */
   header nav a,
   header a {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     font-weight: 500;
     letter-spacing: 0.01em;
   }
@@ -158,7 +164,7 @@
 
   /* ── Crypto / DeFi badge style ── */
   .badge-crypto {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'DM Sans', 'PingFang SC', sans-serif;
     font-weight: 600;
     font-size: 0.65rem;
     letter-spacing: 0.08em;
@@ -167,7 +173,7 @@
 
   /* ── Section nav link style (nav bar rows) ── */
   .crypto-nav-link {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'DM Sans', 'PingFang SC', sans-serif;
     font-weight: 500;
     font-size: 0.8125rem;
     letter-spacing: 0.02em;
@@ -184,7 +190,7 @@
 
   /* ── Data / number monospace display ── */
   .data-value {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
