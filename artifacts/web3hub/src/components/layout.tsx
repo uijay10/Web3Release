@@ -4,7 +4,7 @@ import { WalletPickerModal } from "@/components/wallet-modal";
 import { useGetMe } from "@workspace/api-client-react";
 import { useLang, type LangCode } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
-import { LogOut, Mail, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare, FileText, X } from "lucide-react";
+import { LogOut, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare, FileText, X } from "lucide-react";
 import { cn, truncateAddress, generateGradient } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
@@ -259,10 +259,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <svg viewBox="0 0 24 24" className="w-4.5 h-4.5 fill-muted-foreground dark:fill-slate-400 group-hover:fill-sky-500 transition-colors">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
-            </a>
-            <a href="mailto:" title="Email"
-              className="w-9 h-9 rounded-full bg-muted/60 dark:bg-slate-700 hover:bg-pink-50 dark:hover:bg-pink-900/40 flex items-center justify-center transition-colors group">
-              <Mail className="w-4.5 h-4.5 text-muted-foreground dark:text-slate-400 group-hover:text-pink-500 transition-colors" />
             </a>
             <a href="#" title="Telegram"
               className="w-9 h-9 rounded-full bg-muted/60 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors group">
