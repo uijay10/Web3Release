@@ -273,9 +273,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
               </svg>
             </a>
-            <button onClick={() => setWhitepaperOpen(true)} title="Whitepaper"
-              className="w-10 h-10 rounded-full bg-muted/60 dark:bg-slate-700 hover:bg-violet-50 dark:hover:bg-violet-900/40 flex items-center justify-center transition-colors group">
-              <FileText className="w-5 h-5 text-muted-foreground dark:text-slate-400 group-hover:text-violet-500 transition-colors" />
+            <button onClick={() => setWhitepaperOpen(true)}
+              className="px-3 py-1.5 rounded-full bg-muted/60 dark:bg-slate-700 hover:bg-violet-50 dark:hover:bg-violet-900/40 text-xs font-medium text-muted-foreground dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors border border-border/50 dark:border-slate-600">
+              免责声明
             </button>
           </div>
           <div className="flex items-center gap-3 flex-wrap justify-center">
@@ -289,7 +289,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </footer>
 
-      {/* ── Whitepaper Modal ── */}
+      {/* ── Disclaimer Modal ── */}
       {whitepaperOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setWhitepaperOpen(false)}>
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border border-border" onClick={e => e.stopPropagation()}>
@@ -297,99 +297,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-violet-500" />
-                <span className="font-bold text-base text-foreground">Web3 Release Whitepaper</span>
-                <span className="text-xs text-muted-foreground ml-1">v1.0 · March 22, 2026</span>
+                <span className="font-bold text-base text-foreground">Web3 Release 免责声明</span>
+                <span className="text-xs text-muted-foreground ml-1">版本 1.0 · 2026年3月23日</span>
               </div>
               <button onClick={() => setWhitepaperOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
             {/* Scrollable content */}
-            <div className="overflow-y-auto flex-1 px-6 py-5 text-sm text-foreground leading-relaxed space-y-5">
-              <section>
-                <h2 className="text-base font-bold mb-2">1. Abstract</h2>
-                <p className="text-muted-foreground">Web3 Release is a decentralized, community-driven Web3 collaboration platform designed to connect <strong>crypto teams</strong>, <strong>KOLs (Key Opinion Leaders)</strong>, and <strong>developers</strong>, building a transparent and efficient hub for blockchain ecosystem publishing and collaboration.</p>
-                <p className="text-muted-foreground mt-2">The platform enables real identity verification through wallet connections, allowing seamless interactions for crypto team needs, talent matching, knowledge sharing, and community engagement. Its core goal is to address long-standing issues in the Web3 ecosystem—fragmentation, lack of trust, and insufficient incentives—accelerating healthier and faster real-world adoption of blockchain innovation.</p>
+            <div className="overflow-y-auto flex-1 px-6 py-5 text-sm text-foreground leading-relaxed space-y-4">
+              {[
+                ["1. 平台性质", "Web3 Release 是一个去中心化、社区驱动的 Web3 协作平台，仅提供信息发布、展示和匹配服务。平台不参与任何交易、投资、融资、代币发行或法律行为，仅作为用户间信息交流的中介工具。平台上所有内容（包括但不限于需求发布、合作意向、测试网招募、IDO 信息、空投计划、招聘、节点招募等）均由用户自行发布，平台不拥有、不控制、不担保其真实性、合法性、完整性或安全性。"],
+                ["2. 用户责任", "用户在使用平台时，应自行判断内容的真实性、可信度和风险。用户之间的一切互动、合作、交易、转账、投资等行为均为双方自愿、私下达成，与 Web3 Release 平台无关。用户因基于平台信息产生的任何损失、纠纷、法律责任，均由用户自行承担，平台不承担任何连带责任。"],
+                ["3. 无投资建议", "平台上出现的任何项目信息、代币、空投、IDO、Launchpad、融资公告、节点招募等内容，不构成任何形式的投资建议、金融建议、法律建议或商业承诺。平台不提供投资咨询服务，用户参与任何项目均需自行评估风险，并遵守当地法律法规。投资有风险，入市需谨慎。"],
+                ["4. 代币与积分声明", "平台当前积分系统仅用于记录用户贡献与活跃度，是未来 $W3R 代币空投分配的重要凭证，但不保证任何兑换价值或收益。未来 $W3R 代币（如发行）仅用于平台内能量消耗、发帖门槛等实用功能，不构成证券、金融衍生品或投资工具。平台不承诺任何代币升值、回报、分红或流动性。代币相关事宜以最终白皮书、DAO 治理决议为准。"],
+                ["5. 技术与安全风险", "平台基于区块链和钱包连接技术运行，可能存在智能合约漏洞、网络攻击、钱包安全问题、DNS 解析延迟、DDoS 等技术风险。用户需自行保护钱包私钥、助记词等信息，避免钓鱼、诈骗。平台不对因用户操作失误、技术故障导致的资产损失负责。"],
+                ["6. 第三方链接与内容", "平台可能链接外部网站、社交媒体、项目官网等第三方资源，这些链接仅供参考，平台不控制、不审核、不担保其内容。用户访问第三方链接产生的任何后果，由用户自行承担。"],
+                ["7. 法律适用与管辖", "本免责声明受新加坡法律管辖（如有争议，以新加坡法院为第一审管辖）。平台保留随时修改本声明的权利，修改后继续使用即视为同意。"],
+              ].map(([title, body]) => (
+                <section key={title}>
+                  <h2 className="font-bold text-foreground mb-1.5">{title}</h2>
+                  <p className="text-muted-foreground">{body}</p>
+                </section>
+              ))}
+
+              <section className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-2">
+                <p className="font-bold text-amber-700 dark:text-amber-400 mb-1">重要提醒</p>
+                <p className="text-muted-foreground text-sm">使用 Web3 Release 即表示您已阅读、理解并完全同意本免责声明。平台不向任何用户提供任何明示或默示的担保或承诺。参与 Web3 生态存在高风险，请用户理性判断、谨慎行事。如不同意本声明，请立即停止使用平台。</p>
               </section>
 
-              <section>
-                <h2 className="text-base font-bold mb-2">2. Current Pain Points in the Web3 Ecosystem</h2>
-                <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
-                  <li>Crypto teams struggle to efficiently find reliable developers, security auditors, node operators, or community partners. Information is scattered across Twitter, Discord, Telegram, and other channels, resulting in extremely high screening costs.</li>
-                  <li>KOLs frequently receive numerous low-quality collaboration requests, making it difficult to assess project legitimacy, while high-quality content creators lack sustained incentive mechanisms.</li>
-                  <li>Developers face unequal opportunities in on-chain projects, remaining invisible and struggling to match with truly valuable tasks (e.g., bug bounties, hackathons, node recruitment).</li>
-                  <li>The overall ecosystem suffers from information asymmetry, trust barriers, redundant development, low-quality collaborations, rampant scams, and reduced efficiency in genuine innovation.</li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-base font-bold mb-2">3. Core Solutions</h2>
-                <p className="text-muted-foreground mb-2">Web3 Release offers a unified, permissionless collaboration space where all interactions are based on wallet addresses, ensuring pseudonymity with traceability. The main user roles:</p>
-                <div className="space-y-3">
-                  <div className="bg-muted/40 rounded-xl p-4">
-                    <h3 className="font-semibold text-sm mb-1">3.1 Crypto Teams</h3>
-                    <p className="text-muted-foreground text-xs">Can publish testnet recruitment, IDO/Launchpad collaborations, security audit requests, integration announcements, airdrop plans, funding/recruitment/node recruitment, hackathons/bug bounties, and more. All content appears in the homepage "Project Showcase" area and corresponding sections.</p>
-                  </div>
-                  <div className="bg-muted/40 rounded-xl p-4">
-                    <h3 className="font-semibold text-sm mb-1">3.2 KOLs (Key Opinion Leaders)</h3>
-                    <p className="text-muted-foreground text-xs">Can publish collaboration intentions, project reviews, market insights, AMAs, and more. Dedicated KOL section + KOL leaderboard, automatically ranked based on real engagement metrics. The top 200 most active KOLs each month receive ecosystem airdrop rewards.</p>
-                  </div>
-                  <div className="bg-muted/40 rounded-xl p-4">
-                    <h3 className="font-semibold text-sm mb-1">3.3 Developers</h3>
-                    <p className="text-muted-foreground text-xs">Can publish technical shares, job intentions, open-source contributions, bug bounty tasks, etc. Dedicated "Developers" section where all developer posts are vertically displayed, making it easy for crypto teams to quickly screen talent.</p>
-                  </div>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-base font-bold mb-2">4. Points System (Core Incentive Mechanism)</h2>
-                <p className="text-muted-foreground mb-2">Web3 Release features a built-in points system to incentivize high-quality content creation and community participation. The total points supply is unlimited and can be used for future airdrop redemptions or other ecosystem benefits.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
-                    <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1.5">General User Points</p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Daily check-in: <strong>+1,000 pts</strong></li>
-                      <li>• Likes: <strong>+100 pts</strong> per like</li>
-                      <li>• Comments: <strong>+100 pts</strong> per comment (first 10/day)</li>
-                      <li>• Referral: 20% of referred user's daily points</li>
-                    </ul>
-                  </div>
-                  <div className="bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 rounded-xl p-3">
-                    <p className="text-xs font-semibold text-violet-700 dark:text-violet-400 mb-1.5">KOL-Exclusive Points</p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Post liked: <strong>+10 pts</strong> per like</li>
-                      <li>• Post commented: <strong>+10 pts</strong> per comment</li>
-                      <li>• Per 1,000 post views: <strong>+50 pts</strong></li>
-                      <li>• Referral: same 20% as above</li>
-                    </ul>
-                  </div>
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-base font-bold mb-2">5. Contributions to the Blockchain Field</h2>
-                <div className="space-y-2">
-                  {[
-                    ["Reduces Collaboration Friction", "Crypto team demands and developer/KOL supply are matched in real time on a single platform, minimizing cross-platform searches and trust costs."],
-                    ["Verifiable Reputation System", "Based on wallet addresses + engagement data (likes, comments, views), it forms a decentralized reputation system that reduces scam risks."],
-                    ["Incentivizes Genuine Contributions", "Points are earned from real interactions, enabling KOLs and developers to receive ongoing rewards through high-quality content."],
-                    ["Promotes Multi-Chain Collaboration", "Unified display of cross-chain information such as testnets, airdrops, audits, and hackathons accelerates ecosystem interconnectivity."],
-                    ["Empowers Developers and Mid-Tier KOLs", "Provides zero-barrier exposure channels, allowing truly capable individuals to be discovered without relying on centralized platform algorithms or paid promotions."],
-                  ].map(([title, desc]) => (
-                    <div key={title} className="flex gap-2.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0 mt-1.5" />
-                      <div><span className="font-semibold">{title}</span> — <span className="text-muted-foreground">{desc}</span></div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/20 dark:to-blue-950/20 border border-violet-100 dark:border-violet-900 rounded-2xl p-5">
-                <h2 className="text-base font-bold mb-2">6. Vision</h2>
-                <p className="text-muted-foreground">Web3 Release aims to become the <strong>"Twitter + LinkedIn + Gitcoin"</strong> of the Web3 era—a truly decentralized, community self-driven collaboration and publishing hub.</p>
-                <p className="text-muted-foreground mt-2">We believe that when crypto teams, KOLs, and developers can freely publish and collaborate in an environment of trust, traceability, and sufficient incentives, the next wave of genuine blockchain innovation will accelerate.</p>
-                <p className="mt-3 font-bold text-violet-600 dark:text-violet-400">Web3 Release – Connecting Demands, Unleashing Innovation.</p>
-              </section>
+              <p className="text-right text-xs text-muted-foreground pt-1">Web3 Release 团队 · 2026年3月23日</p>
             </div>
           </div>
         </div>
