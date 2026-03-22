@@ -192,18 +192,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <div className="absolute right-0 mt-2 w-52 rounded-xl shadow-2xl border border-border dark:border-slate-700 py-1 z-50"
                       style={{ background: "var(--card)", opacity: 1 }}>
                       <Link href="/profile" onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-3 text-sm text-foreground dark:text-slate-100 hover:bg-muted dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                        className="flex items-center gap-2.5 px-4 py-3 text-sm text-foreground dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer">
                         <LayoutDashboard className="w-4 h-4 text-blue-500" /> {t("dashboard")}
                       </Link>
                       {admin && (
                         <Link href="/admin" onClick={() => setIsDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors cursor-pointer">
+                          className="flex items-center gap-2.5 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer">
                           <ShieldCheck className="w-4 h-4" /> Admin Panel
                         </Link>
                       )}
                       <div className="border-t border-border/40 dark:border-slate-700 my-1" />
                       <button onClick={() => { disconnect(); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-destructive dark:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-950/30 transition-colors text-left">
+                        className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-destructive dark:text-red-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors text-left">
                         <LogOut className="w-4 h-4" /> {t("logout")}
                       </button>
                     </div>
