@@ -58,8 +58,8 @@ router.post("/applications/:id/approve", requireAdmin, async (req, res) => {
     if (!app.length) return res.status(404).json({ error: "Not found" });
     await db.update(spaceApplicationsTable).set({ status: "approved" }).where(eq(spaceApplicationsTable.id, id));
     const approvedType = app[0].type as string;
-    const energyGrant = approvedType === "project" ? 50 : 1000;
-    const pinGrant = approvedType === "project" ? 3 : 0;
+    const energyGrant = 1000; // all types receive 1000 energy on approval
+    const pinGrant = approvedType === "project" ? 10 : 0; // project gets 10 pin slots
     const existingUser = await db.select().from(usersTable).where(eq(usersTable.wallet, app[0].wallet)).limit(1);
     const curEnergy = existingUser[0]?.energy ?? 0;
     const curPin = existingUser[0]?.pinCount ?? 0;
@@ -102,8 +102,8 @@ router.post("/applications/batch", requireAdmin, async (req, res) => {
         await db.update(spaceApplicationsTable).set({ status }).where(eq(spaceApplicationsTable.id, id));
         if (action === "approve") {
           const batchType = app[0].type as string;
-          const bEnergyGrant = batchType === "project" ? 50 : 1000;
-          const bPinGrant = batchType === "project" ? 3 : 0;
+          const bEnergyGrant = 1000; // all types receive 1000 energy on approval
+          const bPinGrant = batchType === "project" ? 10 : 0; // project gets 10 pin slots
           const bUser = await db.select().from(usersTable).where(eq(usersTable.wallet, app[0].wallet)).limit(1);
           const bCurEnergy = bUser[0]?.energy ?? 0;
           const bCurPin = bUser[0]?.pinCount ?? 0;

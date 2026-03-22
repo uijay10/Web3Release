@@ -198,8 +198,8 @@ router.post("/", async (req, res) => {
       }
     }
 
-    // Daily post limit
-    const dailyLimit = spaceType === "project" ? 20 : spaceType === "kol" ? 20 : spaceType === "developer" ? 20 : 0;
+    // Daily post limit — all approved types: 10 posts / 24 h
+    const dailyLimit = spaceType === "project" ? 10 : spaceType === "kol" ? 10 : spaceType === "developer" ? 10 : 0;
     if (dailyLimit > 0) {
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
       const todayRows = await db.select({ count: sql<number>`count(*)` })

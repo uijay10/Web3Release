@@ -80,9 +80,10 @@ artifacts-monorepo/
 - `space_applications` – wallet, type (kol/project/developer), links, status
 
 ### Energy System
-- KOL: 1000 energy on activation, 20 posts/day max
-- Project team: 50 energy on activation, unlimited daily posts
-- Developer: 0 energy, 10 posts/day, only visible in developer column
+- All 3 types (team/KOL/developer): 1000 energy on approval, 10 posts/day max
+- Team (project): also receives 10 pin slots on approval; each pin lasts 3 days (72h)
+- KOL/Developer: 0 pin slots on approval
+- Check-in and points sections hidden for team and developer (KOL only)
 
 ### Payment (Energy Recharge)
 - 150 USDT = 10 energy
