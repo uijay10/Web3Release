@@ -203,7 +203,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       )}
                       <div className="border-t border-border/40 dark:border-slate-700 my-1" />
                       <button onClick={() => { disconnect(); setIsDropdownOpen(false); }}
-                        className="group w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-500 dark:text-red-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors text-left">
+                        className="group w-full flex items-center gap-2.5 px-4 py-3 text-sm text-foreground dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors text-left">
                         <LogOut className="w-4 h-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" /> {t("logout")}
                       </button>
                     </div>
