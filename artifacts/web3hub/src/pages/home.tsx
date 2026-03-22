@@ -269,7 +269,7 @@ export default function Home() {
           <h2 className="pinned-title-glow text-sm font-extrabold uppercase tracking-widest">{t("pinned")}</h2>
           <span className="w-2 h-2 rounded-full bg-[#fbbf24] shadow-[0_0_8px_#fbbf24,0_0_16px_#fbbf24] animate-pulse" />
           <span className="text-xs text-muted-foreground ml-1">
-            （{t("pinnedExclusive")} · {pinnedPosts.length}/{PIN_SLOTS} {t("slotsUsed")} · {t("threeDayCountdown")}）
+            （{pinnedPosts.length}/{PIN_SLOTS} {t("slotsUsed")} · {t("threeDayCountdown")}）
           </span>
         </div>
         <div className="pinned-zone-wrapper">
