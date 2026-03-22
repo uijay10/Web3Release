@@ -3,12 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Heart, MessageCircle, ArrowLeft, Pin, Eye, User, Share2 } from "lucide-react";
 import { filterContent, filterErrorMessage } from "@/lib/content-filter";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useWeb3Auth } from "@/lib/web3";
 import { generateGradient, truncateAddress } from "@/lib/utils";
 import { RoleBadge } from "@/components/role-badge";
 import { formatDistanceToNow, format } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
 import { useLang } from "@/lib/i18n";
+import { isAdmin } from "@/lib/admin";
+import { AdminPinModal } from "@/components/post-card";
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -56,7 +59,11 @@ export default function PostDetail() {
   const [pinning, setPinning] = useState(false);
   const [pinMsg, setPinMsg] = useState("");
   const [pinConfirmOpen, setPinConfirmOpen] = useState(false);
+  const [adminPinOpen, setAdminPinOpen] = useState(false);
+  const [adminPinHours, setAdminPinHours] = useState<number | "">(72);
+  const [adminPinCustom, setAdminPinCustom] = useState(false);
   const [copied, setCopied] = useState(false);
+  const admin = isAdmin(address);
 
   const likeCount = likes ?? post?.likes ?? 0;
   const commentCount = comments ?? post?.comments ?? 0;
@@ -132,6 +139,30 @@ export default function PostDetail() {
     }
   };
 
+  const doAdminPin = async () => {
+    if (!address || !post) return;
+    const hours = Number(adminPinHours);
+    if (!hours || hours < 1) return;
+    setAdminPinOpen(false);
+    setPinning(true);
+    setPinMsg("");
+    try {
+      const res = await fetch(`${apiBase}/posts/${post.id}/pin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address, durationHours: hours }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        setPinMsg(`❌ ${d.error}`);
+        return;
+      }
+      setPinMsg(`✅ 管理员置顶成功！有效期 ${hours >= 24 ? Math.round(hours / 24) + " 天" : hours + " 小时"}`);
+    } finally {
+      setPinning(false);
+    }
+  };
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true);
@@ -198,8 +229,31 @@ export default function PostDetail() {
         <span className="text-lg font-semibold">{lang === "zh-CN" ? "帖子" : "Post"}</span>
       </div>
 
-      {/* ── Pin banner ── */}
-      {isConnected && post.authorType === "project" && !post.isPinned && (
+      {/* ── Admin pin banner ── */}
+      {isConnected && admin && (
+        <div className="flex items-center gap-3 mx-4 mt-4 px-4 py-3 bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 rounded-2xl">
+          <Pin className="w-4 h-4 text-violet-500 shrink-0" />
+          {pinMsg ? (
+            <span className="text-sm text-violet-600 dark:text-violet-400 flex-1">{pinMsg}</span>
+          ) : (
+            <div className="flex items-center justify-between flex-1 min-w-0">
+              <div className="min-w-0">
+                <span className="text-sm text-violet-700 dark:text-violet-300 font-medium">
+                  {post.isPinned ? "重新设置置顶时长" : "管理员置顶此帖"}
+                </span>
+                <span className="ml-2 text-[10px] text-violet-400 bg-violet-100 dark:bg-violet-900/40 px-1.5 py-0.5 rounded-full">免费</span>
+              </div>
+              <button onClick={() => { setPinMsg(""); setAdminPinHours(72); setAdminPinCustom(false); setAdminPinOpen(true); }} disabled={pinning}
+                className="ml-3 px-4 py-1.5 rounded-lg text-xs bg-violet-500 text-white hover:bg-violet-600 transition-colors disabled:opacity-50 shrink-0">
+                {pinning ? "处理中..." : "置顶"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Regular pin banner (non-admin, project posts only) ── */}
+      {isConnected && !admin && post.authorType === "project" && !post.isPinned && (
         <div className="flex items-start gap-3 mx-4 mt-4 px-4 py-3 bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 rounded-2xl">
           <Pin className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
           {pinMsg ? (
@@ -234,6 +288,15 @@ export default function PostDetail() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Admin pin duration modal */}
+      {adminPinOpen && createPortal(
+        <AdminPinModal
+          hours={adminPinHours} setHours={setAdminPinHours}
+          custom={adminPinCustom} setCustom={setAdminPinCustom}
+          pinning={pinning} onConfirm={doAdminPin} onClose={() => setAdminPinOpen(false)}
+        />, document.body
       )}
 
       {/* ── Author row ── */}

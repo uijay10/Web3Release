@@ -389,20 +389,47 @@ router.post("/:id/comment", async (req, res) => {
   res.json({ comments: updated[0].comments, content });
 });
 
+const ADMIN_WALLETS_SET = new Set([
+  "0xbe4548c1458be01838f1faafd69d335f0567399a","0x65fc40db57e872720294b7acbb2cdd88ca401929",
+  "0xf9ba6e907e252de62d563db41bcdea7a37ea03c6","0xc1a420c0ac06d16dfb17c5ebd61caecd93840afd",
+  "0x246104d684b52e87c3e1e5b1cfbd274451e421bc","0xd9520bd2592529fa5bd34643c57c08bdc0c9a6b0",
+  "0xf3c14704107b4fee7384fa1bfba9a82975a3c12c","0xf49a301350a2665e9150e8d9b2686a25a39ffecf",
+  "0x8ce881fd733879e419e7d78248c4e41f48c5b3b2","0x46cfbb9407eddf3954ca027bd7ac802402b61b95",
+  "0x5de63ba702c04906d368f6c17fc78acff06094fe","0x8818aa3fbc1c2963651bc604554f7f4725a51704",
+  "0x4b0b18f3f51d860b46d05229591e450a6a4850f9","0x394cf5ff2a1bffff5e475ff2ab6566a63a8258d10",
+  "0xa0adb22151b7555c2d9c178e6da0e975d65b6013",
+]);
+
 router.post("/:id/pin", async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
-  const { wallet } = req.body;
+  const { wallet, durationHours } = req.body;
   if (!wallet) return res.status(400).json({ error: "wallet required" });
 
   const lw = wallet.toLowerCase();
   const userRows = await db.select().from(usersTable).where(eq(usersTable.wallet, lw)).limit(1);
   const user = userRows[0];
   if (!user) return res.status(404).json({ error: "User not found" });
+
+  const isAdminUser = ADMIN_WALLETS_SET.has(lw) || (user.energy ?? 0) >= 99_000_000_000_000;
+
+  // ── ADMIN PATH: free pin, any post, custom duration, immediate ──
+  if (isAdminUser) {
+    const postRows = await db.select().from(postsTable).where(eq(postsTable.id, id)).limit(1);
+    if (!postRows.length) return res.status(404).json({ error: "Post not found" });
+
+    const hours = Math.max(1, Math.min(8760, Number(durationHours) || 72)); // clamp 1h–1yr
+    const pinnedUntil = new Date(Date.now() + hours * 3600_000);
+    await db.update(postsTable)
+      .set({ isPinned: true, pinnedUntil, pinQueued: false, pinQueuedAt: null })
+      .where(eq(postsTable.id, id));
+    return res.json({ ok: true, queued: false, adminPin: true, pinnedUntil: pinnedUntil.toISOString() });
+  }
+
+  // ── REGULAR PATH: requires pin credits, project posts only ──
   if ((user.pinCount ?? 0) <= 0) return res.status(403).json({ error: "No pin credits" });
 
-  // Check post belongs to a project-type user
   const postRows = await db.select().from(postsTable).where(eq(postsTable.id, id)).limit(1);
   if (!postRows.length) return res.status(404).json({ error: "Post not found" });
   const post = postRows[0];
@@ -420,18 +447,15 @@ router.post("/:id/pin", async (req, res) => {
   const activeCount = Number(activeRows[0]?.count ?? 0);
 
   if (activeCount < PIN_SLOTS) {
-    // Slot available → pin immediately
     const pinnedUntil = new Date(Date.now() + 72 * 3600_000);
     await db.update(postsTable)
       .set({ isPinned: true, pinnedUntil, pinQueued: false, pinQueuedAt: null })
       .where(eq(postsTable.id, id));
     return res.json({ ok: true, queued: false, pinnedUntil: pinnedUntil.toISOString() });
   } else {
-    // All 14 slots full → join queue
     await db.update(postsTable)
       .set({ pinQueued: true, pinQueuedAt: new Date() })
       .where(eq(postsTable.id, id));
-    // Calculate estimated wait: find the earliest-expiring pinned post
     const earliest = await db.select({ pinnedUntil: postsTable.pinnedUntil })
       .from(postsTable)
       .where(and(eq(postsTable.isPinned, true), eq(postsTable.authorType, "project")))
