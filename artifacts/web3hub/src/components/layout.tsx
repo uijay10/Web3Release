@@ -291,21 +291,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ── Disclaimer Modal ── */}
       {whitepaperOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setWhitepaperOpen(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border border-border" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setWhitepaperOpen(false)}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border border-border/50 dark:border-slate-800" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-violet-500" />
-                <span className="font-bold text-base text-foreground">Web3 Release 免责声明</span>
-                <span className="text-xs text-muted-foreground ml-1">版本 1.0 · 2026年3月23日</span>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                  <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-foreground leading-tight">Web3 Release 免责声明</p>
+                  <p className="text-xs text-muted-foreground leading-tight">版本 1.0 · 2026年3月23日</p>
+                </div>
               </div>
-              <button onClick={() => setWhitepaperOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-                <X className="w-5 h-5" />
+              <button onClick={() => setWhitepaperOpen(false)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted dark:hover:bg-slate-800 transition-colors text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
               </button>
             </div>
             {/* Scrollable content */}
-            <div className="overflow-y-auto flex-1 px-6 py-5 text-sm text-foreground leading-relaxed space-y-4">
+            <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
               {[
                 ["1. 平台性质", "Web3 Release 是一个去中心化、社区驱动的 Web3 协作平台，仅提供信息发布、展示和匹配服务。平台不参与任何交易、投资、融资、代币发行或法律行为，仅作为用户间信息交流的中介工具。平台上所有内容（包括但不限于需求发布、合作意向、测试网招募、IDO 信息、空投计划、招聘、节点招募等）均由用户自行发布，平台不拥有、不控制、不担保其真实性、合法性、完整性或安全性。"],
                 ["2. 用户责任", "用户在使用平台时，应自行判断内容的真实性、可信度和风险。用户之间的一切互动、合作、交易、转账、投资等行为均为双方自愿、私下达成，与 Web3 Release 平台无关。用户因基于平台信息产生的任何损失、纠纷、法律责任，均由用户自行承担，平台不承担任何连带责任。"],
@@ -315,18 +319,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 ["6. 第三方链接与内容", "平台可能链接外部网站、社交媒体、项目官网等第三方资源，这些链接仅供参考，平台不控制、不审核、不担保其内容。用户访问第三方链接产生的任何后果，由用户自行承担。"],
                 ["7. 法律适用与管辖", "本免责声明受新加坡法律管辖（如有争议，以新加坡法院为第一审管辖）。平台保留随时修改本声明的权利，修改后继续使用即视为同意。"],
               ].map(([title, body]) => (
-                <section key={title}>
-                  <h2 className="font-bold text-foreground mb-1.5">{title}</h2>
-                  <p className="text-muted-foreground">{body}</p>
-                </section>
+                <div key={title} className="rounded-xl border border-border/40 dark:border-slate-800 bg-muted/30 dark:bg-slate-800/30 px-4 py-3">
+                  <p className="font-semibold text-sm text-foreground mb-1">{title}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+                </div>
               ))}
 
-              <section className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-2">
-                <p className="font-bold text-amber-700 dark:text-amber-400 mb-1">重要提醒</p>
-                <p className="text-muted-foreground text-sm">使用 Web3 Release 即表示您已阅读、理解并完全同意本免责声明。平台不向任何用户提供任何明示或默示的担保或承诺。参与 Web3 生态存在高风险，请用户理性判断、谨慎行事。如不同意本声明，请立即停止使用平台。</p>
-              </section>
+              <div className="rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-900/10 px-4 py-3">
+                <p className="font-semibold text-sm text-amber-700 dark:text-amber-400 mb-1">重要提醒</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">使用 Web3 Release 即表示您已阅读、理解并完全同意本免责声明。平台不向任何用户提供任何明示或默示的担保或承诺。参与 Web3 生态存在高风险，请用户理性判断、谨慎行事。如不同意本声明，请立即停止使用平台。</p>
+              </div>
 
-              <p className="text-right text-xs text-muted-foreground pt-1">Web3 Release 团队 · 2026年3月23日</p>
+              <p className="text-right text-xs text-muted-foreground pb-1">Web3 Release 团队 · 2026年3月23日</p>
             </div>
           </div>
         </div>
