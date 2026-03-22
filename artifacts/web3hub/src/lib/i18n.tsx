@@ -97,7 +97,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     pinnedExclusive: "项目方专属", slotsUsed: "已占用", threeDayCountdown: "3天倒计时",
     regularDesc: "最新优先", itemUnit: "条",
     roleProject: "区块链团队", roleDeveloper: "开发者", roleMember: "平台会员",
-    memberTabProject: "项目方", memberTabKol: "KOL", memberTabDev: "开发者",
+    memberTabProject: "团队", memberTabKol: "KOL", memberTabDev: "开发者",
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
