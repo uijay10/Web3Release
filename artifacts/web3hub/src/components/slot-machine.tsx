@@ -22,7 +22,7 @@ function useAudio() {
   function playWin(amount: number) {
     try {
       const ac = getCtx();
-      const freqs = amount >= 500 ? [523, 659, 784, 1047] : amount >= 200 ? [392, 523, 659] : [330, 440];
+      const freqs = amount >= 701 ? [523, 659, 784, 1047] : amount >= 301 ? [392, 523, 659] : [330, 440];
       freqs.forEach((freq, i) => {
         const osc = ac.createOscillator();
         const gain = ac.createGain();

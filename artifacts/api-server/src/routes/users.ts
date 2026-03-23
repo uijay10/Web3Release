@@ -37,9 +37,9 @@ function fmtUser(u: typeof usersTable.$inferSelect) {
 
 function rollTokenPrize(): number {
   const r = Math.random();
-  if (r < 0.4) return Math.floor(100 + Math.random() * 101);  // 100-200
-  if (r < 0.8) return Math.floor(201 + Math.random() * 299);  // 201-499
-  return Math.floor(500 + Math.random() * 501);                // 500-1000
+  if (r < 0.5) return Math.floor(100 + Math.random() * 201);  // 100-300 (50%)
+  if (r < 0.8) return Math.floor(301 + Math.random() * 400);  // 301-700 (30%)
+  return Math.floor(701 + Math.random() * 300);                // 701-1000 (20%)
 }
 
 router.get("/me", async (req, res) => {

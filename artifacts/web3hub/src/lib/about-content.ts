@@ -42,7 +42,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "全部用户均可获取代币的方式",
             items: [
-              "每日代币抽奖：每 24 小时可抽取一次；奖励范围及概率：100–200 代币（40%）、200–500 代币（40%）、500–1000 代币（20%）；所有抽奖所得实时累加至余额。",
+              "每日代币抽奖：每 24 小时可抽取一次；奖励范围及概率：100–300 代币（50%）、301–700 代币（30%）、701–1000 代币（20%）；所有抽奖所得实时累加至余额。",
               "邀请奖励：通过专属邀请链接/码成功邀请新用户并激活后，建立永久绑定。邀请者每日自动获得被邀请者当日实际获取代币总量的 15% 作为奖励，无上限、实时结算。所有身份用户均可参与邀请奖励。",
             ],
           },
@@ -179,7 +179,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "Token Sources Available to All Users",
             items: [
-              "Daily slot pull: once every 24 hours; prize range: 100–200 tokens (40%), 200–500 tokens (40%), 500–1,000 tokens (20%). All prizes credited to balance instantly.",
+              "Daily slot pull: once every 24 hours; prize range: 100–300 tokens (50%), 301–700 tokens (30%), 701–1,000 tokens (20%). All prizes credited to balance instantly.",
               "Referral bonus: After a successful invite, earn 15% of your invitee's daily token earnings automatically — no cap, settled in real time. All user types are eligible for referral rewards.",
             ],
           },
@@ -315,7 +315,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "Token-Quellen für normale Nutzer",
             items: [
-              "Täglicher Slot-Zug: einmal alle 24 Stunden; 100–200 (40 %), 200–500 (40 %), 500–1000 (20 %) Tokens.",
+              "Täglicher Slot-Zug: einmal alle 24 Stunden; 100–300 (50 %), 301–700 (30 %), 701–1000 (20 %) Tokens.",
               "Like: +5 Tokens (max. 20 gültige Likes/Tag).",
               "Kommentar: +5 Tokens (max. 20 gültige Kommentare/Tag).",
               "Tages-Cap: 40 Interaktionen insgesamt; danach keine weiteren Token-Belohnungen.",
@@ -436,7 +436,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "Источники токенов для обычных пользователей",
             items: [
-              "Ежедневный слот: раз в 24 часа; 100–200 (40 %), 200–500 (40 %), 500–1000 (20 %) токенов.",
+              "Ежедневный слот: раз в 24 часа; 100–300 (50 %), 301–700 (30 %), 701–1000 (20 %) токенов.",
               "Лайк: +5 токенов (макс. 20 лайков/день).",
               "Комментарий: +5 токенов (макс. 20 комментариев/день).",
               "Дневной лимит: 40 взаимодействий; после — токены не начисляются.",
@@ -556,7 +556,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "Sources de tokens pour les utilisateurs ordinaires",
             items: [
-              "Tirage quotidien : une fois toutes les 24 h ; 100–200 (40 %), 200–500 (40 %), 500–1000 (20 %) tokens.",
+              "Tirage quotidien : une fois toutes les 24 h ; 100–300 (50 %), 301–700 (30 %), 701–1000 (20 %) tokens.",
               "Like : +5 tokens (max. 20 valides/jour).",
               "Commentaire : +5 tokens (max. 20 valides/jour).",
               "Plafond journalier : 40 interactions au total ; aucune récompense supplémentaire au-delà.",
@@ -673,7 +673,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "一般ユーザーのトークン獲得方法",
             items: [
-              "毎日スロット：24時間に1回；100–200（40%）・200–500（40%）・500–1000（20%）トークン。",
+              "毎日スロット：24時間に1回；100–300（50%）・301–700（30%）・701–1000（20%）トークン。",
               "いいね：+5トークン（1日最大20回有効）。",
               "コメント：+5トークン（1日最大20回有効）。",
               "1日上限：40インタラクション（上限超過後は報酬なし）。",
@@ -789,7 +789,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "일반 사용자 토큰 획득 방법",
             items: [
-              "일일 슬롯: 24시간에 1회; 100–200(40%)·200–500(40%)·500–1000(20%) 토큰.",
+              "일일 슬롯: 24시간에 1회; 100–300(50%)·301–700(30%)·701–1000(20%) 토큰.",
               "좋아요: +5 토큰 (일일 최대 20회 유효).",
               "댓글: +5 토큰 (일일 최대 20회 유효).",
               "일일 상한: 40회 상호작용 (초과 시 토큰 보상 없음).",
@@ -905,7 +905,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "Cách kiếm token cho người dùng thông thường",
             items: [
-              "Kéo slot hàng ngày: 1 lần/24 giờ; 100–200 (40%)·200–500 (40%)·500–1000 (20%) token.",
+              "Kéo slot hàng ngày: 1 lần/24 giờ; 100–300 (50%)·301–700 (30%)·701–1000 (20%) token.",
               "Like: +5 token (tối đa 20 lần/ngày hợp lệ).",
               "Bình luận: +5 token (tối đa 20 lần/ngày hợp lệ).",
               "Giới hạn ngày: 40 tương tác; vượt quá không nhận thêm token.",
