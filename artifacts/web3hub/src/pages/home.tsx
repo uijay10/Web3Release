@@ -93,7 +93,7 @@ function DailyLuckyBtn({ lastSlotPull, label }: { lastSlotPull: string | null; l
         color: "#dc2626",
         border: "1px solid rgba(239,68,68,0.3)",
         textDecoration: "none",
-        fontWeight: 400,
+        fontWeight: 600,
       }}>
       立即抽奖
     </a>
@@ -291,7 +291,7 @@ export default function Home() {
 
       {/* Encouragement + Search */}
       <div className="rounded-2xl px-6 py-5 space-y-4 border border-blue-200/60" style={{background: "linear-gradient(135deg, #dbeafe 0%, #eff6ff 50%, #e0f2fe 100%)"}}>
-        <p className="text-lg sm:text-xl font-bold text-blue-700 leading-snug">
+        <p className="text-lg sm:text-xl font-bold leading-snug" style={{ color: "#FF69B4" }}>
           {t("encouragement")}
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
