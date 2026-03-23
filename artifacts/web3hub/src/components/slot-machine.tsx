@@ -5,9 +5,9 @@ const SYMBOLS = ["🎰", "💎", "⭐", "🔥", "🌊", "⚡", "🎯", "🏆"];
 
 function useAudio() {
   const ctx = useRef<AudioContext | null>(null);
-  function getCtx() {
+  function getCtx(): AudioContext {
     if (!ctx.current) ctx.current = new AudioContext();
-    return ctx.current;
+    return ctx.current!;
   }
   function playTick() {
     try {

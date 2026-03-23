@@ -13,6 +13,7 @@ import { useLang } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { Link } from "wouter";
 import { PostCard } from "@/components/post-card";
+import { SlotMachine } from "@/components/slot-machine";
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -149,6 +150,8 @@ export default function Profile() {
   const [invitedUsers, setInvitedUsers] = useState<any[]>([]);
   const [showInvited, setShowInvited] = useState(false);
   const [deletingId, setDeletingId] = useState<number|null>(null);
+  const [tokenCount, setTokenCount] = useState<number>(0);
+  const [lastSlotPull, setLastSlotPull] = useState<string | null>(null);
 
   const isSpaceOwner = me?.spaceStatus === "approved" || me?.spaceStatus === "active";
   const spaceType = me?.spaceType;
@@ -165,6 +168,8 @@ export default function Profile() {
       setTwitter(me.twitter ?? "");
       setWebsite(me.website ?? "");
       setUsername(me.username ?? "");
+      setTokenCount(me.tokens ?? 0);
+      setLastSlotPull(me.lastSlotPull ?? null);
     }
   }, [me]);
 
@@ -386,36 +391,19 @@ export default function Profile() {
           <SpaceStatusBadge status={me?.spaceStatus} rejectedAt={me?.spaceRejectedAt} />
         </InfoRow>
 
-        {/* 2. 我的签到 – KOL 专属，团队/开发者不显示 */}
-        {spaceType !== "project" && spaceType !== "developer" && (
-          <InfoRow label={t("checkinLabel")}>
-            {canCheckin ? (
-              <div className="flex items-center gap-3 flex-wrap">
-                <button
-                  onClick={handleCheckin}
-                  disabled={!checkinReady || checkinMutation.isPending}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                    checkinReady ? "bg-pink-500 text-white hover:bg-pink-600" : "bg-muted text-muted-foreground cursor-not-allowed"
-                  }`}
-                >
-                  {checkinMutation.isPending ? t("saving") : t("checkin")}
-                </button>
-                {!checkinReady && checkinCountdown && (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" /> {t("nextCheckin")} <span className="font-mono font-bold text-foreground">{checkinCountdown}</span>
-                  </span>
-                )}
-                {checkinReady && <span className="text-xs text-green-600 font-medium">{t("canCheckin")}</span>}
-                {checkinMutation.data && (
-                  <span className={`text-xs font-medium ${checkinMutation.data.success ? "text-green-600" : "text-amber-600"}`}>
-                    {checkinMutation.data.message}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <span className="text-sm text-muted-foreground italic">{t("checkinNA")}</span>
-            )}
-          </InfoRow>
+        {/* 2. 每日抽奖老虎机 – 所有用户可见 */}
+        {address && (
+          <div className="py-2">
+            <SlotMachine
+              wallet={address}
+              tokens={tokenCount}
+              lastSlotPull={lastSlotPull}
+              onSuccess={(newTokens, _earned) => {
+                setTokenCount(newTokens);
+                setLastSlotPull(new Date().toISOString());
+              }}
+            />
+          </div>
         )}
 
         {/* 3. 我的积分 – KOL 专属，团队/开发者不显示 */}
