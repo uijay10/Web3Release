@@ -40,20 +40,27 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
               "平台正式代币 $WBR 的 60% 将定期分批次通过空投形式发放，用于激励平台活跃用户、内容贡献者和社区增长，实现真正的去中心化治理与价值分配。空投将基于用户在平台上的真实贡献（如抽奖、互动、邀请、内容发布等累积代币）进行加权分配，确保代币向社区倾斜，促进长期可持续发展和去中心化。",
           },
           {
-            heading: "普通用户代币获取方式",
+            heading: "全部用户均可获取代币的方式",
             items: [
               "每日代币抽奖：每 24 小时可抽取一次；奖励范围及概率：100–200 代币（40%）、200–500 代币（40%）、500–1000 代币（20%）；所有抽奖所得实时累加至余额。",
-              "点赞一次：+5 代币（每日上限 20 次有效）。",
-              "评论一次：+5 代币（每日上限 20 次有效）。",
-              "普通用户每日活动总量上限：40 次（包括点赞 + 评论 + 抽奖等所有互动行为，超出后当日不再产生代币奖励，防止刷量）。",
-              "邀请奖励：通过专属邀请链接/码成功邀请新用户并激活后，建立永久绑定。邀请者每日自动获得被邀请者当日实际获取代币总量的 15% 作为奖励（基数包括：抽奖 + 点赞/评论奖励），无上限、实时结算。邀请机制仅适用于普通用户，团队/KOL/开发者身份账户不参与邀请奖励。",
+              "邀请奖励：通过专属邀请链接/码成功邀请新用户并激活后，建立永久绑定。邀请者每日自动获得被邀请者当日实际获取代币总量的 15% 作为奖励，无上限、实时结算。所有身份用户均可参与邀请奖励。",
             ],
           },
           {
-            heading: "团队、KOL 及开发者代币获取规则",
+            heading: "普通用户额外获取方式（点赞/评论任务）",
             items: [
-              "其发布的每条内容，获得的每个点赞或每条评论均额外获得 1 代币。",
-              "每日获取上限：2000 代币，超出部分不予累积。",
+              "点赞一次：+5 代币（每日上限 20 次有效）。",
+              "评论一次：+5 代币（每日上限 20 次有效）。",
+              "每日点赞 + 评论任务总上限：40 次，超出后当日不再产生任务代币奖励，防止刷量。",
+            ],
+          },
+          {
+            heading: "团队、KOL 及开发者额外获取方式（被互动奖励）",
+            items: [
+              "自己发布的帖子每获得 1 个点赞：+5 代币。",
+              "自己发布的帖子每获得 1 条评论：+5 代币。",
+              "每 24 小时通过被互动获得的代币上限：2000 代币，超出部分不予累积。",
+              "注：团队/KOL/开发者不可通过主动点赞或评论他人帖子获取代币任务奖励。",
             ],
           },
         ],
@@ -159,20 +166,27 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
               "60% of the official $WBR token supply will be distributed periodically via airdrops to reward active users, content contributors, and community growth. Airdrops are weighted by real contributions (slot pulls, interactions, referrals, posts), ensuring tokens flow to the community and support long-term decentralized growth.",
           },
           {
-            heading: "General User Token Sources",
+            heading: "Token Sources Available to All Users",
             items: [
               "Daily slot pull: once every 24 hours; prize range: 100–200 tokens (40%), 200–500 tokens (40%), 500–1,000 tokens (20%). All prizes credited to balance instantly.",
-              "Like a post: +5 tokens (up to 20 valid likes/day).",
-              "Comment on a post: +5 tokens (up to 20 valid comments/day).",
-              "Daily activity cap: 40 interactions total (likes + comments + pulls). No more token rewards once the daily cap is reached.",
-              "Referral bonus: After a successful invite, earn 15% of your invitee's daily token earnings (slot + likes/comments) automatically — no cap, settled in real time. Referral rewards apply to general users only; Team/KOL/Developer accounts are not eligible.",
+              "Referral bonus: After a successful invite, earn 15% of your invitee's daily token earnings automatically — no cap, settled in real time. All user types are eligible for referral rewards.",
             ],
           },
           {
-            heading: "Team, KOL & Developer Token Rules",
+            heading: "General Users — Additional Task Rewards (Likes & Comments)",
             items: [
-              "Each like or comment received on their posts earns +1 token.",
-              "Daily earning cap: 2,000 tokens; amounts beyond the cap are not accumulated.",
+              "Like a post: +5 tokens (up to 20 valid likes/day).",
+              "Comment on a post: +5 tokens (up to 20 valid comments/day).",
+              "Daily task cap: 40 interactions (likes + comments). No more task rewards once the cap is reached.",
+            ],
+          },
+          {
+            heading: "Team, KOL & Developer — Additional Interaction Rewards",
+            items: [
+              "Each like received on their own posts: +5 tokens.",
+              "Each comment received on their own posts: +5 tokens.",
+              "Daily cap: 2,000 tokens received via interactions; amounts beyond the cap are not accumulated.",
+              "Note: Team/KOL/Developer accounts do not earn task tokens by actively liking or commenting on others' posts.",
             ],
           },
         ],

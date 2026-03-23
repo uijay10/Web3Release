@@ -302,6 +302,7 @@ router.post("/:id/like", async (req, res) => {
       }
 
       // Post author earns tokens when their post is liked (project/kol/developer only, max 2000/day)
+      const TOKENS_PER_LIKE_AUTHOR = 5;
       const isSpaceAuthor = post.authorType === "project" || post.authorType === "kol" || post.authorType === "developer";
       if (isSpaceAuthor && post.authorWallet !== lw) {
         const authorRows = await db.select().from(usersTable).where(eq(usersTable.wallet, post.authorWallet)).limit(1);
@@ -310,14 +311,15 @@ router.post("/:id/like", async (req, res) => {
           const authorIsToday = (author as any).lastTokenDate === today;
           const currentEarned = authorIsToday ? ((author as any).dailyTokensEarned ?? 0) : 0;
           const MAX_AUTHOR_DAILY = 2000;
-          if (currentEarned < MAX_AUTHOR_DAILY) {
+          const canEarn = Math.min(TOKENS_PER_LIKE_AUTHOR, MAX_AUTHOR_DAILY - currentEarned);
+          if (canEarn > 0) {
             await db.update(usersTable).set({
-              tokens: ((author as any).tokens ?? 0) + 1,
-              dailyTokensEarned: currentEarned + 1,
+              tokens: ((author as any).tokens ?? 0) + canEarn,
+              dailyTokensEarned: currentEarned + canEarn,
               lastTokenDate: today,
             } as any).where(eq(usersTable.wallet, post.authorWallet));
             // Inviter gets 15% of author's token earnings
-            awardInviterBonus(post.authorWallet, 1);
+            awardInviterBonus(post.authorWallet, canEarn);
           } else if (!authorIsToday) {
             await db.update(usersTable).set({ dailyTokensEarned: 0, lastTokenDate: today } as any).where(eq(usersTable.wallet, post.authorWallet));
           }
@@ -387,6 +389,7 @@ router.post("/:id/comment", async (req, res) => {
       }
 
       // Post author earns tokens when their post is commented on (project/kol/developer only, max 2000/day)
+      const TOKENS_PER_COMMENT_AUTHOR = 5;
       const isSpaceAuthor = post.authorType === "project" || post.authorType === "kol" || post.authorType === "developer";
       if (isSpaceAuthor && post.authorWallet !== lw) {
         const authorRows = await db.select().from(usersTable).where(eq(usersTable.wallet, post.authorWallet)).limit(1);
@@ -395,14 +398,15 @@ router.post("/:id/comment", async (req, res) => {
           const authorIsToday = (author as any).lastTokenDate === today;
           const currentEarned = authorIsToday ? ((author as any).dailyTokensEarned ?? 0) : 0;
           const MAX_AUTHOR_DAILY = 2000;
-          if (currentEarned < MAX_AUTHOR_DAILY) {
+          const canEarn = Math.min(TOKENS_PER_COMMENT_AUTHOR, MAX_AUTHOR_DAILY - currentEarned);
+          if (canEarn > 0) {
             await db.update(usersTable).set({
-              tokens: ((author as any).tokens ?? 0) + 1,
-              dailyTokensEarned: currentEarned + 1,
+              tokens: ((author as any).tokens ?? 0) + canEarn,
+              dailyTokensEarned: currentEarned + canEarn,
               lastTokenDate: today,
             } as any).where(eq(usersTable.wallet, post.authorWallet));
             // Inviter gets 15% of author's token earnings
-            awardInviterBonus(post.authorWallet, 1);
+            awardInviterBonus(post.authorWallet, canEarn);
           } else if (!authorIsToday) {
             await db.update(usersTable).set({ dailyTokensEarned: 0, lastTokenDate: today } as any).where(eq(usersTable.wallet, post.authorWallet));
           }
