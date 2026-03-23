@@ -406,17 +406,15 @@ export default function Profile() {
           </div>
         )}
 
-        {/* 3. 我的积分 – KOL 专属，团队/开发者不显示 */}
-        {spaceType !== "project" && spaceType !== "developer" && (
-          <InfoRow label={t("pointsLabel")}>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="flex items-center gap-1.5 text-xl font-bold text-amber-500">
-                <Star className="w-4 h-4" /> {points.toLocaleString()}
-              </span>
-              <span className="text-xs text-muted-foreground">{t("pointsDesc")}</span>
-            </div>
-          </InfoRow>
-        )}
+        {/* 3. 我的代币 – 所有用户显示 */}
+        <InfoRow label={t("tokenLabel")}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="flex items-center gap-1.5 text-xl font-bold text-yellow-500">
+              <Star className="w-4 h-4" /> {tokenCount.toLocaleString()} <span className="text-sm font-semibold text-yellow-400">$WBR</span>
+            </span>
+            <span className="text-xs text-muted-foreground">{t("tokenDesc")}</span>
+          </div>
+        </InfoRow>
 
         {/* 4. 我的能量 + 置顶次数 */}
         <InfoRow label={t("energyLabel")}>

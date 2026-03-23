@@ -133,6 +133,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "抽取中...", slotResult: "恭喜！获得 {amount} $WBR！",
     slotNextPull: "下次抽取：{time}", slotCooldown: "今日已抽（24h冷却）",
     slotDesc: "每日一次·奖励 100~1000 $WBR·TGE 按 1:1 兑换",
+    tokenDesc: "一次点赞5/Token ·一次评论5/Token·各20次/日 = 200上限",
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
@@ -263,6 +264,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "Pulling...", slotResult: "Congrats! You got {amount} $WBR!",
     slotNextPull: "Next pull: {time}", slotCooldown: "Already pulled today (24h cooldown)",
     slotDesc: "Once per day · Win 100–1000 $WBR · 1:1 exchange at TGE",
+    tokenDesc: "Like +5 Token · Comment +5 Token · 20x/day each = 200 cap",
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
