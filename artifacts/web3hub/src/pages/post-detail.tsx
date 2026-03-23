@@ -316,7 +316,7 @@ export default function PostDetail() {
         <div className="flex items-center gap-3 min-w-0">
           <Link href={authorHref} className="shrink-0">
             <div
-              className="w-11 h-11 rounded-full border border-border/40 overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all bg-background"
+              className="w-11 h-11 rounded-full border border-border/40 overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all bg-transparent"
               style={post.authorAvatar
                 ? { backgroundImage: `url(${post.authorAvatar})`, backgroundSize: "cover", backgroundPosition: "center" }
                 : { background: generateGradient(post.authorWallet) }}

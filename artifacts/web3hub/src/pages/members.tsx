@@ -37,7 +37,7 @@ function MemberCard({ member }: { member: Member }) {
     <Link href={`/profile/${member.wallet}`}
       className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border/40 bg-card hover:border-primary/40 hover:shadow-sm transition-all group cursor-pointer">
       <div
-        className="w-10 h-10 rounded-full shrink-0 border border-border overflow-hidden bg-background"
+        className="w-10 h-10 rounded-full shrink-0 border border-border overflow-hidden bg-transparent"
         style={member.avatar
           ? { backgroundImage: `url(${member.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
           : { background: generateGradient(member.wallet) }}

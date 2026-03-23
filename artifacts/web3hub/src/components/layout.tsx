@@ -184,8 +184,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-2 p-1 pr-3 rounded-full border border-border hover:border-primary/50 hover:bg-muted/30 transition-all"
                   >
                     <div
-                      className="w-7 h-7 rounded-full"
-                      style={{ background: user?.avatar ? `url(${user.avatar}) center/cover` : generateGradient(address) }}
+                      className="w-7 h-7 rounded-full bg-transparent overflow-hidden"
+                      style={user?.avatar
+                        ? { backgroundImage: `url(${user.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : { background: generateGradient(address) }}
                     />
                     <span className="text-sm font-medium font-mono">{truncateAddress(address)}</span>
                     {admin && <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />}

@@ -36,7 +36,7 @@ export function ProjectCard({ project, isPinned, compact }: ProjectCardProps) {
         )}
 
         <Link href={`/project/${project.id}`} className="flex flex-col items-center justify-center flex-1 p-4 gap-3">
-          <div className="w-16 h-16 rounded-full bg-muted border border-gray-100 overflow-hidden flex items-center justify-center shrink-0">
+          <div className="w-16 h-16 rounded-full bg-transparent border border-gray-100 overflow-hidden flex items-center justify-center shrink-0">
             {project.logo ? (
               <img src={project.logo} alt={project.name} className="w-full h-full object-cover" />
             ) : (
@@ -72,7 +72,7 @@ export function ProjectCard({ project, isPinned, compact }: ProjectCardProps) {
           </span>
         )}
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-full bg-muted border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-transparent border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
             {project.logo ? (
               <img src={project.logo} alt={project.name} className="w-full h-full object-cover" />
             ) : (
@@ -103,7 +103,7 @@ export function ProjectCard({ project, isPinned, compact }: ProjectCardProps) {
         </span>
       )}
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-full bg-muted border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-transparent border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
           {project.logo ? (
             <img src={project.logo} alt={project.name} className="w-full h-full object-cover" />
           ) : (

@@ -105,12 +105,12 @@ function AuthorAvatar({ wallet, name, avatar, size = "sm" }: {
 }) {
   const initials = ((name ?? wallet ?? "?").slice(0, 2)).toUpperCase();
   const cls = size === "xl"
-    ? "w-20 h-20 rounded-full shrink-0 flex items-center justify-center text-base font-bold text-white overflow-hidden bg-background"
+    ? "w-20 h-20 rounded-full shrink-0 flex items-center justify-center text-base font-bold text-white overflow-hidden bg-transparent"
     : size === "lg"
-    ? "w-14 h-14 rounded-full shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden bg-background"
+    ? "w-14 h-14 rounded-full shrink-0 flex items-center justify-center text-sm font-bold text-white overflow-hidden bg-transparent"
     : size === "md"
-    ? "w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden bg-background"
-    : "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden bg-background";
+    ? "w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden bg-transparent"
+    : "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden bg-transparent";
   return (
     <div className={cls} style={avatar ? undefined : { background: generateGradient(wallet ?? "0") }}>
       {avatar ? <img src={avatar} className="w-full h-full object-cover" alt="" /> : initials}

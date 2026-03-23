@@ -264,7 +264,7 @@ export default function Profile() {
         {/* Avatar + Name */}
         <div className="bg-card border border-border rounded-2xl p-6 flex items-center gap-5">
           <div className="relative group cursor-pointer shrink-0" onClick={() => fileRef.current?.click()}>
-            <div className="w-20 h-20 rounded-2xl border-2 border-amber-300 shadow-lg bg-background"
+            <div className="w-20 h-20 rounded-2xl border-2 border-amber-300 shadow-lg bg-transparent"
               style={me?.avatar
                 ? { backgroundImage: `url(${me.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
                 : { background: generateGradient(address) }} />
@@ -337,7 +337,7 @@ export default function Profile() {
       {/* ── Avatar + Name Header ── */}
       <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-5">
         <div className="relative group cursor-pointer shrink-0" onClick={() => fileRef.current?.click()}>
-          <div className="w-20 h-20 rounded-2xl border-2 border-border shadow bg-background"
+          <div className="w-20 h-20 rounded-2xl border-2 border-border shadow bg-transparent"
             style={me?.avatar
               ? { backgroundImage: `url(${me.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
               : { background: generateGradient(address) }} />
@@ -511,7 +511,7 @@ export default function Profile() {
                 ) : (
                   invitedUsers.map(u => (
                     <div key={u.wallet} className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full shrink-0 bg-background"
+                      <div className="w-7 h-7 rounded-full shrink-0 bg-transparent"
                         style={u.avatar
                           ? { backgroundImage: `url(${u.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
                           : { background: generateGradient(u.wallet) }} />

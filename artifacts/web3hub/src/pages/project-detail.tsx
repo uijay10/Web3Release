@@ -17,7 +17,7 @@ export default function ProjectDetail() {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Project Header */}
       <div className="bg-card rounded-3xl p-8 border border-border shadow-sm flex flex-col sm:flex-row gap-8 items-start sm:items-center">
-        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-muted border shrink-0 overflow-hidden flex items-center justify-center">
+        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-transparent border shrink-0 overflow-hidden flex items-center justify-center">
           {project.logo ? (
             <img src={project.logo} alt={project.name} className="w-full h-full object-cover" />
           ) : (
