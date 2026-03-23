@@ -17,37 +17,43 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
     title: "关于平台",
     subtitle:
       "Web3 Release 是一个去中心化、社区驱动的 Web3 协作平台，定位为「加密团队一站式需求发布与匹配中心」（the all-in-one demand publishing & matching platform for crypto teams）。平台通过钱包连接实现真实身份验证，帮助加密团队、KOL 和开发者高效连接，发布需求、匹配人才、分享知识和社区互动。",
-    coreConcept: "核心理念：连接需求，释放创新。加密团队可以随时发布各种需求，区块链用户（开发者、KOL、节点运营者等）可以快速发现并响应，实现透明、高效的协作。",
+    coreConcept:
+      "核心理念：连接需求，释放创新。加密团队可以随时发布各种需求，区块链用户（开发者、KOL、节点运营者等）可以快速发现并响应，实现透明、高效的协作。",
     sections: [
       {
         heading: "当前主要功能展示",
         items: [
-          "Pinned Zone：置顶区，展示高优先级或热门需求（有倒计时，如 3 天剩余）。",
+          "Pinned Zone：置顶区，展示高优先级或热门需求（带倒计时，如 3 天剩余）。",
           "Elite Teams：精英团队/项目列表，按最新排序展示，支持不同视图（Testnet View、Jobs View、Integration View 等）。",
           "发布与匹配：团队发布需求后，内容以时间线形式出现在首页「项目展示」区和对应专栏，最新内容优先置顶。",
           "操作入口：Connect Wallet（连接钱包 🌙）、Join Guild / Join Now（申请加入，火箭 🚀）。",
         ],
       },
       {
-        heading: "积分系统（核心激励机制）",
+        heading: "代币激励系统（核心激励机制）",
         intro:
-          "平台内置积分系统，用于奖励高质量内容创作、真实互动和社区参与。积分总量无限，是兑换未来空投的重要凭证（未来 $WBR 代币空投分配将以积分占比作为主要权重依据，越活跃、贡献越大，空投份额越高）。",
+          "平台内置代币获取与增长机制，用于奖励高质量内容创作、真实互动和社区参与。代币总量无限，是未来 $WBR 代币空投/兑换的重要凭证（TGE 时所有累积代币 1:1 兑换为正式代币，越活跃、贡献越大，持有份额越高）。",
         subsections: [
           {
-            heading: "普通用户积分来源",
+            heading: "平台代币分配与空投计划",
+            intro:
+              "平台正式代币 $WBR 的 60% 将定期分批次通过空投形式发放，用于激励平台活跃用户、内容贡献者和社区增长，实现真正的去中心化治理与价值分配。空投将基于用户在平台上的真实贡献（如抽奖、互动、邀请、内容发布等累积代币）进行加权分配，确保代币向社区倾斜，促进长期可持续发展和去中心化。",
+          },
+          {
+            heading: "普通用户代币获取方式",
             items: [
-              "每日签到：+1000 积分",
-              "点赞：+100 积分/次（每日上限）",
-              "评论：+100 积分/条（前 10 条有效，每日上限）",
-              "邀请奖励：被邀请用户每日积分的 20% 自动分配给邀请者（无上限）",
+              "每日代币抽奖：每 24 小时可抽取一次；奖励范围及概率：100–200 代币（40%）、200–500 代币（40%）、500–1000 代币（20%）；所有抽奖所得实时累加至余额。",
+              "点赞一次：+5 代币（每日上限 20 次有效）。",
+              "评论一次：+5 代币（每日上限 20 次有效）。",
+              "普通用户每日活动总量上限：40 次（包括点赞 + 评论 + 抽奖等所有互动行为，超出后当日不再产生代币奖励，防止刷量）。",
+              "邀请奖励：通过专属邀请链接/码成功邀请新用户并激活后，建立永久绑定。邀请者每日自动获得被邀请者当日实际获取代币总量的 15% 作为奖励（基数包括：抽奖 + 点赞/评论奖励），无上限、实时结算。邀请机制仅适用于普通用户，团队/KOL/开发者身份账户不参与邀请奖励。",
             ],
           },
           {
-            heading: "KOL 专属积分来源（KOL 不参与普通签到/点赞/评论积分）",
+            heading: "团队、KOL 及开发者代币获取规则",
             items: [
-              "每条内容被点赞 1 次 +10 积分，被评论 1 次 +10 积分",
-              "内容浏览量每 1000 次 +50 积分",
-              "邀请奖励同上",
+              "其发布的每条内容，获得的每个点赞或每条评论均额外获得 1 代币。",
+              "每日获取上限：2000 代币，超出部分不予累积。",
             ],
           },
         ],
@@ -57,11 +63,11 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
         intro:
           "能量是内容发布和提升可见度的核心资源，目前通过申请身份赠送，未来由代币提供或兑换（代币作为内容消耗的凭据）。",
         items: [
-          "申请身份通过后自动赠送 1000 能量（作为首次使用礼包）。",
+          "申请身份通过后自动赠送 1000 能量（首次使用礼包）。",
           "每次内容消耗 1 能量（无论内容类型）。",
           "每日内容最多 10 次（即使能量充足，也受此上限限制，防止刷量和内容泛滥）。",
           "能量有上限（当前测试上限 100,000），未使用能量每 30 天衰减 20%（鼓励活跃使用）。",
-          "未来代币（$WBR）将作为内容消耗的凭据：用户持有/赚取代币后兑换能量，用于内容发布、置顶、Boost 等行为，形成平台经济闭环。",
+          "未来 $WBR 代币将作为内容消耗凭据：用户持有/赚取代币后可兑换能量，用于发布内容、置顶、Boost 等行为，形成平台经济闭环。",
         ],
       },
       {
@@ -70,21 +76,20 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "1. 身份申请与能量门槛",
             items: [
-              "所有用户需先连接钱包并申请身份。",
               "申请时选择身份类别标签（仅限以下三种，不可多选）：加密团队、KOL（关键意见领袖）、开发者。",
-              "身份申请通过后，系统自动赠送 1000 能量。",
-              "每次内容消耗 1 能量（能量不足无法发布内容，需通过未来代币兑换或其他方式补充）。",
+              "身份通过后自动赠送 1000 能量。",
+              "每次内容消耗 1 能量（能量不足无法发布，需未来通过代币兑换补充）。",
               "每日内容上限：最多 10 次/天。",
             ],
           },
           {
             heading: "2. 内容标签与自动归集",
             items: [
-              "发布内容时，用户需选择内容类型标签（非身份类别，而是具体需求/主题，例如：测试网招募、IDO 合作/Launchpad、安全审计、集成公告、空投计划、融资招聘、节点招募、黑客松/漏洞赏金、其他（自定义描述））。",
-              "加密团队身份用户发布内容后：内容自动显示在首页优质团队区（Elite Teams/Pinned Zone 优先考虑），默认获得首页曝光卡位（每个团队限 1 个卡位）。",
-              "KOL 身份用户发布内容后：内容自动归集到 KOL 专区 + KOL 排行榜（基于点赞、评论、浏览量实时排名）。",
-              "开发者身份用户发布内容后：内容自动归集到开发者专栏（垂直展示，便于团队快速筛选人才，不占用首页普通展示位）。",
-              "内容标签决定内容在对应子栏目的展示位置，便于精准匹配。",
+              "发布内容时，用户需选择内容类型标签（例如：测试网招募、IDO 合作/Launchpad、安全审计、集成公告、空投计划、融资招聘、节点招募、黑客松/漏洞赏金、其他）。",
+              "加密团队身份：内容自动进入首页优质团队区（Elite Teams/Pinned Zone 优先考虑），默认获得首页曝光卡位（每个团队限 1 个）。",
+              "KOL 身份：内容自动归集到 KOL 专区 + KOL 排行榜（基于点赞、评论、浏览量实时排名）。",
+              "开发者身份：内容自动归集到开发者专栏（垂直展示，便于团队筛选人才，不占用首页普通位）。",
+              "标签决定内容在对应子栏目的展示位置，实现精准匹配。",
             ],
           },
           {
@@ -100,7 +105,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
       {
         heading: "平台愿景与解决的问题",
         intro:
-          "Web3 Release 致力于成为 Web3 时代的「Twitter + LinkedIn + Gitcoin」——一个真正去中心化、由社区自驱动的协作与发布中心。在信任、可追溯、激励充分的环境中，让加密团队、KOL 和开发者自由发布与协作，加速区块链下一波真实创新。",
+          "Web3 Release 致力于成为 Web3 时代的「Twitter + LinkedIn + Gitcoin」——一个真正去中心化、社区自驱动的协作与发布中心。在信任、可追溯、激励充分的环境中，让加密团队、KOL 和开发者自由发布与协作，加速区块链下一波真实创新。",
         subsections: [
           {
             heading: "主要解决的问题",
@@ -117,9 +122,9 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
             items: [
               "身份类别申请 + 内容标签分类，大幅降低协作门槛。",
               "能量门槛（未来代币消耗）+ 每日内容上限 10 次，建立可验证信任。",
-              "自动归集展示 + 积分作为空投凭证，激励真实贡献。",
-              "去中心化声誉体系，促进多链互联，赋能中小参与者。",
-              "让区块链生态更健康、更高效发展。",
+              "抽奖 + 互动（每日活动上限 40 次） + 邀请机制（15% 奖励），激励真实活跃与社区增长。",
+              "平台代币 60% 定期分批空投 + 代币 1:1 兑换，奖励长期贡献，实现真正的去中心化。",
+              "去中心化声誉体系，促进多链互联，赋能中小参与者，让区块链生态更健康、更高效发展。",
             ],
           },
         ],
@@ -140,29 +145,34 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           "Pinned Zone: Highlights high-priority or trending posts with a live countdown.",
           "Elite Teams: Project list sorted by latest activity, with multiple view modes (Testnet, Jobs, Integration, etc.).",
           "Publish & Match: Posts appear in the homepage timeline and their corresponding section immediately after publishing.",
-          "Entry Points: Connect Wallet, Join Guild / Join Now (apply for a space).",
+          "Entry Points: Connect Wallet 🌙, Join Guild / Join Now 🚀 (apply for a space).",
         ],
       },
       {
-        heading: "Points System (Core Incentive)",
+        heading: "Token Incentive System (Core Mechanism)",
         intro:
-          "The platform has a built-in points system to reward quality content creation, genuine interactions, and community participation. Points are unlimited and serve as credentials for future airdrops — the more active and contributive you are, the higher your airdrop allocation.",
+          "The platform has a built-in token earning system to reward quality content, genuine interactions, and community participation. Tokens are unlimited and serve as the key credential for the future $WBR token airdrop/exchange — all accumulated tokens convert 1:1 at TGE, so the more active you are, the higher your share.",
         subsections: [
           {
-            heading: "General User Points Sources",
+            heading: "Token Distribution & Airdrop Plan",
+            intro:
+              "60% of the official $WBR token supply will be distributed periodically via airdrops to reward active users, content contributors, and community growth. Airdrops are weighted by real contributions (slot pulls, interactions, referrals, posts), ensuring tokens flow to the community and support long-term decentralized growth.",
+          },
+          {
+            heading: "General User Token Sources",
             items: [
-              "Daily check-in: +1,000 points",
-              "Likes given: +100 points each (daily cap)",
-              "Comments posted: +100 points each (first 10 valid, daily cap)",
-              "Referral reward: 20% of invited users' daily points auto-credited to the referrer (no cap)",
+              "Daily slot pull: once every 24 hours; prize range: 100–200 tokens (40%), 200–500 tokens (40%), 500–1,000 tokens (20%). All prizes credited to balance instantly.",
+              "Like a post: +5 tokens (up to 20 valid likes/day).",
+              "Comment on a post: +5 tokens (up to 20 valid comments/day).",
+              "Daily activity cap: 40 interactions total (likes + comments + pulls). No more token rewards once the daily cap is reached.",
+              "Referral bonus: After a successful invite, earn 15% of your invitee's daily token earnings (slot + likes/comments) automatically — no cap, settled in real time. Referral rewards apply to general users only; Team/KOL/Developer accounts are not eligible.",
             ],
           },
           {
-            heading: "KOL Exclusive Points (KOLs do not earn regular check-in/like/comment points)",
+            heading: "Team, KOL & Developer Token Rules",
             items: [
-              "Each like on a post: +10 points; each comment: +10 points",
-              "Every 1,000 post views: +50 points",
-              "Referral reward: same as above",
+              "Each like or comment received on their posts earns +1 token.",
+              "Daily earning cap: 2,000 tokens; amounts beyond the cap are not accumulated.",
             ],
           },
         ],
@@ -176,7 +186,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           "Each post costs 1 energy, regardless of content type.",
           "Daily post cap: 10 posts/day (even with sufficient energy — prevents spam).",
           "Energy has a ceiling (current test cap: 100,000); unused energy decays 20% every 30 days (encouraging active use).",
-          "Future token ($WBR) will serve as posting currency: earn/hold tokens → convert to energy → post, pin, boost, forming a platform economic loop.",
+          "Future $WBR tokens will serve as posting currency: earn/hold tokens → convert to energy → post, pin, boost, forming a complete platform economic loop.",
         ],
       },
       {
@@ -185,20 +195,19 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "1. Identity Application & Energy Threshold",
             items: [
-              "All users must first connect a wallet and apply for an identity.",
-              "Choose one identity tag (only one allowed): Crypto Team, KOL (Key Opinion Leader), or Developer.",
+              "Choose one identity tag (only one): Crypto Team, KOL (Key Opinion Leader), or Developer.",
               "Upon approval, the system automatically grants 1,000 energy.",
               "Each post costs 1 energy (no energy = cannot post; replenish via future token exchange).",
-              "Daily post limit: max 10/day; resets the next day.",
+              "Daily post limit: max 10/day.",
             ],
           },
           {
             heading: "2. Post Tags & Auto-Routing",
             items: [
-              "Select a content-type tag when posting (not your identity): Testnet Recruitment, IDO / Launchpad, Security Audit, Integration Announcement, Airdrop Plan, Funding / Hiring, Node Recruitment, Hackathon / Bug Bounty, Other.",
+              "Select a content-type tag when posting: Testnet Recruitment, IDO / Launchpad, Security Audit, Integration Announcement, Airdrop Plan, Funding / Hiring, Node Recruitment, Hackathon / Bug Bounty, Other.",
               "Crypto Team posts: automatically featured in the Elite Teams section on the homepage (one slot per team).",
               "KOL posts: automatically routed to the KOL Zone + KOL leaderboard (ranked by likes, comments, and views in real time).",
-              "Developer posts: automatically routed to the Developer Column (vertical display for fast talent discovery, does not occupy the main homepage feed).",
+              "Developer posts: automatically routed to the Developer Column (vertical display for fast talent discovery, separate from the main homepage feed).",
             ],
           },
           {
@@ -206,7 +215,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
             items: [
               "Posts are published instantly with no manual review (decentralized principle).",
               "High-energy users can apply for pinning/boosting (consumes more energy for a longer or higher-placement pin).",
-              "The platform retains a reporting/takedown mechanism (community governance or admin intervention for obvious scams/spam).",
+              "The platform retains a reporting/takedown mechanism for obvious scams or spam content.",
             ],
           },
         ],
@@ -226,6 +235,16 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
               "Centralization dependency: smaller participants rely on algorithms or paid promotion for exposure.",
             ],
           },
+          {
+            heading: "Web3 Release's Solutions",
+            items: [
+              "Identity application + content tag routing significantly lower collaboration barriers.",
+              "Energy threshold (future token consumption) + daily 10-post cap establish verifiable trust.",
+              "Slot pull + interactions (40 daily cap) + referral rewards (15% bonus) incentivize genuine activity and community growth.",
+              "60% periodic token airdrops + 1:1 TGE conversion reward long-term contributors and drive real decentralization.",
+              "Decentralized reputation system across multiple chains empowers smaller participants for a healthier, more efficient blockchain ecosystem.",
+            ],
+          },
         ],
       },
     ],
@@ -236,7 +255,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
     subtitle:
       "Web3 Release ist eine dezentralisierte, community-getriebene Web3-Kollaborationsplattform — das All-in-One-Zentrum für Bedarfsveröffentlichung und Matching für Krypto-Teams. Über Wallet-Verbindung werden Krypto-Teams, KOLs und Entwickler effizient vernetzt.",
     coreConcept:
-      "Kernkonzept: Bedarf verbinden, Innovation freisetzen. Krypto-Teams können jederzeit Anforderungen veröffentlichen; Blockchain-Nutzer (Entwickler, KOLs, Node-Betreiber usw.) können diese schnell entdecken und darauf reagieren.",
+      "Kernkonzept: Bedarf verbinden, Innovation freisetzen. Krypto-Teams können jederzeit Anforderungen veröffentlichen; Blockchain-Nutzer können diese schnell entdecken und darauf reagieren.",
     sections: [
       {
         heading: "Hauptfunktionen",
@@ -244,29 +263,34 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           "Pinned Zone: Zeigt Beiträge mit hoher Priorität mit einem Live-Countdown.",
           "Elite Teams: Projektliste nach Aktualität sortiert, mit verschiedenen Ansichtsmodi.",
           "Veröffentlichen & Matchen: Beiträge erscheinen sofort in der Homepage-Timeline.",
-          "Einstiegspunkte: Wallet verbinden, Gilde beitreten / Jetzt beitreten.",
+          "Einstiegspunkte: Wallet verbinden 🌙, Gilde beitreten / Jetzt beitreten 🚀.",
         ],
       },
       {
-        heading: "Punktesystem (Kernanreiz)",
+        heading: "Token-Anreizsystem (Kernanreiz)",
         intro:
-          "Das Punktesystem belohnt qualitativ hochwertigen Content, echte Interaktionen und Community-Teilnahme. Punkte sind unbegrenzt und dienen als Nachweis für zukünftige Airdrops.",
+          "Das Token-System belohnt qualitativ hochwertigen Content, echte Interaktionen und Community-Teilnahme. Tokens sind unbegrenzt und werden bei TGE 1:1 in offizielle $WBR-Token getauscht.",
         subsections: [
           {
-            heading: "Punktequellen für normale Nutzer",
+            heading: "Token-Verteilung & Airdrop-Plan",
+            intro:
+              "60 % der offiziellen $WBR-Token werden regelmäßig per Airdrop an aktive Nutzer, Content-Beitragende und die Community verteilt — gewichtet nach echten Beiträgen (Slots, Interaktionen, Einladungen, Posts).",
+          },
+          {
+            heading: "Token-Quellen für normale Nutzer",
             items: [
-              "Tägliches Einchecken: +1.000 Punkte",
-              "Likes: +100 Punkte je Like (Tageslimit)",
-              "Kommentare: +100 Punkte je Kommentar (erste 10 gültig, Tageslimit)",
-              "Einladungsbonus: 20 % der täglichen Punkte der eingeladenen Nutzer für den Einlader (kein Limit)",
+              "Täglicher Slot-Zug: einmal alle 24 Stunden; 100–200 (40 %), 200–500 (40 %), 500–1000 (20 %) Tokens.",
+              "Like: +5 Tokens (max. 20 gültige Likes/Tag).",
+              "Kommentar: +5 Tokens (max. 20 gültige Kommentare/Tag).",
+              "Tages-Cap: 40 Interaktionen insgesamt; danach keine weiteren Token-Belohnungen.",
+              "Einladungsbonus: 15 % der täglichen Token-Einnahmen des Eingeladenen (kein Limit, Echtzeit-Abrechnung). Nur für normale Nutzer.",
             ],
           },
           {
-            heading: "KOL-exklusive Punkte",
+            heading: "Team-, KOL- & Entwickler-Token-Regeln",
             items: [
-              "Je Like auf einen Beitrag: +10 Punkte; je Kommentar: +10 Punkte",
-              "Alle 1.000 Aufrufe: +50 Punkte",
-              "Einladungsbonus wie oben",
+              "Jeder Like oder Kommentar auf eigene Beiträge: +1 Token.",
+              "Tages-Limit: 2.000 Tokens.",
             ],
           },
         ],
@@ -278,8 +302,8 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           "Nach Identitätsgenehmigung werden automatisch 1.000 Energie vergeben.",
           "Jeder Beitrag kostet 1 Energie.",
           "Tägliches Beitragslimit: max. 10 Beiträge/Tag.",
-          "Energie hat eine Obergrenze; ungenutzte Energie verfällt alle 30 Tage um 20 %.",
-          "Zukünftiger Token ($WBR) dient als Posting-Währung.",
+          "Energie hat eine Obergrenze (100.000); ungenutzte Energie verfällt alle 30 Tage um 20 %.",
+          "Zukünftiger $WBR-Token dient als Posting-Währung und bildet einen wirtschaftlichen Kreislauf.",
         ],
       },
       {
@@ -288,27 +312,23 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "1. Identitätsantrag & Energieschwelle",
             items: [
-              "Alle Nutzer müssen zuerst eine Wallet verbinden und eine Identität beantragen.",
-              "Wähle eine Identitätskategorie: Krypto-Team, KOL oder Entwickler.",
-              "Nach Genehmigung werden automatisch 1.000 Energie gewährt.",
-              "Jeder Beitrag kostet 1 Energie; tägliches Limit: max. 10/Tag.",
+              "Wähle eine Identitätskategorie (nur eine): Krypto-Team, KOL oder Entwickler.",
+              "Nach Genehmigung: 1.000 Energie; täglich max. 10 Beiträge.",
             ],
           },
           {
             heading: "2. Beitrags-Tags & Auto-Routing",
             items: [
-              "Wähle beim Veröffentlichen einen Inhaltstyp-Tag: Testnet, IDO/Launchpad, Sicherheitsaudit, Integration, Airdrop, Finanzierung, Nodes, Hackathon/Bug Bounty, Sonstiges.",
-              "Krypto-Team-Beiträge: automatisch in der Elite-Teams-Sektion featured.",
-              "KOL-Beiträge: automatisch in die KOL-Zone + Rangliste weitergeleitet.",
-              "Entwickler-Beiträge: automatisch in die Entwickler-Spalte weitergeleitet.",
+              "Inhaltstyp-Tag wählen: Testnet, IDO/Launchpad, Sicherheitsaudit, Integration, Airdrop, Finanzierung, Nodes, Hackathon/Bug Bounty, Sonstiges.",
+              "Krypto-Teams → Elite Teams. KOL → KOL-Zone + Rangliste. Entwickler → Entwickler-Spalte.",
             ],
           },
           {
             heading: "3. Inhaltsmoderation & Priorität",
             items: [
-              "Beiträge werden sofort ohne manuelle Prüfung veröffentlicht.",
+              "Sofortige Veröffentlichung ohne manuelle Prüfung.",
               "Nutzer mit viel Energie können Pinning/Boosting beantragen.",
-              "Die Plattform behält einen Melde-/Abnahmemechanismus für offensichtliche Betrügereien.",
+              "Melde-/Abnahmemechanismus für offensichtliche Betrügereien.",
             ],
           },
         ],
@@ -316,7 +336,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
       {
         heading: "Vision & gelöste Probleme",
         intro:
-          "Web3 Release strebt danach, das Web3-'Twitter + LinkedIn + Gitcoin' zu werden — ein wirklich dezentralisierter, community-getriebener Kollaborations- und Veröffentlichungs-Hub.",
+          "Web3 Release strebt danach, das Web3-'Twitter + LinkedIn + Gitcoin' zu werden — ein wirklich dezentralisierter, community-getriebener Hub.",
         subsections: [
           {
             heading: "Hauptprobleme",
@@ -324,8 +344,16 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
               "Hohe Kollaborationsreibung: Angebot und Nachfrage auf vielen Plattformen verstreut.",
               "Mangelndes Vertrauen: Schlechte Qualität und Betrug erschweren die Verifikation.",
               "Ungleiche Chancen: Entwickler/KOLs kämpfen um Sichtbarkeit.",
-              "Informationsfragmentierung: Redundante Inhalte und minderwertige Kollaboration.",
-              "Zentralisierungsabhängigkeit: Kleinere Teilnehmer sind auf Algorithmen oder bezahlte Werbung angewiesen.",
+              "Informationsfragmentierung und Zentralisierungsabhängigkeit.",
+            ],
+          },
+          {
+            heading: "Web3 Release's Lösungen",
+            items: [
+              "Identitätsantrag + Inhalts-Tags senken Hürden erheblich.",
+              "Energieschwelle + 10-Beiträge-Limit schaffen verifizierbares Vertrauen.",
+              "Slot + Interaktionen (40/Tag) + 15 % Einladungsbonus fördern echte Aktivität.",
+              "60 % Airdrop + 1:1 TGE belohnen Langzeitbeitragende und fördern echte Dezentralisierung.",
             ],
           },
         ],
@@ -346,29 +374,34 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           "Pinned Zone: закреплённые записи с обратным отсчётом.",
           "Elite Teams: список проектов с сортировкой по дате и разными режимами просмотра.",
           "Публикация и подбор: записи сразу появляются в ленте главной страницы.",
-          "Точки входа: подключение кошелька, вступление в гильдию.",
+          "Точки входа: подключение кошелька 🌙, вступление в гильдию 🚀.",
         ],
       },
       {
-        heading: "Система очков (ключевой стимул)",
+        heading: "Токен-система (ключевой стимул)",
         intro:
-          "Встроенная система очков поощряет качественный контент, взаимодействие и участие в сообществе. Очки служат подтверждением для будущих аирдропов.",
+          "Встроенная система токенов поощряет качественный контент и участие в сообществе. Все накопленные токены конвертируются 1:1 в $WBR при TGE.",
         subsections: [
           {
-            heading: "Источники очков для обычных пользователей",
+            heading: "Распределение токенов и план аирдропа",
+            intro:
+              "60 % официальных $WBR-токенов будут распределяться периодически через аирдропы активным пользователям, взвешенным по реальным вкладам (слоты, взаимодействия, рефералы, публикации).",
+          },
+          {
+            heading: "Источники токенов для обычных пользователей",
             items: [
-              "Ежедневный чек-ин: +1 000 очков",
-              "Лайки: +100 очков за лайк (дневной лимит)",
-              "Комментарии: +100 очков за комментарий (первые 10, дневной лимит)",
-              "Реферальный бонус: 20 % ежедневных очков приглашённых пользователей (без лимита)",
+              "Ежедневный слот: раз в 24 часа; 100–200 (40 %), 200–500 (40 %), 500–1000 (20 %) токенов.",
+              "Лайк: +5 токенов (макс. 20 лайков/день).",
+              "Комментарий: +5 токенов (макс. 20 комментариев/день).",
+              "Дневной лимит: 40 взаимодействий; после — токены не начисляются.",
+              "Реферальный бонус: 15 % ежедневных токенов приглашённого, без лимита, в реальном времени. Только для обычных пользователей.",
             ],
           },
           {
-            heading: "Эксклюзивные очки KOL",
+            heading: "Правила для команд, KOL и разработчиков",
             items: [
-              "Лайк на запись: +10 очков; комментарий: +10 очков",
-              "Каждые 1 000 просмотров: +50 очков",
-              "Реферальный бонус аналогичен",
+              "Каждый лайк или комментарий на собственные публикации: +1 токен.",
+              "Дневной лимит: 2 000 токенов.",
             ],
           },
         ],
@@ -378,10 +411,9 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
         intro: "Энергия — основной ресурс для публикации и повышения видимости.",
         items: [
           "После одобрения личности автоматически выдаётся 1 000 энергии.",
-          "Каждая публикация стоит 1 энергию.",
-          "Дневной лимит публикаций: max 10 в день.",
-          "Энергия имеет потолок; неиспользованная энергия убывает на 20 % каждые 30 дней.",
-          "Будущий токен ($WBR) станет платёжным средством для публикаций.",
+          "Каждая публикация стоит 1 энергию; дневной лимит: 10 публикаций.",
+          "Потолок энергии — 100 000; неиспользованная энергия убывает на 20 % каждые 30 дней.",
+          "Будущий $WBR-токен станет платёжным средством для публикаций.",
         ],
       },
       {
@@ -390,26 +422,23 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
           {
             heading: "1. Заявка на личность и порог энергии",
             items: [
-              "Все пользователи должны подключить кошелёк и подать заявку на личность.",
               "Выберите одну категорию: крипто-команда, KOL или разработчик.",
-              "После одобрения автоматически выдаётся 1 000 энергии; дневной лимит: 10 публикаций.",
+              "После одобрения: 1 000 энергии; дневной лимит: 10 публикаций.",
             ],
           },
           {
             heading: "2. Теги и авто-маршрутизация",
             items: [
-              "Выберите тег типа контента: тестнет, IDO/Launchpad, аудит, интеграция, аирдроп, финансирование, ноды, хакатон/баунти, прочее.",
-              "Крипто-команды: контент попадает в Elite Teams на главной.",
-              "KOL: запись попадает в зону KOL + рейтинг.",
-              "Разработчики: запись попадает в колонку разработчиков.",
+              "Тег типа контента: тестнет, IDO/Launchpad, аудит, интеграция, аирдроп, финансирование, ноды, хакатон/баунти, прочее.",
+              "Крипто-команды → Elite Teams. KOL → зона KOL + рейтинг. Разработчики → колонка разработчиков.",
             ],
           },
           {
             heading: "3. Модерация и приоритет",
             items: [
               "Публикации выходят мгновенно без ручной модерации.",
-              "Пользователи с высокой энергией могут закреплять/бустить записи.",
-              "Платформа сохраняет механизм жалоб/удалений.",
+              "Пользователи с большим количеством энергии могут закреплять/буст свои публикации.",
+              "Механизм жалоб для очевидных мошенников и спама.",
             ],
           },
         ],
@@ -417,16 +446,24 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
       {
         heading: "Видение и решаемые проблемы",
         intro:
-          "Web3 Release стремится стать Web3-аналогом «Twitter + LinkedIn + Gitcoin» — по-настоящему децентрализованным, управляемым сообществом центром коллаборации.",
+          "Web3 Release стремится стать Web3-аналогом 'Twitter + LinkedIn + Gitcoin' — по-настоящему децентрализованным центром для совместной работы.",
         subsections: [
           {
             heading: "Ключевые проблемы",
             items: [
-              "Высокое трение коллаборации: спрос и предложение рассредоточены по многим платформам.",
-              "Недоверие: мошенничество и низкокачественные приглашения.",
-              "Неравные возможности: разработчикам и KOL трудно получить видимость.",
-              "Фрагментация информации: дублирование контента между цепочками.",
-              "Зависимость от централизации: малые участники вынуждены полагаться на алгоритмы.",
+              "Высокое трение при коллаборации: запросы разбросаны по множеству платформ.",
+              "Недоверие: низкокачественные приглашения и мошенничество.",
+              "Неравные возможности: разработчики и KOL не могут быть замечены.",
+              "Фрагментация информации и зависимость от централизации.",
+            ],
+          },
+          {
+            heading: "Решения Web3 Release",
+            items: [
+              "Заявка на личность + теги снижают барьеры коллаборации.",
+              "Порог энергии + 10 публикаций/день создают проверяемое доверие.",
+              "Слот + 40 взаимодействий/день + 15 % реферальный бонус стимулируют реальную активность.",
+              "60 % аирдроп + конвертация 1:1 вознаграждают долгосрочных участников.",
             ],
           },
         ],
@@ -437,39 +474,44 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
   "fr": {
     title: "À propos",
     subtitle:
-      "Web3 Release est une plateforme de collaboration Web3 décentralisée et communautaire — le centre tout-en-un de publication de besoins et de mise en relation pour les équipes crypto. La vérification par wallet connecte efficacement équipes, KOL et développeurs.",
+      "Web3 Release est une plateforme Web3 décentralisée et communautaire — le centre tout-en-un de publication et de matching pour les équipes crypto. La vérification via wallet connecte efficacement équipes, KOLs et développeurs.",
     coreConcept:
-      "Concept central : connecter les besoins, libérer l'innovation. Les équipes crypto publient leurs besoins à tout moment et les utilisateurs blockchain y répondent rapidement.",
+      "Concept clé : connecter les besoins, libérer l'innovation. Les équipes crypto publient à tout moment, les utilisateurs blockchain trouvent et répondent rapidement.",
     sections: [
       {
         heading: "Fonctionnalités principales",
         items: [
-          "Pinned Zone : met en avant les publications prioritaires avec un compte à rebours.",
-          "Elite Teams : liste de projets triée par date avec plusieurs modes d'affichage.",
-          "Publier & Matcher : les publications apparaissent immédiatement dans le fil de la page d'accueil.",
-          "Points d'entrée : Connecter le wallet, Rejoindre la guilde / Rejoindre maintenant.",
+          "Pinned Zone : publications prioritaires avec compte à rebours en direct.",
+          "Elite Teams : liste de projets triée par activité, avec plusieurs modes d'affichage.",
+          "Publication & Matching : les posts apparaissent immédiatement dans la timeline de la page d'accueil.",
+          "Points d'entrée : Connecter Wallet 🌙, Rejoindre la Guilde 🚀.",
         ],
       },
       {
-        heading: "Système de points (incitation principale)",
+        heading: "Système de tokens (mécanisme d'incitation)",
         intro:
-          "Le système de points intégré récompense la création de contenu de qualité, les interactions authentiques et la participation communautaire. Les points servent de preuve pour les futurs airdrops.",
+          "Le système de tokens récompense le contenu de qualité, les interactions réelles et la participation communautaire. Tous les tokens accumulés sont convertis 1:1 en $WBR au TGE.",
         subsections: [
           {
-            heading: "Sources de points pour les utilisateurs généraux",
+            heading: "Distribution des tokens & plan d'airdrop",
+            intro:
+              "60 % des $WBR officiels seront distribués périodiquement via airdrops aux utilisateurs actifs, pondérés par les contributions réelles (tirages, interactions, parrainages, publications).",
+          },
+          {
+            heading: "Sources de tokens pour les utilisateurs ordinaires",
             items: [
-              "Check-in quotidien : +1 000 points",
-              "Likes : +100 points par like (plafond quotidien)",
-              "Commentaires : +100 points par commentaire (10 premiers valides, plafond quotidien)",
-              "Bonus de parrainage : 20 % des points quotidiens des utilisateurs invités (sans plafond)",
+              "Tirage quotidien : une fois toutes les 24 h ; 100–200 (40 %), 200–500 (40 %), 500–1000 (20 %) tokens.",
+              "Like : +5 tokens (max. 20 valides/jour).",
+              "Commentaire : +5 tokens (max. 20 valides/jour).",
+              "Plafond journalier : 40 interactions au total ; aucune récompense supplémentaire au-delà.",
+              "Bonus de parrainage : 15 % des tokens quotidiens du filleul, sans plafond, en temps réel. Uniquement pour les utilisateurs ordinaires.",
             ],
           },
           {
-            heading: "Points exclusifs KOL",
+            heading: "Règles pour équipes, KOLs & développeurs",
             items: [
-              "Chaque like sur une publication : +10 points ; chaque commentaire : +10 points",
-              "Toutes les 1 000 vues : +50 points",
-              "Bonus de parrainage identique",
+              "Chaque like ou commentaire reçu sur leurs publications : +1 token.",
+              "Plafond journalier : 2 000 tokens.",
             ],
           },
         ],
@@ -479,55 +521,56 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
         intro: "L'énergie est la ressource centrale pour publier et augmenter la visibilité.",
         items: [
           "1 000 énergie accordée automatiquement après approbation de l'identité.",
-          "Chaque publication coûte 1 énergie.",
-          "Plafond quotidien : max 10 publications/jour.",
-          "L'énergie a un plafond ; l'énergie non utilisée décroît de 20 % tous les 30 jours.",
-          "Le futur token ($WBR) servira de monnaie de publication.",
+          "Chaque publication coûte 1 énergie ; max. 10 publications/jour.",
+          "Plafond d'énergie : 100 000 ; l'énergie non utilisée diminue de 20 % tous les 30 jours.",
+          "Futur token $WBR = devise de publication, formant une boucle économique complète.",
         ],
       },
       {
         heading: "Règles de publication",
         subsections: [
           {
-            heading: "1. Demande d'identité et seuil d'énergie",
+            heading: "1. Demande d'identité & seuil d'énergie",
             items: [
-              "Tous les utilisateurs doivent connecter un wallet et demander une identité.",
-              "Choisissez une catégorie : Équipe crypto, KOL ou Développeur.",
-              "Après approbation : 1 000 énergie ; limite quotidienne : 10 publications.",
+              "Choisissez une catégorie (une seule) : Équipe crypto, KOL ou Développeur.",
+              "Après approbation : 1 000 énergie ; max. 10 publications/jour.",
             ],
           },
           {
-            heading: "2. Tags et routage automatique",
+            heading: "2. Tags & routage automatique",
             items: [
-              "Choisissez un tag de type de contenu : Testnet, IDO/Launchpad, Audit, Intégration, Airdrop, Financement, Nœuds, Hackathon/Bug Bounty, Autre.",
-              "Équipes crypto : le contenu apparaît dans Elite Teams sur la page d'accueil.",
-              "KOL : publication routée vers la zone KOL + classement.",
-              "Développeurs : publication routée vers la colonne Développeur.",
+              "Tag de type de contenu : Testnet, IDO/Launchpad, Audit, Intégration, Airdrop, Financement, Nœuds, Hackathon/Bug Bounty, Autre.",
+              "Équipes → Elite Teams. KOL → Zone KOL + classement. Développeurs → colonne développeurs.",
             ],
           },
           {
-            heading: "3. Modération et priorité",
+            heading: "3. Modération & priorité",
             items: [
-              "Les publications sont instantanées, sans modération manuelle.",
-              "Les utilisateurs à haute énergie peuvent épingler/booster leurs publications.",
-              "La plateforme conserve un mécanisme de signalement/suppression.",
+              "Publication instantanée sans revue manuelle.",
+              "Les utilisateurs avec beaucoup d'énergie peuvent épingler/booster.",
+              "Mécanisme de signalement pour escroqueries et spam.",
             ],
           },
         ],
       },
       {
-        heading: "Vision et problèmes résolus",
+        heading: "Vision & problèmes résolus",
         intro:
-          "Web3 Release vise à devenir le « Twitter + LinkedIn + Gitcoin » du Web3 — un hub de collaboration vraiment décentralisé et communautaire.",
+          "Web3 Release vise à devenir le 'Twitter + LinkedIn + Gitcoin' du Web3 — un hub décentralisé et communautaire pour la collaboration et la publication.",
         subsections: [
           {
-            heading: "Problèmes clés adressés",
+            heading: "Problèmes principaux résolus",
             items: [
-              "Forte friction de collaboration : offre et demande dispersées sur de nombreuses plateformes.",
-              "Manque de confiance : invitations de mauvaise qualité et arnaques répandues.",
-              "Opportunités inégales : les développeurs/KOL peinent à être visibles.",
-              "Fragmentation de l'information : contenu redondant inter-chaînes.",
-              "Dépendance à la centralisation : les petits participants dépendent des algorithmes.",
+              "Friction de collaboration élevée, manque de confiance, opportunités inégales.",
+              "Fragmentation de l'information et dépendance à la centralisation.",
+            ],
+          },
+          {
+            heading: "Solutions de Web3 Release",
+            items: [
+              "Demande d'identité + tags de contenu réduisent les barrières.",
+              "Tirage + 40 interactions/jour + 15 % de bonus de parrainage stimulent l'activité réelle.",
+              "60 % d'airdrop + conversion 1:1 récompensent les contributeurs à long terme.",
             ],
           },
         ],
@@ -538,97 +581,102 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
   "ja": {
     title: "プラットフォームについて",
     subtitle:
-      "Web3 Release は分散型・コミュニティ主導の Web3 コラボレーションプラットフォームです。ウォレット接続による本人確認を通じて、暗号チーム・KOL・開発者を効率的につなぎます。",
+      "Web3 Release は、暗号チーム向けのオールインワン需要発信・マッチングプラットフォームです。ウォレット接続で本人確認を行い、暗号チーム・KOL・開発者を効率的につなぎます。",
     coreConcept:
-      "コアコンセプト：ニーズをつなぎ、イノベーションを解き放つ。暗号チームはいつでもニーズを投稿でき、ブロックチェーンユーザーが迅速に発見・応答できます。",
+      "コアコンセプト：需要をつなぎ、イノベーションを解放する。暗号チームはいつでも要件を投稿でき、ブロックチェーンユーザーはすぐに発見して応答できます。",
     sections: [
       {
         heading: "主な機能",
         items: [
-          "Pinned Zone：優先度の高い投稿をカウントダウン付きで表示。",
-          "Elite Teams：最新順のプロジェクト一覧、複数のビューモードをサポート。",
-          "投稿 & マッチング：投稿後すぐにホームページのタイムラインに表示。",
-          "エントリーポイント：ウォレット接続、ギルド加入 / 今すぐ加入。",
+          "Pinned Zone：カウントダウン付きの高優先度投稿を表示。",
+          "Elite Teams：最新順のプロジェクトリスト（複数ビューモード対応）。",
+          "発信・マッチング：投稿はすぐにホームページのタイムラインに表示されます。",
+          "エントリー：ウォレット接続 🌙、ギルド参加 🚀。",
         ],
       },
       {
-        heading: "ポイントシステム（コアインセンティブ）",
+        heading: "トークンインセンティブシステム",
         intro:
-          "組み込みのポイントシステムは、質の高いコンテンツ作成、真のインタラクション、コミュニティ参加を報酬します。ポイントは無制限で、将来のエアドロップの証明になります。",
+          "質の高いコンテンツ・真のインタラクション・コミュニティ参加を報酬するトークンシステム。TGEで全累積トークンが$WBRに1:1交換されます。",
         subsections: [
           {
-            heading: "一般ユーザーのポイント源",
+            heading: "トークン配布 & エアドロップ計画",
+            intro:
+              "公式$WBRの60%は定期的にエアドロップで配布。実際の貢献（スロット・インタラクション・紹介・投稿）に応じて加重分配されます。",
+          },
+          {
+            heading: "一般ユーザーのトークン獲得方法",
             items: [
-              "毎日のチェックイン：+1,000 ポイント",
-              "いいね：+100 ポイント/回（日次上限あり）",
-              "コメント：+100 ポイント/件（最初の 10 件有効、日次上限あり）",
-              "招待ボーナス：招待ユーザーの日次ポイントの 20% が自動付与（上限なし）",
+              "毎日スロット：24時間に1回；100–200（40%）・200–500（40%）・500–1000（20%）トークン。",
+              "いいね：+5トークン（1日最大20回有効）。",
+              "コメント：+5トークン（1日最大20回有効）。",
+              "1日上限：40インタラクション（上限超過後は報酬なし）。",
+              "紹介ボーナス：招待者が招待した人の1日獲得トークンの15%を自動取得（上限なし、リアルタイム精算）。一般ユーザーのみ対象。",
             ],
           },
           {
-            heading: "KOL 専用ポイント",
+            heading: "チーム・KOL・開発者のルール",
             items: [
-              "投稿へのいいね 1 回：+10 ポイント；コメント 1 件：+10 ポイント",
-              "1,000 回表示ごと：+50 ポイント",
-              "招待ボーナスは同上",
+              "自分の投稿に対するいいね・コメント1件につき+1トークン。",
+              "1日上限：2,000トークン。",
             ],
           },
         ],
       },
       {
         heading: "エネルギーシステム（投稿の燃料）",
-        intro: "エネルギーは投稿と可視性向上のコアリソースです。",
+        intro: "エネルギーは投稿と可視性向上の主要リソースです。",
         items: [
-          "身分承認後に 1,000 エネルギーが自動付与されます。",
-          "投稿ごとに 1 エネルギーを消費します。",
-          "1 日の投稿上限：最大 10 件/日。",
-          "エネルギーには上限があり、未使用分は 30 日ごとに 20% 減衰します。",
-          "将来のトークン（$WBR）が投稿通貨となります。",
+          "身分承認後に自動で1,000エネルギー付与。",
+          "投稿1件につき1エネルギー消費；1日最大10件。",
+          "上限100,000；未使用エネルギーは30日ごとに20%減衰。",
+          "将来的に$WBRトークンで投稿通貨として機能し、経済ループを形成。",
         ],
       },
       {
         heading: "投稿ルール",
         subsections: [
           {
-            heading: "1. 身分申請とエネルギー要件",
+            heading: "1. 身分申請 & エネルギー閾値",
             items: [
-              "全ユーザーはウォレットを接続し、身分を申請する必要があります。",
-              "1 つの身分カテゴリを選択：暗号チーム・KOL・開発者。",
-              "承認後に 1,000 エネルギーが付与。1 日最大 10 件まで投稿可能。",
+              "カテゴリを1つ選択：暗号チーム・KOL・開発者。",
+              "承認後：1,000エネルギー；1日最大10件。",
             ],
           },
           {
-            heading: "2. 投稿タグ & 自動ルーティング",
+            heading: "2. タグ & 自動ルーティング",
             items: [
-              "コンテンツタイプタグを選択：テストネット、IDO/Launchpad、セキュリティ監査、統合、エアドロップ、資金調達、ノード、ハッカソン/バグバウンティ、その他。",
-              "暗号チームの投稿：ホームページの Elite Teams に自動掲載。",
-              "KOL の投稿：KOL ゾーン + ランキングに自動配信。",
-              "開発者の投稿：開発者コラムに自動配信。",
+              "コンテンツタグを選択：テストネット・IDO/Launchpad・監査・統合・エアドロップ・採用・ノード・ハッカソン/バウンティ・その他。",
+              "チーム → Elite Teams。KOL → KOLゾーン + ランキング。開発者 → 開発者コラム。",
             ],
           },
           {
-            heading: "3. コンテンツモデレーションと優先度",
+            heading: "3. モデレーション & 優先度",
             items: [
-              "投稿は即時公開、手動審査なし（分散型原則）。",
+              "即時公開（人工審査なし）。",
               "高エネルギーユーザーはピン留め/ブーストを申請可能。",
-              "プラットフォームには報告/削除メカニズムが残されています。",
+              "明らかな詐欺・スパムに対する通報/削除メカニズムあり。",
             ],
           },
         ],
       },
       {
-        heading: "ビジョンと解決する問題",
+        heading: "ビジョン & 解決する問題",
         intro:
-          "Web3 Release は Web3 時代の「Twitter + LinkedIn + Gitcoin」を目指します。信頼・追跡可能・十分なインセンティブの環境で、自由なコラボレーションを実現します。",
+          "Web3 Releaseは、Web3版の「Twitter + LinkedIn + Gitcoin」を目指す真の分散型コラボレーションハブです。",
         subsections: [
           {
-            heading: "解決する主な問題",
+            heading: "主な課題",
             items: [
-              "高いコラボレーションの摩擦：需要と供給が多くのプラットフォームに分散。",
-              "信頼の欠如：低品質な招待や詐欺が蔓延。",
-              "機会の不平等：開発者/KOL は可視性を得るのが困難。",
-              "情報の断片化：クロスチェーンの冗長コンテンツ。",
-              "中央集権への依存：小規模参加者はアルゴリズムや有料プロモーションに頼る。",
+              "高い協業摩擦・信頼欠如・不平等な機会・情報の断片化・中央集権依存。",
+            ],
+          },
+          {
+            heading: "Web3 Releaseの解決策",
+            items: [
+              "身分申請+タグで協業ハードルを大幅に低下。",
+              "スロット+40件/日+15%紹介ボーナスで真の活動を促進。",
+              "60%エアドロップ+1:1変換で長期貢献者を報酬。",
             ],
           },
         ],
@@ -639,39 +687,44 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
   "ko": {
     title: "플랫폼 소개",
     subtitle:
-      "Web3 Release는 탈중앙화된 커뮤니티 기반 Web3 협업 플랫폼으로, 크립토 팀을 위한 올인원 수요 발행 및 매칭 센터입니다. 지갑 연결을 통한 실명 인증으로 크립토 팀, KOL, 개발자를 효율적으로 연결합니다.",
+      "Web3 Release는 탈중앙화된 커뮤니티 기반 Web3 협업 플랫폼으로, 암호화폐 팀을 위한 원스톱 수요 발행 및 매칭 센터입니다. 지갑 연결을 통한 실명 인증으로 팀, KOL, 개발자를 효율적으로 연결합니다.",
     coreConcept:
-      "핵심 개념: 수요를 연결하고 혁신을 해방시킵니다. 크립토 팀은 언제든지 요구사항을 게시할 수 있고, 블록체인 사용자들이 빠르게 발견하고 응답할 수 있습니다.",
+      "핵심 개념: 수요를 연결하고 혁신을 해방하라. 암호화폐 팀은 언제든지 요구사항을 게시하고, 블록체인 사용자는 빠르게 발견하고 응답할 수 있습니다.",
     sections: [
       {
         heading: "주요 기능",
         items: [
-          "Pinned Zone: 우선순위가 높은 게시물을 카운트다운과 함께 표시.",
-          "Elite Teams: 최신순으로 정렬된 프로젝트 목록, 다양한 보기 모드 지원.",
-          "게시 & 매칭: 게시 후 즉시 홈페이지 타임라인에 표시.",
-          "진입점: 지갑 연결, 길드 가입 / 지금 가입.",
+          "Pinned Zone: 실시간 카운트다운이 있는 고우선순위 게시물 표시.",
+          "Elite Teams: 최신순으로 정렬된 프로젝트 목록 (다양한 뷰 모드 지원).",
+          "발행 & 매칭: 게시물은 홈페이지 타임라인에 즉시 표시됩니다.",
+          "진입점: 지갑 연결 🌙, 길드 가입 🚀.",
         ],
       },
       {
-        heading: "포인트 시스템 (핵심 인센티브)",
+        heading: "토큰 인센티브 시스템",
         intro:
-          "내장된 포인트 시스템은 고품질 콘텐츠 제작, 진정한 상호작용, 커뮤니티 참여를 보상합니다. 포인트는 무제한이며 미래 에어드롭의 증빙으로 사용됩니다.",
+          "고품질 콘텐츠, 진정한 상호작용, 커뮤니티 참여를 보상하는 토큰 시스템. TGE 시 누적된 모든 토큰이 $WBR로 1:1 교환됩니다.",
         subsections: [
           {
-            heading: "일반 사용자 포인트 출처",
+            heading: "토큰 분배 & 에어드롭 계획",
+            intro:
+              "공식 $WBR의 60%는 정기적으로 에어드롭을 통해 활성 사용자에게 배포됩니다. 실제 기여도(슬롯, 상호작용, 초대, 게시물)에 가중치를 두어 분배합니다.",
+          },
+          {
+            heading: "일반 사용자 토큰 획득 방법",
             items: [
-              "일일 체크인: +1,000 포인트",
-              "좋아요: +100 포인트/회 (일일 한도)",
-              "댓글: +100 포인트/건 (첫 10건 유효, 일일 한도)",
-              "초대 보너스: 초대한 사용자 일일 포인트의 20% 자동 적립 (한도 없음)",
+              "일일 슬롯: 24시간에 1회; 100–200(40%)·200–500(40%)·500–1000(20%) 토큰.",
+              "좋아요: +5 토큰 (일일 최대 20회 유효).",
+              "댓글: +5 토큰 (일일 최대 20회 유효).",
+              "일일 상한: 40회 상호작용 (초과 시 토큰 보상 없음).",
+              "초대 보너스: 초대된 사용자의 일일 토큰 획득량의 15%를 자동 수령 (상한 없음, 실시간 정산). 일반 사용자만 해당.",
             ],
           },
           {
-            heading: "KOL 전용 포인트",
+            heading: "팀·KOL·개발자 규칙",
             items: [
-              "게시물 좋아요 1회: +10 포인트; 댓글 1건: +10 포인트",
-              "1,000회 조회마다: +50 포인트",
-              "초대 보너스 동일",
+              "자신의 게시물에 좋아요/댓글 1회당 +1 토큰.",
+              "일일 상한: 2,000 토큰.",
             ],
           },
         ],
@@ -680,56 +733,56 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
         heading: "에너지 시스템 (게시 연료)",
         intro: "에너지는 게시 및 가시성 향상을 위한 핵심 자원입니다.",
         items: [
-          "신분 승인 후 자동으로 1,000 에너지 지급.",
-          "게시물당 1 에너지 소모.",
-          "일일 게시 한도: 최대 10회/일.",
-          "에너지에는 상한이 있으며, 미사용 에너지는 30일마다 20% 감소.",
-          "향후 토큰($WBR)이 게시 통화로 사용됩니다.",
+          "신원 승인 후 자동으로 1,000 에너지 지급.",
+          "게시물 1개당 1 에너지 소모; 일일 최대 10개.",
+          "상한 100,000; 미사용 에너지는 30일마다 20% 감소.",
+          "향후 $WBR 토큰이 게시 통화로 기능하여 경제 루프를 형성.",
         ],
       },
       {
         heading: "게시 규칙",
         subsections: [
           {
-            heading: "1. 신분 신청 및 에너지 요건",
+            heading: "1. 신원 신청 & 에너지 임계값",
             items: [
-              "모든 사용자는 지갑 연결 후 신분을 신청해야 합니다.",
-              "하나의 신분 카테고리 선택: 크립토 팀, KOL, 개발자.",
-              "승인 후 1,000 에너지 자동 지급; 일일 최대 10회 게시 가능.",
+              "카테고리 1개 선택: 암호화폐 팀·KOL·개발자.",
+              "승인 후: 1,000 에너지; 일일 최대 10개.",
             ],
           },
           {
-            heading: "2. 게시물 태그 및 자동 라우팅",
+            heading: "2. 태그 & 자동 라우팅",
             items: [
-              "콘텐츠 유형 태그 선택: 테스트넷, IDO/런치패드, 보안 감사, 통합, 에어드롭, 자금 조달, 노드, 해커톤/버그 바운티, 기타.",
-              "크립토 팀 게시물: 홈페이지 Elite Teams에 자동 노출.",
-              "KOL 게시물: KOL 구역 + 리더보드에 자동 배치.",
-              "개발자 게시물: 개발자 컬럼에 자동 배치.",
+              "콘텐츠 태그 선택: 테스트넷·IDO/Launchpad·감사·통합·에어드롭·채용·노드·해커톤/버그바운티·기타.",
+              "팀 → Elite Teams. KOL → KOL존 + 랭킹. 개발자 → 개발자 컬럼.",
             ],
           },
           {
-            heading: "3. 콘텐츠 모더레이션 및 우선순위",
+            heading: "3. 콘텐츠 관리 & 우선순위",
             items: [
-              "게시물은 수동 검토 없이 즉시 게시됩니다 (탈중앙화 원칙).",
-              "에너지가 높은 사용자는 핀/부스트 신청 가능.",
-              "플랫폼은 신고/삭제 메커니즘을 유지합니다.",
+              "즉시 게시 (수동 검토 없음).",
+              "에너지가 많은 사용자는 핀/부스트 신청 가능.",
+              "사기·스팸에 대한 신고/삭제 메커니즘.",
             ],
           },
         ],
       },
       {
-        heading: "비전 및 해결하는 문제",
+        heading: "비전 & 해결하는 문제",
         intro:
-          "Web3 Release는 Web3 시대의 'Twitter + LinkedIn + Gitcoin'이 되기를 목표로 합니다 — 진정한 탈중앙화, 커뮤니티 주도의 협업 허브.",
+          "Web3 Release는 Web3 시대의 'Twitter + LinkedIn + Gitcoin'을 목표로 하는 진정한 탈중앙화 협업 허브입니다.",
         subsections: [
           {
-            heading: "주요 해결 문제",
+            heading: "주요 문제",
             items: [
-              "높은 협업 마찰: 수요와 공급이 여러 플랫폼에 분산.",
-              "신뢰 부족: 저품질 초대 및 사기 만연.",
-              "불평등한 기회: 개발자/KOL의 가시성 확보 어려움.",
-              "정보 파편화: 크로스체인 중복 콘텐츠.",
-              "중앙화 의존: 소규모 참여자는 알고리즘이나 유료 홍보에 의존.",
+              "높은 협업 마찰, 신뢰 부족, 불평등한 기회, 정보 파편화, 중앙화 의존.",
+            ],
+          },
+          {
+            heading: "Web3 Release의 솔루션",
+            items: [
+              "신원 신청 + 태그로 협업 장벽을 크게 낮춤.",
+              "슬롯 + 40회/일 + 15% 초대 보너스로 진정한 활동 촉진.",
+              "60% 에어드롭 + 1:1 변환으로 장기 기여자 보상.",
             ],
           },
         ],
@@ -740,39 +793,44 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
   "vi": {
     title: "Giới thiệu nền tảng",
     subtitle:
-      "Web3 Release là nền tảng cộng tác Web3 phi tập trung, do cộng đồng vận hành — trung tâm đăng tải nhu cầu và kết nối toàn diện cho các nhóm crypto. Xác thực danh tính qua ví giúp kết nối hiệu quả các nhóm, KOL và nhà phát triển.",
+      "Web3 Release là nền tảng cộng tác Web3 phi tập trung, cộng đồng — trung tâm tất cả trong một để các nhóm crypto đăng nhu cầu và tìm kiếm đối tác. Xác minh danh tính qua ví kết nối các đội, KOL và nhà phát triển hiệu quả.",
     coreConcept:
-      "Khái niệm cốt lõi: Kết nối nhu cầu, giải phóng sáng tạo. Các nhóm crypto có thể đăng yêu cầu bất cứ lúc nào và người dùng blockchain nhanh chóng phát hiện và phản hồi.",
+      "Khái niệm cốt lõi: Kết nối nhu cầu, giải phóng đổi mới. Đội crypto đăng yêu cầu bất kỳ lúc nào, người dùng blockchain nhanh chóng tìm thấy và phản hồi.",
     sections: [
       {
         heading: "Tính năng chính",
         items: [
-          "Pinned Zone: Hiển thị bài đăng ưu tiên cao với đồng hồ đếm ngược.",
-          "Elite Teams: Danh sách dự án được sắp xếp theo mới nhất, hỗ trợ nhiều chế độ xem.",
-          "Đăng & Kết nối: Bài đăng xuất hiện ngay trên timeline trang chủ.",
-          "Điểm vào: Kết nối ví, Tham gia Hội / Tham gia ngay.",
+          "Pinned Zone: Hiển thị bài đăng ưu tiên cao với đếm ngược trực tiếp.",
+          "Elite Teams: Danh sách dự án sắp xếp theo mới nhất, nhiều chế độ xem.",
+          "Đăng & Ghép cặp: Bài đăng xuất hiện ngay trên timeline trang chủ.",
+          "Điểm vào: Kết nối Ví 🌙, Tham gia Guild 🚀.",
         ],
       },
       {
-        heading: "Hệ thống điểm (Khuyến khích cốt lõi)",
+        heading: "Hệ thống token khuyến khích",
         intro:
-          "Hệ thống điểm tích hợp thưởng cho nội dung chất lượng, tương tác thực và tham gia cộng đồng. Điểm không giới hạn và là bằng chứng cho các airdrop trong tương lai.",
+          "Hệ thống token thưởng nội dung chất lượng, tương tác thực và tham gia cộng đồng. Tất cả token tích lũy được đổi 1:1 thành $WBR tại TGE.",
         subsections: [
           {
-            heading: "Nguồn điểm cho người dùng thông thường",
+            heading: "Phân phối token & Kế hoạch airdrop",
+            intro:
+              "60% $WBR chính thức sẽ được phân phối định kỳ qua airdrop cho người dùng tích cực, được tính theo đóng góp thực tế (kéo slot, tương tác, giới thiệu, đăng bài).",
+          },
+          {
+            heading: "Cách kiếm token cho người dùng thông thường",
             items: [
-              "Điểm danh hàng ngày: +1.000 điểm",
-              "Lượt thích: +100 điểm/lần (giới hạn ngày)",
-              "Bình luận: +100 điểm/bình luận (10 bình luận đầu hợp lệ, giới hạn ngày)",
-              "Thưởng giới thiệu: 20% điểm ngày của người được mời tự động cộng vào người giới thiệu (không giới hạn)",
+              "Kéo slot hàng ngày: 1 lần/24 giờ; 100–200 (40%)·200–500 (40%)·500–1000 (20%) token.",
+              "Like: +5 token (tối đa 20 lần/ngày hợp lệ).",
+              "Bình luận: +5 token (tối đa 20 lần/ngày hợp lệ).",
+              "Giới hạn ngày: 40 tương tác; vượt quá không nhận thêm token.",
+              "Thưởng giới thiệu: 15% token hàng ngày của người được mời, không giới hạn, thời gian thực. Chỉ áp dụng cho người dùng thông thường.",
             ],
           },
           {
-            heading: "Điểm độc quyền KOL",
+            heading: "Quy tắc cho Nhóm, KOL & Nhà phát triển",
             items: [
-              "Mỗi lượt thích bài đăng: +10 điểm; mỗi bình luận: +10 điểm",
-              "Mỗi 1.000 lượt xem: +50 điểm",
-              "Thưởng giới thiệu tương tự",
+              "Mỗi like hoặc bình luận nhận trên bài đăng: +1 token.",
+              "Giới hạn ngày: 2.000 token.",
             ],
           },
         ],
@@ -781,39 +839,35 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
         heading: "Hệ thống năng lượng (Nhiên liệu đăng bài)",
         intro: "Năng lượng là tài nguyên cốt lõi để đăng bài và tăng khả năng hiển thị.",
         items: [
-          "1.000 năng lượng tự động cấp sau khi danh tính được phê duyệt.",
-          "Mỗi bài đăng tiêu tốn 1 năng lượng.",
-          "Giới hạn đăng bài hàng ngày: tối đa 10 bài/ngày.",
-          "Năng lượng có giới hạn tối đa; năng lượng không dùng giảm 20% mỗi 30 ngày.",
-          "Token trong tương lai ($WBR) sẽ là tiền tệ đăng bài.",
+          "Tự động tặng 1.000 năng lượng sau khi phê duyệt danh tính.",
+          "Mỗi bài đăng tốn 1 năng lượng; tối đa 10 bài/ngày.",
+          "Giới hạn 100.000; năng lượng không dùng giảm 20% mỗi 30 ngày.",
+          "$WBR trong tương lai sẽ là tiền tệ đăng bài, tạo vòng kinh tế hoàn chỉnh.",
         ],
       },
       {
         heading: "Quy tắc đăng bài",
         subsections: [
           {
-            heading: "1. Đăng ký danh tính & ngưỡng năng lượng",
+            heading: "1. Đăng ký danh tính & Ngưỡng năng lượng",
             items: [
-              "Tất cả người dùng cần kết nối ví và đăng ký danh tính.",
-              "Chọn một danh mục: Nhóm Crypto, KOL hoặc Nhà phát triển.",
-              "Sau khi phê duyệt: 1.000 năng lượng; giới hạn 10 bài/ngày.",
+              "Chọn 1 danh mục: Đội crypto·KOL·Nhà phát triển.",
+              "Sau phê duyệt: 1.000 năng lượng; tối đa 10 bài/ngày.",
             ],
           },
           {
-            heading: "2. Thẻ bài đăng & định tuyến tự động",
+            heading: "2. Tags & Định tuyến tự động",
             items: [
-              "Chọn thẻ loại nội dung: Testnet, IDO/Launchpad, Kiểm toán, Tích hợp, Airdrop, Tài trợ, Node, Hackathon/Bug Bounty, Khác.",
-              "Bài của nhóm Crypto: tự động hiển thị trong Elite Teams trên trang chủ.",
-              "Bài của KOL: tự động chuyển đến Vùng KOL + bảng xếp hạng.",
-              "Bài của Nhà phát triển: tự động chuyển đến Cột Nhà phát triển.",
+              "Chọn tag loại nội dung: Testnet·IDO/Launchpad·Kiểm toán·Tích hợp·Airdrop·Tuyển dụng·Node·Hackathon/Bug Bounty·Khác.",
+              "Đội → Elite Teams. KOL → Khu KOL + Bảng xếp hạng. Nhà phát triển → Cột nhà phát triển.",
             ],
           },
           {
-            heading: "3. Kiểm duyệt nội dung & ưu tiên",
+            heading: "3. Kiểm duyệt & Ưu tiên",
             items: [
-              "Bài đăng được phát hành ngay lập tức, không cần kiểm duyệt thủ công.",
-              "Người dùng năng lượng cao có thể đăng ký ghim/boost.",
-              "Nền tảng giữ lại cơ chế báo cáo/gỡ xuống.",
+              "Đăng ngay lập tức không cần duyệt thủ công.",
+              "Người dùng nhiều năng lượng có thể ghim/boost.",
+              "Cơ chế báo cáo/gỡ xuống cho lừa đảo và spam rõ ràng.",
             ],
           },
         ],
@@ -821,16 +875,20 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
       {
         heading: "Tầm nhìn & Vấn đề giải quyết",
         intro:
-          "Web3 Release hướng tới trở thành 'Twitter + LinkedIn + Gitcoin' của Web3 — một trung tâm cộng tác phi tập trung thực sự, do cộng đồng dẫn dắt.",
+          "Web3 Release hướng tới trở thành 'Twitter + LinkedIn + Gitcoin' của Web3 — trung tâm cộng tác phi tập trung thực sự.",
         subsections: [
           {
-            heading: "Vấn đề chính được giải quyết",
+            heading: "Vấn đề chính",
             items: [
-              "Ma sát cộng tác cao: cung và cầu phân tán trên nhiều nền tảng.",
-              "Thiếu tin tưởng: lời mời kém chất lượng và lừa đảo tràn lan.",
-              "Cơ hội không bình đẳng: nhà phát triển/KOL khó được nhìn thấy.",
-              "Thông tin phân mảnh: nội dung trùng lặp xuyên chuỗi.",
-              "Phụ thuộc tập trung: người tham gia nhỏ phụ thuộc vào thuật toán hoặc quảng cáo trả phí.",
+              "Ma sát cộng tác cao, thiếu tin cậy, cơ hội không đồng đều, phân mảnh thông tin, phụ thuộc tập trung.",
+            ],
+          },
+          {
+            heading: "Giải pháp của Web3 Release",
+            items: [
+              "Đăng ký danh tính + phân loại tag giảm rào cản cộng tác.",
+              "Slot + 40 tương tác/ngày + 15% thưởng giới thiệu khuyến khích hoạt động thực.",
+              "60% airdrop + đổi 1:1 tặng thưởng người đóng góp lâu dài.",
             ],
           },
         ],
