@@ -46,6 +46,60 @@ function useCountdownStr(until: string | null | undefined) {
   return cd;
 }
 
+function getSlotCountdown(lastPull: string): string {
+  const next = new Date(new Date(lastPull).getTime() + 24 * 60 * 60 * 1000);
+  const diff = next.getTime() - Date.now();
+  if (diff <= 0) return "";
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${String(h).padStart(2,"0")}.${String(m).padStart(2,"0")}.${String(s).padStart(2,"0")}`;
+}
+
+function DailyLuckyBtn({ lastSlotPull, label }: { lastSlotPull: string | null; label: string }) {
+  const [cd, setCd] = useState(() => lastSlotPull ? getSlotCountdown(lastSlotPull) : "");
+
+  useEffect(() => {
+    if (!lastSlotPull) { setCd(""); return; }
+    const tick = () => setCd(getSlotCountdown(lastSlotPull));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [lastSlotPull]);
+
+  const canPull = !lastSlotPull || Date.now() - new Date(lastSlotPull).getTime() >= 24 * 60 * 60 * 1000;
+
+  if (!canPull && cd) {
+    // Already pulled — show countdown, no interaction
+    return (
+      <span className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold select-none cursor-default"
+        style={{
+          background: "rgba(251,191,36,0.08)",
+          border: "1.5px solid rgba(251,191,36,0.25)",
+          color: "rgba(251,191,36,0.6)",
+          fontVariantNumeric: "tabular-nums",
+          fontFamily: "monospace",
+          letterSpacing: "0.05em",
+        }}>
+        🎰 {cd}
+      </span>
+    );
+  }
+
+  return (
+    <a href="/web3hub/profile"
+      className="daily-lucky-btn shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all"
+      style={{
+        background: "linear-gradient(90deg, #f59e0b, #fbbf24)",
+        color: "#1a1a1a",
+        border: "1.5px solid rgba(251,191,36,0.6)",
+        textDecoration: "none",
+      }}>
+      🎰 {label}
+    </a>
+  );
+}
+
 function AuthorAvatar({ wallet, name, avatar, size = "sm" }: {
   wallet: string; name?: string | null; avatar?: string | null; size?: "sm" | "md" | "lg" | "xl";
 }) {
@@ -219,6 +273,7 @@ export default function Home() {
     <div className="space-y-6 pb-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-end gap-3 pt-2">
+        <DailyLuckyBtn lastSlotPull={me?.lastSlotPull ?? null} label={t("dailyLucky")} />
         {hasJoined ? (
           <span className="shrink-0 inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700/60 cursor-default select-none pointer-events-none">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />{t("alreadyJoined")}
