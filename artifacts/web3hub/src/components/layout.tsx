@@ -137,6 +137,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
               >
                 {t("navHome")}
               </Link>
+              <Link href="/about"
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-all",
+                  location === "/about"
+                    ? "bg-blue-600 text-white border-blue-600 shadow"
+                    : "bg-blue-600 text-white border-blue-600 shadow hover:bg-blue-700"
+                )}
+              >
+                {t("nav_about")}
+              </Link>
             </div>
 
             <div className="flex items-center gap-3 ml-auto">
