@@ -109,7 +109,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const navLinkClass = (href: string) => cn(
-    "relative px-3.5 py-1.5 rounded-full text-base font-normal whitespace-nowrap transition-all duration-200 group",
+    "relative px-2.5 py-1 rounded-full text-[11px] font-normal whitespace-nowrap transition-all duration-200 group",
     location === href
       ? "text-white bg-white/15"
       : "text-white/90 hover:text-white"

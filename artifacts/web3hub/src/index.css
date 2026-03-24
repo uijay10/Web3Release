@@ -5,6 +5,14 @@ html {
   font-size: 90%;
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 @theme inline {
   --font-sans: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   --font-display: 'DM Sans', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
