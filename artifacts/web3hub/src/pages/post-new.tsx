@@ -17,7 +17,7 @@ function getApiBase() {
 
 const ALL_SECTIONS = [
   "testnet", "ido", "security", "integration", "airdrop",
-  "events", "funding", "jobs", "nodes", "showcase",
+  "events", "funding", "jobs", "nodes",
   "ecosystem", "partners", "hackathon", "ama", "bugbounty",
   "community", "developer",
 ] as const;
@@ -34,7 +34,7 @@ const SECTION_LABEL_KEYS: Record<string, string> = {
   testnet: "sTestnetLabel", ido: "sIdoLabel", security: "sSecurityLabel",
   integration: "sIntegrationLabel", airdrop: "sAirdropLabel", events: "sEventsLabel",
   funding: "sFundingLabel", jobs: "sJobsLabel", nodes: "sNodesLabel",
-  showcase: "sShowcaseLabel", ecosystem: "sEcosystemLabel", partners: "sPartnersLabel",
+  ecosystem: "sEcosystemLabel", partners: "sPartnersLabel",
   hackathon: "sHackathonLabel", ama: "sAmaLabel", bugbounty: "sBugbountyLabel",
   community: "nav_community", developer: "nav_developer",
 };
