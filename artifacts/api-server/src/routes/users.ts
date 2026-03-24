@@ -31,6 +31,7 @@ function fmtUser(u: typeof usersTable.$inferSelect) {
     language: u.language,
     pinCount: u.pinCount,
     spaceRejectedAt: (u as any).spaceRejectedAt?.toISOString() ?? null,
+    tags: (u as any).tags ? JSON.parse((u as any).tags) : [],
     createdAt: u.createdAt.toISOString(),
   };
 }
@@ -68,7 +69,7 @@ router.get("/invited", async (req, res) => {
 });
 
 router.post("/upsert", async (req, res) => {
-  const { wallet, username, avatar, twitter, website, language, inviteCode: usedCode } = req.body;
+  const { wallet, username, avatar, twitter, website, language, tags, inviteCode: usedCode } = req.body;
   if (!wallet) return res.status(400).json({ error: "wallet required" });
 
   const lw = wallet.toLowerCase();
@@ -110,6 +111,7 @@ router.post("/upsert", async (req, res) => {
   if (twitter !== undefined) updateData.twitter = twitter;
   if (website !== undefined) updateData.website = website;
   if (language !== undefined) updateData.language = language;
+  if (tags !== undefined) updateData.tags = Array.isArray(tags) ? JSON.stringify(tags.slice(0, 2)) : null;
 
   const updated = Object.keys(updateData).length > 0
     ? await db.update(usersTable).set(updateData).where(eq(usersTable.wallet, lw)).returning()

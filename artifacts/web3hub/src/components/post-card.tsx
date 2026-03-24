@@ -37,12 +37,27 @@ interface PostCardPost {
   authorName?: string | null;
   authorAvatar?: string | null;
   authorType?: string | null;
+  authorTags?: string[] | null;
   views?: number;
   likes: number;
   comments: number;
   isPinned?: boolean;
   pinnedUntil?: string | null;
   createdAt: string;
+}
+
+const TAG_COLORS: Record<string, string> = {
+  L1: "bg-blue-500/15 text-blue-500", L2: "bg-blue-400/15 text-blue-400",
+  Infrastructure: "bg-slate-500/15 text-slate-400", DePIN: "bg-indigo-500/15 text-indigo-400",
+  Node: "bg-slate-400/15 text-slate-400", Validator: "bg-indigo-400/15 text-indigo-400",
+  DeFi: "bg-emerald-500/15 text-emerald-500", DEX: "bg-teal-500/15 text-teal-500",
+  RWA: "bg-cyan-500/15 text-cyan-500", SocialFi: "bg-violet-500/15 text-violet-500",
+  NFT: "bg-pink-500/15 text-pink-500", GameFi: "bg-orange-500/15 text-orange-500",
+  AI: "bg-purple-500/15 text-purple-500",
+};
+function TagBadge({ tag }: { tag: string }) {
+  const cls = TAG_COLORS[tag] ?? "bg-muted text-muted-foreground";
+  return <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${cls}`}>{tag}</span>;
 }
 
 interface PostCardProps {
@@ -301,6 +316,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
               <Link href={authorHref} className="text-xs font-semibold text-foreground hover:text-primary transition-colors">{displayName}</Link>
               <RoleBadge spaceType={post.authorType} size="xs" />
+              {post.authorTags?.map(tag => <TagBadge key={tag} tag={tag} />)}
               <span className="text-[10px] text-muted-foreground ml-auto">{formatDistanceToNow(new Date(post.createdAt))} ago</span>
             </div>
             <p className="font-semibold text-sm text-foreground line-clamp-1">{post.title}</p>
@@ -413,6 +429,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
           <div className="flex items-center gap-2 flex-wrap">
             <Link href={authorHref} className="font-semibold text-sm hover:text-primary transition-colors">{displayName}</Link>
             <RoleBadge spaceType={post.authorType} size="xs" />
+            {post.authorTags?.map(tag => <TagBadge key={tag} tag={tag} />)}
             <span className="text-xs text-primary/70 bg-primary/8 px-2 py-0.5 rounded-full ml-auto">#{t(SECTION_KEY_MAP[post.section] ?? post.section) || post.section}</span>
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">{formatDistanceToNow(new Date(post.createdAt))} ago</div>

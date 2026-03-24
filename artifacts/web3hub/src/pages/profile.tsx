@@ -144,6 +144,7 @@ export default function Profile() {
   const [twitter, setTwitter] = useState("");
   const [website, setWebsite] = useState("");
   const [username, setUsername] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [editingName, setEditingName] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle"|"saving"|"saved">("idle");
@@ -168,6 +169,7 @@ export default function Profile() {
       setTwitter(me.twitter ?? "");
       setWebsite(me.website ?? "");
       setUsername(me.username ?? "");
+      setSelectedTags(me.tags ?? []);
       setTokenCount(me.tokens ?? 0);
       setLastSlotPull(me.lastSlotPull ?? null);
     }
@@ -186,7 +188,7 @@ export default function Profile() {
     if (!address || !dirty) return;
     setSaveStatus("saving");
     upsertMutation.mutate(
-      { data: { wallet: address, twitter: twitter || null, website: website || null, username: username.trim() || undefined } as any },
+      { data: { wallet: address, twitter: twitter || null, website: website || null, username: username.trim() || undefined, tags: selectedTags } as any },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
@@ -407,6 +409,45 @@ export default function Profile() {
         <InfoRow label={t("spaceLabel")}>
           <SpaceStatusBadge status={me?.spaceStatus} rejectedAt={me?.spaceRejectedAt} />
         </InfoRow>
+
+        {/* 1b. 展示标签 (仅 project 类型团队可选) */}
+        {isSpaceOwner && spaceType === "project" && (
+          <InfoRow label={lang === "zh-CN" ? "展示标签" : "Display Tags"}>
+            <div className="space-y-2">
+              <p className="text-[11px] text-muted-foreground">
+                {lang === "zh-CN" ? "最多选2个，将显示在首页帖子和子页面" : "Select up to 2 tags — shown on homepage and post pages"}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {["L1","L2","Infrastructure","DePIN","Node","Validator","DeFi","DEX","RWA","SocialFi","NFT","GameFi","AI"].map(tag => {
+                  const active = selectedTags.includes(tag);
+                  const disabled = !active && selectedTags.length >= 2;
+                  return (
+                    <button
+                      key={tag}
+                      disabled={disabled}
+                      onClick={() => {
+                        const next = active
+                          ? selectedTags.filter(t => t !== tag)
+                          : [...selectedTags, tag];
+                        setSelectedTags(next);
+                        setDirty(true);
+                      }}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+                        active
+                          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                          : disabled
+                            ? "bg-muted/30 text-muted-foreground/40 border-border/30 cursor-not-allowed"
+                            : "bg-muted/50 text-muted-foreground border-border hover:border-blue-400 hover:text-blue-500"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </InfoRow>
+        )}
 
         {/* 2. 每日抽奖老虎机 – 所有用户可见 */}
         {address && (

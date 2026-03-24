@@ -46,7 +46,7 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: string | null; authorAvatarLive?: string | null }) {
+function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: string | null; authorAvatarLive?: string | null; authorTagsLive?: string[] | null }) {
   const autoViews = computeAutoViews(p.id, p.createdAt, p.authorType);
   return {
     id: p.id,
@@ -57,6 +57,7 @@ function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: strin
     authorName: p.authorNameLive ?? p.authorName,
     authorAvatar: p.authorAvatarLive ?? p.authorAvatar,
     authorType: p.authorType,
+    authorTags: p.authorTagsLive ?? [],
     views: (p.views ?? 0) + autoViews,
     likes: p.likes,
     comments: p.comments,
@@ -140,13 +141,13 @@ router.get("/", async (req, res) => {
 
   const wallets = [...new Set(posts.map(p => p.authorWallet))];
   const users = wallets.length
-    ? await db.select({ wallet: usersTable.wallet, username: usersTable.username, avatar: usersTable.avatar })
+    ? await db.select({ wallet: usersTable.wallet, username: usersTable.username, avatar: usersTable.avatar, tags: (usersTable as any).tags })
         .from(usersTable).where(sql`${usersTable.wallet} = ANY(ARRAY[${sql.join(wallets.map(w => sql`${w}`), sql`, `)}]::text[])`)
     : [];
-  const userMap = Object.fromEntries(users.map(u => [u.wallet, u]));
+  const userMap = Object.fromEntries(users.map(u => [u.wallet, { ...u, parsedTags: (u as any).tags ? JSON.parse((u as any).tags) : [] }]));
 
   res.json({
-    posts: posts.map(p => formatPost({ ...p, authorNameLive: userMap[p.authorWallet]?.username ?? null, authorAvatarLive: userMap[p.authorWallet]?.avatar ?? null })),
+    posts: posts.map(p => formatPost({ ...p, authorNameLive: userMap[p.authorWallet]?.username ?? null, authorAvatarLive: userMap[p.authorWallet]?.avatar ?? null, authorTagsLive: userMap[p.authorWallet]?.parsedTags ?? [] })),
     total: Number(all[0]?.count ?? 0),
     page,
     totalPages: Math.ceil(Number(all[0]?.count ?? 0) / limit),
