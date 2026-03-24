@@ -92,7 +92,7 @@ async function expireAndPromote() {
       .limit(slotsAvailable);
 
     for (const qp of queued) {
-      const pinnedUntil = new Date(Date.now() + 72 * 3600_000);
+      const pinnedUntil = new Date(Date.now() + 24 * 3600_000);
       await db.update(postsTable)
         .set({ isPinned: true, pinnedUntil, pinQueued: false, pinQueuedAt: null })
         .where(eq(postsTable.id, qp.id));
@@ -478,7 +478,7 @@ router.post("/:id/pin", async (req, res) => {
   const activeCount = Number(activeRows[0]?.count ?? 0);
 
   if (activeCount < PIN_SLOTS) {
-    const pinnedUntil = new Date(Date.now() + 72 * 3600_000);
+    const pinnedUntil = new Date(Date.now() + 24 * 3600_000);
     await db.update(postsTable)
       .set({ isPinned: true, pinnedUntil, pinQueued: false, pinQueuedAt: null })
       .where(eq(postsTable.id, id));

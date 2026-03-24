@@ -23,7 +23,7 @@ export const ABOUT_CONTENT: Record<string, AboutContent> = {
       {
         heading: "当前主要功能展示",
         items: [
-          "Pinned Zone：置顶区，展示高优先级或热门需求（带倒计时，如 3 天剩余）。",
+          "Pinned Zone：置顶区，展示高优先级或热门需求（带倒计时，如 1 天剩余）。",
           "Elite Teams：精英团队/项目列表，按最新排序展示，支持不同视图（Testnet View、Jobs View、Integration View 等）。",
           "发布与匹配：团队发布需求后，内容以时间线形式出现在首页「项目展示」区和对应专栏，最新内容优先置顶。",
           "操作入口：Connect Wallet（连接钱包 🌙）、Join Guild / Join Now（申请加入，火箭 🚀）。",
