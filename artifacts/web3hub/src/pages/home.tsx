@@ -330,10 +330,18 @@ export default function Home() {
               {t("spacePending")}
             </span>
           ) : (
-            <Link href="/apply"
-              className="shrink-0 inline-flex items-center justify-center gap-1 px-6 py-2.5 rounded-full font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-300 transition-all">
-              🚀 {t("joinNow")}
-            </Link>
+            <div className="shrink-0 flex items-center gap-2">
+              <Link href="/apply"
+                className="inline-flex items-center justify-center gap-1 px-6 py-2.5 rounded-full font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-300 transition-all">
+                🚀 {t("joinNow")}
+              </Link>
+              {isConnected && address && me && (
+                <Link href="/post/new"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full font-bold text-sm bg-green-500 hover:bg-green-600 text-white shadow-md shadow-green-300/50 transition-all">
+                  <PenSquare className="w-4 h-4" /> {t("postJobBtn")}
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>
