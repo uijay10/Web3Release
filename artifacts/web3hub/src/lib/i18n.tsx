@@ -141,6 +141,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "每24小时最多发布10次，今日还可发布 {n} 次，仅限正规求职内容，违规可能遭永久封禁。",
     expiryLabel: "到期：",
     normalOverwriteMsg: "当前已有发布内容，继续发布之前内容将被覆盖，确定此操作吗？",
+    exchangeEnergyBtn: "兑换能量", exchangeOnlyNormal: "仅普通用户可用", postJobBtn: "发布求职",
+    exchangeModalTitle: "代币兑换能量", exchangeModalRule: "规则：200 代币 = 1 点能量，每次消耗后立即到账",
+    exchangeModalBalance: "当前代币余额：", exchangeTokenUnit: "代币",
+    exchangeEnergyOf: "兑换 {n} 点能量", exchangingLabel: "兑换中…", exchangeConfirm: "确认兑换 {n} 点",
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
@@ -279,6 +283,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "Up to 10 posts per day. {n} remaining today. Legitimate job listings only; violations may result in a permanent ban.",
     expiryLabel: "Expires:",
     normalOverwriteMsg: "You already have a published post. Posting again will overwrite it. Are you sure?",
+    exchangeEnergyBtn: "Exchange Energy", exchangeOnlyNormal: "Normal users only", postJobBtn: "Post Job",
+    exchangeModalTitle: "Exchange Tokens for Energy", exchangeModalRule: "Rate: 200 tokens = 1 energy, instant deposit",
+    exchangeModalBalance: "Current token balance:", exchangeTokenUnit: "tokens",
+    exchangeEnergyOf: "Get {n} Energy", exchangingLabel: "Exchanging...", exchangeConfirm: "Confirm {n} Energy",
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
@@ -398,6 +406,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "Bis zu 10 Posts täglich. Heute noch {n} übrig. Nur seriöse Stellenangebote; Verstöße können zu einem dauerhaften Bann führen.",
     expiryLabel: "Läuft ab:",
     normalOverwriteMsg: "Sie haben bereits einen veröffentlichten Beitrag. Das erneute Posten überschreibt ihn. Sind Sie sicher?",
+    exchangeEnergyBtn: "Energie tauschen", exchangeOnlyNormal: "Nur für normale Nutzer", postJobBtn: "Job inserieren",
+    exchangeModalTitle: "Token in Energie umtauschen", exchangeModalRule: "Kurs: 200 Token = 1 Energie, sofortige Gutschrift",
+    exchangeModalBalance: "Aktuelles Token-Guthaben:", exchangeTokenUnit: "Token",
+    exchangeEnergyOf: "{n} Energie erhalten", exchangingLabel: "Tausche...", exchangeConfirm: "{n} Energie bestätigen",
   },
   "ru": {
     home: "Главная", profile: "Профиль", connect: "Подключить кошелёк", disconnect: "Отключить",
@@ -517,6 +529,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "До 10 постов в день. Осталось {n} сегодня. Только легальные вакансии; нарушения могут привести к бессрочной блокировке.",
     expiryLabel: "Истекает:",
     normalOverwriteMsg: "У вас уже есть опубликованный пост. Новая публикация перезапишет его. Вы уверены?",
+    exchangeEnergyBtn: "Обменять энергию", exchangeOnlyNormal: "Только для обычных пользователей", postJobBtn: "Опубликовать резюме",
+    exchangeModalTitle: "Обмен токенов на энергию", exchangeModalRule: "Курс: 200 токенов = 1 энергия, мгновенное зачисление",
+    exchangeModalBalance: "Текущий баланс токенов:", exchangeTokenUnit: "токенов",
+    exchangeEnergyOf: "Получить {n} энергии", exchangingLabel: "Обмен...", exchangeConfirm: "Подтвердить {n} энергии",
   },
   "fr": {
     home: "Accueil", profile: "Profil", connect: "Connecter le wallet", disconnect: "Déconnecter",
@@ -636,6 +652,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "Jusqu'à 10 posts par jour. Il reste {n} aujourd'hui. Annonces légitimes uniquement ; les violations peuvent entraîner un bannissement permanent.",
     expiryLabel: "Expire :",
     normalOverwriteMsg: "Vous avez déjà une publication. Continuer va écraser votre contenu précédent. Êtes-vous sûr ?",
+    exchangeEnergyBtn: "Échanger de l'énergie", exchangeOnlyNormal: "Réservé aux utilisateurs standard", postJobBtn: "Publier une annonce",
+    exchangeModalTitle: "Échanger des tokens contre de l'énergie", exchangeModalRule: "Taux : 200 tokens = 1 énergie, crédit instantané",
+    exchangeModalBalance: "Solde de tokens actuel :", exchangeTokenUnit: "tokens",
+    exchangeEnergyOf: "Obtenir {n} énergie", exchangingLabel: "Échange en cours...", exchangeConfirm: "Confirmer {n} énergie",
   },
   "ja": {
     home: "ホーム", profile: "プロフィール", connect: "ウォレット接続", disconnect: "切断",
@@ -755,6 +775,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "1日最大10回。本日残り {n} 回。正規の求人のみ。違反は永久バンの可能性があります。",
     expiryLabel: "期限：",
     normalOverwriteMsg: "すでに投稿があります。続けると以前の内容が上書きされます。よろしいですか？",
+    exchangeEnergyBtn: "エネルギーに交換", exchangeOnlyNormal: "一般ユーザー専用", postJobBtn: "求人投稿",
+    exchangeModalTitle: "トークンをエネルギーに交換", exchangeModalRule: "レート：200 トークン = 1 エネルギー、即時付与",
+    exchangeModalBalance: "現在のトークン残高：", exchangeTokenUnit: "トークン",
+    exchangeEnergyOf: "{n} エネルギー取得", exchangingLabel: "交換中…", exchangeConfirm: "{n} エネルギーを確認",
   },
   "ko": {
     home: "홈", profile: "프로필", connect: "지갑 연결", disconnect: "연결 해제",
@@ -874,6 +898,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "하루 최대 10번. 오늘 {n}번 남음. 정규 구직 공고만 허용; 위반 시 영구 차단될 수 있습니다.",
     expiryLabel: "만료：",
     normalOverwriteMsg: "이미 게시된 내용이 있습니다. 계속하면 이전 내용이 덮어씌워집니다. 계속하시겠습니까?",
+    exchangeEnergyBtn: "에너지 교환", exchangeOnlyNormal: "일반 사용자 전용", postJobBtn: "구직 게시",
+    exchangeModalTitle: "토큰을 에너지로 교환", exchangeModalRule: "비율: 200 토큰 = 1 에너지, 즉시 지급",
+    exchangeModalBalance: "현재 토큰 잔액:", exchangeTokenUnit: "토큰",
+    exchangeEnergyOf: "{n} 에너지 획득", exchangingLabel: "교환 중...", exchangeConfirm: "{n} 에너지 확인",
   },
   "vi": {
     home: "Trang chủ", profile: "Hồ sơ", connect: "Kết nối ví", disconnect: "Ngắt kết nối",
@@ -993,6 +1021,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     normalProfileHint: "Tối đa 10 bài mỗi ngày. Còn {n} lần hôm nay. Chỉ đăng tin việc làm hợp lệ; vi phạm có thể bị cấm vĩnh viễn.",
     expiryLabel: "Hết hạn:",
     normalOverwriteMsg: "Bạn đã có nội dung đã đăng. Tiếp tục đăng sẽ ghi đè nội dung trước. Bạn có chắc không?",
+    exchangeEnergyBtn: "Đổi năng lượng", exchangeOnlyNormal: "Chỉ dành cho người dùng thường", postJobBtn: "Đăng tìm việc",
+    exchangeModalTitle: "Đổi token lấy năng lượng", exchangeModalRule: "Tỷ lệ: 200 token = 1 năng lượng, cộng ngay lập tức",
+    exchangeModalBalance: "Số dư token hiện tại:", exchangeTokenUnit: "token",
+    exchangeEnergyOf: "Nhận {n} năng lượng", exchangingLabel: "Đang đổi...", exchangeConfirm: "Xác nhận {n} năng lượng",
   },
 };
 

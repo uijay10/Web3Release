@@ -515,14 +515,14 @@ export default function Profile() {
                 onClick={() => { setExchangeErr(""); setShowExchangeModal(true); }}
                 className="px-4 py-1.5 rounded-full text-sm font-semibold bg-green-500 hover:bg-green-600 text-white transition-colors"
               >
-                兑换能量
+                {t("exchangeEnergyBtn")}
               </button>
             ) : (
               <button disabled
                 className="px-4 py-1.5 rounded-full text-sm font-semibold bg-muted text-muted-foreground cursor-not-allowed"
-                title="仅普通用户可用"
+                title={t("exchangeOnlyNormal")}
               >
-                兑换能量
+                {t("exchangeEnergyBtn")}
               </button>
             )}
           </div>
@@ -646,7 +646,7 @@ export default function Profile() {
           <div className="space-y-2">
             <Link href="/post/new"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-green-500 text-white font-bold text-base hover:bg-green-600 shadow-sm shadow-green-200 dark:shadow-green-900/30 transition-all hover:shadow-md">
-              <PenSquare className="w-5 h-5" /> 发布求职
+              <PenSquare className="w-5 h-5" /> {t("postJobBtn")}
             </Link>
             <p className="text-xs text-muted-foreground">{t("normalProfileHint").replace("{n}", String(normalPostsRemainingProfile))}</p>
           </div>
@@ -699,10 +699,10 @@ export default function Profile() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm border border-border/50 dark:border-slate-800 p-6 space-y-5"
             onClick={e => e.stopPropagation()}>
             <div>
-              <h3 className="text-lg font-bold text-foreground">代币兑换能量</h3>
-              <p className="text-sm text-muted-foreground mt-1">规则：200 代币 = 1 点能量，每次消耗后立即到账</p>
+              <h3 className="text-lg font-bold text-foreground">{t("exchangeModalTitle")}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{t("exchangeModalRule")}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                当前代币余额：<span className="font-bold text-amber-500">{tokenCount.toLocaleString()} $WBR</span>
+                {t("exchangeModalBalance")}<span className="font-bold text-amber-500">{tokenCount.toLocaleString()} $WBR</span>
               </p>
             </div>
 
@@ -718,8 +718,8 @@ export default function Profile() {
                         ? "border-border/30 bg-muted/30 text-muted-foreground/40 cursor-not-allowed"
                         : "border-border/50 bg-muted/30 text-foreground hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-950/20"
                   }`}>
-                  <span className="block text-xs text-muted-foreground mb-0.5">{v} 代币</span>
-                  兑换 {v / 200} 点能量
+                  <span className="block text-xs text-muted-foreground mb-0.5">{v} {t("exchangeTokenUnit")}</span>
+                  {t("exchangeEnergyOf").replace("{n}", String(v / 200))}
                 </button>
               ))}
             </div>
@@ -731,13 +731,13 @@ export default function Profile() {
             <div className="flex gap-3">
               <button onClick={() => setShowExchangeModal(false)}
                 className="flex-1 py-2.5 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:bg-muted/50 transition-colors">
-                取消
+                {t("cancel")}
               </button>
               <button
                 onClick={handleExchange}
                 disabled={exchanging || exchangeAmt > tokenCount}
                 className="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 disabled:bg-muted disabled:text-muted-foreground text-white text-sm font-bold transition-colors">
-                {exchanging ? "兑换中…" : `确认兑换 ${exchangeAmt / 200} 点`}
+                {exchanging ? t("exchangingLabel") : t("exchangeConfirm").replace("{n}", String(exchangeAmt / 200))}
               </button>
             </div>
           </div>
