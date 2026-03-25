@@ -213,23 +213,26 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
     navigator.clipboard.writeText(wallet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
 
+  const fetched = extra !== null;
+
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
-        {/* Header gradient strip */}
-        <div className="h-16 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent relative">
-          <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded-full bg-black/20 hover:bg-black/40 text-white/80 transition-colors">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
+      <div className="bg-background border border-border rounded-2xl shadow-xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
+          <span className="font-bold text-sm text-foreground">{t("userInfoBtn")}</span>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="px-5 pb-5 -mt-8">
-          {/* Avatar + name — shown immediately from post data */}
-          <div className="flex items-end gap-3 mb-4">
-            <div className="w-16 h-16 rounded-2xl border-4 border-card shadow-md shrink-0" style={avatarStyle} />
-            <div className="flex-1 min-w-0 pb-1">
+        <div className="px-5 py-4 space-y-4">
+          {/* Avatar + name */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl border border-border shrink-0" style={avatarStyle} />
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-base truncate">{displayName}</span>
+                <span className="font-bold text-sm truncate">{displayName}</span>
                 {spaceType && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS_MODAL[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
                     {roleLabel}
@@ -247,39 +250,64 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
             </div>
           </div>
 
-          {/* Info rows */}
-          <div className="space-y-2 text-sm">
+          {/* Info rows — always show all fields */}
+          <div className="space-y-2">
             {/* Wallet */}
-            <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
-              <span className="font-mono text-xs text-muted-foreground flex-1 truncate">{wallet}</span>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+              <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+              <span className="font-mono text-xs text-foreground flex-1 truncate">{wallet}</span>
               <button onClick={copyWallet} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
                 {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
 
-            {/* Twitter — from API fetch */}
-            {extra?.twitter && (
+            {/* Twitter */}
+            {fetched && (extra?.twitter ? (
               <a href={`https://twitter.com/${extra.twitter.replace("@", "")}`} target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 hover:bg-muted/50 transition-colors">
                 <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-sky-500" />
-                <span className="text-xs truncate">{extra.twitter.startsWith("@") ? extra.twitter : `@${extra.twitter}`}</span>
+                <span className="text-xs text-foreground truncate">{extra.twitter.startsWith("@") ? extra.twitter : `@${extra.twitter}`}</span>
               </a>
-            )}
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
+                <span className="text-xs text-muted-foreground/50">—</span>
+              </div>
+            ))}
 
-            {/* Website — from API fetch */}
-            {extra?.website && (
+            {/* Website */}
+            {fetched && (extra?.website ? (
               <a href={extra.website.startsWith("http") ? extra.website : `https://${extra.website}`} target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 hover:bg-muted/50 transition-colors">
                 <Globe className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                <span className="text-xs truncate">{extra.website}</span>
+                <span className="text-xs text-foreground truncate">{extra.website}</span>
               </a>
-            )}
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                <Globe className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
+                <span className="text-xs text-muted-foreground/50">—</span>
+              </div>
+            ))}
 
-            {/* Contact — only if marked public */}
-            {extra?.contact && extra?.contactPublic && (
-              <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
+            {/* Contact */}
+            {fetched && (extra?.contact && extra?.contactPublic ? (
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
                 <Phone className="w-3.5 h-3.5 shrink-0 text-primary" />
                 <span className="text-xs text-foreground select-all flex-1 truncate">{extra.contact}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                <Phone className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
+                <span className="text-xs text-muted-foreground/50">—</span>
+              </div>
+            ))}
+
+            {/* Loading skeleton when fetch not done yet */}
+            {!fetched && (
+              <div className="space-y-2 animate-pulse">
+                <div className="h-8 bg-muted/40 rounded-lg" />
+                <div className="h-8 bg-muted/40 rounded-lg" />
+                <div className="h-8 bg-muted/40 rounded-lg" />
               </div>
             )}
           </div>
@@ -468,7 +496,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
               {post.authorTags?.map(tag => <TagBadge key={tag} tag={tag} />)}
               <button
                 onClick={() => setUserInfoOpen(true)}
-                className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                className="text-[10px] font-semibold px-1.5 py-0.5 rounded border border-blue-500/40 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
               >
                 {t("userInfoBtn")}
               </button>
@@ -593,7 +621,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             {post.authorTags?.map(tag => <TagBadge key={tag} tag={tag} />)}
             <button
               onClick={() => setUserInfoOpen(true)}
-              className="text-xs font-medium px-2 py-0.5 rounded-md border border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              className="text-xs font-semibold px-2 py-0.5 rounded-md border border-blue-500/40 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
             >
               {t("userInfoBtn")}
             </button>
