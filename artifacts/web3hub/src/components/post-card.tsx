@@ -216,12 +216,12 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
   const fetched = extra !== null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
-      <div className="bg-background border border-border rounded-2xl shadow-xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
-          <span className="font-bold text-sm text-foreground">{t("userInfoBtn")}</span>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+          <span className="font-bold text-sm text-gray-900 dark:text-white">{t("userInfoBtn")}</span>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -229,17 +229,17 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
         <div className="px-5 py-4 space-y-4">
           {/* Avatar + name */}
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl border border-border shrink-0" style={avatarStyle} />
+            <div className="w-12 h-12 rounded-xl border border-gray-200 dark:border-gray-700 shrink-0" style={avatarStyle} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-bold text-sm truncate">{displayName}</span>
+                <span className="font-bold text-sm text-gray-900 dark:text-white truncate">{displayName}</span>
                 {spaceType && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS_MODAL[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS_MODAL[spaceType] ?? "bg-gray-100 text-gray-500 border-gray-300"}`}>
                     {roleLabel}
                   </span>
                 )}
                 {spaceStatus === "approved" && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/30 font-semibold">✓ Space</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-600 border border-green-300 font-semibold dark:bg-green-900/30 dark:border-green-700">✓ Space</span>
                 )}
               </div>
               {tags.length > 0 && (
@@ -253,10 +253,10 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
           {/* Info rows — always show all fields */}
           <div className="space-y-2">
             {/* Wallet */}
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-              <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-              <span className="font-mono text-xs text-foreground flex-1 truncate">{wallet}</span>
-              <button onClick={copyWallet} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2">
+              <User className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+              <span className="font-mono text-xs text-gray-700 dark:text-gray-300 flex-1 truncate">{wallet}</span>
+              <button onClick={copyWallet} className="shrink-0 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                 {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
@@ -264,50 +264,50 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
             {/* Twitter */}
             {fetched && (extra?.twitter ? (
               <a href={`https://twitter.com/${extra.twitter.replace("@", "")}`} target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 hover:bg-muted/50 transition-colors">
+                className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors">
                 <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-sky-500" />
-                <span className="text-xs text-foreground truncate">{extra.twitter.startsWith("@") ? extra.twitter : `@${extra.twitter}`}</span>
+                <span className="text-xs text-gray-700 dark:text-gray-200 truncate">{extra.twitter.startsWith("@") ? extra.twitter : `@${extra.twitter}`}</span>
               </a>
             ) : (
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
-                <span className="text-xs text-muted-foreground/50">—</span>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2">
+                <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-gray-300 dark:text-gray-600" />
+                <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
               </div>
             ))}
 
             {/* Website */}
             {fetched && (extra?.website ? (
               <a href={extra.website.startsWith("http") ? extra.website : `https://${extra.website}`} target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 hover:bg-muted/50 transition-colors">
+                className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors">
                 <Globe className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                <span className="text-xs text-foreground truncate">{extra.website}</span>
+                <span className="text-xs text-gray-700 dark:text-gray-200 truncate">{extra.website}</span>
               </a>
             ) : (
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                <Globe className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
-                <span className="text-xs text-muted-foreground/50">—</span>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2">
+                <Globe className="w-3.5 h-3.5 shrink-0 text-gray-300 dark:text-gray-600" />
+                <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
               </div>
             ))}
 
             {/* Contact */}
             {fetched && (extra?.contact && extra?.contactPublic ? (
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                <Phone className="w-3.5 h-3.5 shrink-0 text-primary" />
-                <span className="text-xs text-foreground select-all flex-1 truncate">{extra.contact}</span>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2">
+                <Phone className="w-3.5 h-3.5 shrink-0 text-pink-500" />
+                <span className="text-xs text-gray-700 dark:text-gray-200 select-all flex-1 truncate">{extra.contact}</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                <Phone className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
-                <span className="text-xs text-muted-foreground/50">—</span>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2">
+                <Phone className="w-3.5 h-3.5 shrink-0 text-gray-300 dark:text-gray-600" />
+                <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
               </div>
             ))}
 
             {/* Loading skeleton when fetch not done yet */}
             {!fetched && (
               <div className="space-y-2 animate-pulse">
-                <div className="h-8 bg-muted/40 rounded-lg" />
-                <div className="h-8 bg-muted/40 rounded-lg" />
-                <div className="h-8 bg-muted/40 rounded-lg" />
+                <div className="h-9 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+                <div className="h-9 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+                <div className="h-9 bg-gray-100 dark:bg-gray-800 rounded-lg" />
               </div>
             )}
           </div>
