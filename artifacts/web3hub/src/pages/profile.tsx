@@ -136,7 +136,6 @@ export default function Profile() {
     { authorWallet: address ?? "" } as any,
     { query: { enabled: !!address } }
   );
-  const { t } = useLang();
   const fileRef = useRef<HTMLInputElement>(null);
   const admin = isAdmin(address);
   const me = (meData as any)?.user ?? meData;
@@ -154,6 +153,7 @@ export default function Profile() {
   const [tokenCount, setTokenCount] = useState<number>(0);
   const [lastSlotPull, setLastSlotPull] = useState<string | null>(null);
 
+  const { t, lang } = useLang();
   const isSpaceOwner = me?.spaceStatus === "approved" || me?.spaceStatus === "active";
   const spaceType = me?.spaceType;
   const canCheckin = true;
