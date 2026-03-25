@@ -637,7 +637,7 @@ export default function Profile() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-green-500 text-white font-bold text-base hover:bg-green-600 shadow-sm shadow-green-200 dark:shadow-green-900/30 transition-all hover:shadow-md">
                 <PenSquare className="w-5 h-5" /> 发布求职/招聘
               </Link>
-              <p className="text-xs text-muted-foreground">每24小时可发布一次，仅限求职/招聘分区</p>
+              <p className="text-xs text-muted-foreground">每24小时可发布一次，仅限发布正规求职内容，违规发布可能遭永久封禁。</p>
             </div>
           ) : (
             <div className="space-y-2">
