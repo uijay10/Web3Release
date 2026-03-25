@@ -138,6 +138,7 @@ export default function Profile() {
 
   const [twitter, setTwitter] = useState("");
   const [website, setWebsite] = useState("");
+  const [contact, setContact] = useState("");
   const [username, setUsername] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [editingName, setEditingName] = useState(false);
@@ -169,6 +170,7 @@ export default function Profile() {
     if (me) {
       setTwitter(me.twitter ?? "");
       setWebsite(me.website ?? "");
+      setContact((me as any).contact ?? "");
       setUsername(me.username ?? "");
       setSelectedTags(me.tags ?? []);
       setTokenCount(me.tokens ?? 0);
@@ -190,7 +192,7 @@ export default function Profile() {
     if (!address || !dirty) return;
     setSaveStatus("saving");
     upsertMutation.mutate(
-      { data: { wallet: address, twitter: twitter || null, website: website || null, username: username.trim() || undefined, tags: selectedTags } as any },
+      { data: { wallet: address, twitter: twitter || null, website: website || null, contact: contact || null, username: username.trim() || undefined, tags: selectedTags } as any },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
@@ -556,6 +558,17 @@ export default function Profile() {
               </a>
             )}
           </div>
+        </InfoRow>
+
+        {/* 6b. 个人联系方式 */}
+        <InfoRow label={t("contactLabel")}>
+          <input
+            type="text"
+            value={contact}
+            onChange={e => markDirty(setContact)(e.target.value)}
+            placeholder="Telegram / WeChat / Email / Phone..."
+            className="flex-1 text-sm bg-muted/40 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full"
+          />
         </InfoRow>
 
         {/* 7. 钱包地址 */}

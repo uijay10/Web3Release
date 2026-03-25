@@ -35,6 +35,7 @@ export const usersTable = pgTable("users", {
   lastTokenDate: text("last_token_date"),
   lastPostAt: timestamp("last_post_at"),
   tags: text("tags"),
+  contact: text("contact"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
