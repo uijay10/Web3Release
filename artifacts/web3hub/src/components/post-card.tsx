@@ -328,7 +328,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
         )}
         {expiryCountdown && (
           <div className="flex items-center gap-1 text-orange-500 text-xs font-medium mb-2">
-            <Clock className="w-3 h-3" /> 到期：<span className="font-mono font-bold">{expiryCountdown}</span>
+            <Clock className="w-3 h-3" /> {t("expiryLabel")}<span className="font-mono font-bold">{expiryCountdown}</span>
           </div>
         )}
         <div className="flex items-start gap-3">
@@ -444,7 +444,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
       )}
       {expiryCountdown && (
         <div className="flex items-center gap-1 text-orange-500 text-xs font-medium mb-3">
-          <Clock className="w-3.5 h-3.5" /> 到期：<span className="font-mono font-bold">{expiryCountdown}</span>
+          <Clock className="w-3.5 h-3.5" /> {t("expiryLabel")}<span className="font-mono font-bold">{expiryCountdown}</span>
         </div>
       )}
 

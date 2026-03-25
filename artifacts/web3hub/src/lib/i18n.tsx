@@ -137,6 +137,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotDesc: "每日一次·奖励 100~1000 $WBR·TGE 按 1:1 兑换",
     tokenDesc: "一次点赞5/Token ·一次评论5/Token·各20次/日 = 200上限",
     dailyLucky: "每日幸运",
+    normalPostHint: "普通用户每24小时最多发布10次，今日还可发布 {n} 次，仅限个人求职信息。",
+    normalProfileHint: "每24小时最多发布10次，今日还可发布 {n} 次，仅限正规求职内容，违规可能遭永久封禁。",
+    expiryLabel: "到期：",
+    normalOverwriteMsg: "当前已有发布内容，继续发布之前内容将被覆盖，确定此操作吗？",
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
@@ -271,6 +275,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotDesc: "Once per day · Win 100–1000 $WBR · 1:1 exchange at TGE",
     tokenDesc: "Like +5 Token · Comment +5 Token · 20x/day each = 200 cap",
     dailyLucky: "Daily Lucky",
+    normalPostHint: "Regular users can post up to 10 times per day. You have {n} posts left today. Job section only.",
+    normalProfileHint: "Up to 10 posts per day. {n} remaining today. Legitimate job listings only; violations may result in a permanent ban.",
+    expiryLabel: "Expires:",
+    normalOverwriteMsg: "You already have a published post. Posting again will overwrite it. Are you sure?",
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
@@ -386,6 +394,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "Ziehe...", slotResult: "Glückwunsch! {amount} $WBR gewonnen!",
     slotNextPull: "Nächster Zug: {time}", slotCooldown: "Heute bereits gezogen (24h Cooldown)",
     slotDesc: "Einmal täglich · 100–1000 $WBR · 1:1 beim TGE",
+    normalPostHint: "Normale Benutzer können bis zu 10-mal täglich posten. Heute noch {n} Mal. Nur Job-Bereich.",
+    normalProfileHint: "Bis zu 10 Posts täglich. Heute noch {n} übrig. Nur seriöse Stellenangebote; Verstöße können zu einem dauerhaften Bann führen.",
+    expiryLabel: "Läuft ab:",
+    normalOverwriteMsg: "Sie haben bereits einen veröffentlichten Beitrag. Das erneute Posten überschreibt ihn. Sind Sie sicher?",
   },
   "ru": {
     home: "Главная", profile: "Профиль", connect: "Подключить кошелёк", disconnect: "Отключить",
@@ -501,6 +513,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "Крутим...", slotResult: "Поздравляем! Вы выиграли {amount} $WBR!",
     slotNextPull: "Следующий: {time}", slotCooldown: "Уже крутили сегодня (24ч кулдаун)",
     slotDesc: "Раз в день · Выигрыш 100–1000 $WBR · Обмен 1:1 при TGE",
+    normalPostHint: "Обычные пользователи могут публиковать до 10 раз в день. Осталось {n} раз. Только раздел вакансий.",
+    normalProfileHint: "До 10 постов в день. Осталось {n} сегодня. Только легальные вакансии; нарушения могут привести к бессрочной блокировке.",
+    expiryLabel: "Истекает:",
+    normalOverwriteMsg: "У вас уже есть опубликованный пост. Новая публикация перезапишет его. Вы уверены?",
   },
   "fr": {
     home: "Accueil", profile: "Profil", connect: "Connecter le wallet", disconnect: "Déconnecter",
@@ -616,6 +632,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "En cours...", slotResult: "Félicitations ! Vous avez gagné {amount} $WBR !",
     slotNextPull: "Prochain tirage : {time}", slotCooldown: "Déjà tiré aujourd'hui (cooldown 24h)",
     slotDesc: "Une fois par jour · Gagnez 100–1000 $WBR · Échange 1:1 au TGE",
+    normalPostHint: "Les utilisateurs standard peuvent publier jusqu'à 10 fois par jour. Il vous reste {n} publication(s) aujourd'hui. Section emploi uniquement.",
+    normalProfileHint: "Jusqu'à 10 posts par jour. Il reste {n} aujourd'hui. Annonces légitimes uniquement ; les violations peuvent entraîner un bannissement permanent.",
+    expiryLabel: "Expire :",
+    normalOverwriteMsg: "Vous avez déjà une publication. Continuer va écraser votre contenu précédent. Êtes-vous sûr ?",
   },
   "ja": {
     home: "ホーム", profile: "プロフィール", connect: "ウォレット接続", disconnect: "切断",
@@ -731,6 +751,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "引いています...", slotResult: "おめでとう！{amount} $WBR を獲得！",
     slotNextPull: "次回：{time}", slotCooldown: "本日分はすでに引きました（24hクールダウン）",
     slotDesc: "1日1回 · 100〜1000 $WBR 獲得 · TGEで1:1交換",
+    normalPostHint: "一般ユーザーは1日最大10回投稿できます。本日残り {n} 回。求人カテゴリのみ。",
+    normalProfileHint: "1日最大10回。本日残り {n} 回。正規の求人のみ。違反は永久バンの可能性があります。",
+    expiryLabel: "期限：",
+    normalOverwriteMsg: "すでに投稿があります。続けると以前の内容が上書きされます。よろしいですか？",
   },
   "ko": {
     home: "홈", profile: "프로필", connect: "지갑 연결", disconnect: "연결 해제",
@@ -846,6 +870,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "뽑는 중...", slotResult: "축하합니다! {amount} $WBR 획득!",
     slotNextPull: "다음 뽑기: {time}", slotCooldown: "오늘은 이미 뽑았습니다 (24h 쿨다운)",
     slotDesc: "하루 1회 · 100~1000 $WBR 획득 · TGE에서 1:1 교환",
+    normalPostHint: "일반 사용자는 하루 최대 10번 게시할 수 있습니다. 오늘 {n}번 남았습니다. 구직 섹션만 가능합니다.",
+    normalProfileHint: "하루 최대 10번. 오늘 {n}번 남음. 정규 구직 공고만 허용; 위반 시 영구 차단될 수 있습니다.",
+    expiryLabel: "만료：",
+    normalOverwriteMsg: "이미 게시된 내용이 있습니다. 계속하면 이전 내용이 덮어씌워집니다. 계속하시겠습니까?",
   },
   "vi": {
     home: "Trang chủ", profile: "Hồ sơ", connect: "Kết nối ví", disconnect: "Ngắt kết nối",
@@ -961,6 +989,10 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     slotPulling: "Đang quay...", slotResult: "Chúc mừng! Bạn nhận được {amount} $WBR!",
     slotNextPull: "Lần tiếp: {time}", slotCooldown: "Đã quay hôm nay (hồi chiêu 24h)",
     slotDesc: "Mỗi ngày một lần · Nhận 100–1000 $WBR · Đổi 1:1 tại TGE",
+    normalPostHint: "Người dùng thường có thể đăng tối đa 10 lần mỗi ngày. Hôm nay còn {n} lần. Chỉ dành cho mục tìm việc.",
+    normalProfileHint: "Tối đa 10 bài mỗi ngày. Còn {n} lần hôm nay. Chỉ đăng tin việc làm hợp lệ; vi phạm có thể bị cấm vĩnh viễn.",
+    expiryLabel: "Hết hạn:",
+    normalOverwriteMsg: "Bạn đã có nội dung đã đăng. Tiếp tục đăng sẽ ghi đè nội dung trước. Bạn có chắc không?",
   },
 };
 

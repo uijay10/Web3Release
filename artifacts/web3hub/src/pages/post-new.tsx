@@ -85,6 +85,7 @@ export default function PostNew() {
   const [showRecharge, setShowRecharge] = useState(false);
   const [pinQueued, setPinQueued] = useState(false);
   const [pinQueuedEstimate, setPinQueuedEstimate] = useState<string | null>(null);
+  const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
 
   const availableSections = getSections(spaceType);
   const inputCls = "w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground";
@@ -116,6 +117,8 @@ export default function PostNew() {
     if (!address || !validateForm()) return;
     // Normal users (no approved space type) skip the energy requirement — they have a 24h posting limit instead
     if (!isAdminUser && !isNormalPoster && energy <= 0) { setShowRecharge(true); return; }
+    // Show overwrite warning if normal user already posted today
+    if (isNormalPoster && normalPostsUsed >= 1) { setShowOverwriteConfirm(true); return; }
     setStep("confirm");
   };
 
@@ -260,6 +263,25 @@ export default function PostNew() {
         </div>
       )}
 
+      {/* Overwrite confirmation dialog for normal users re-posting */}
+      {showOverwriteConfirm && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-xl space-y-4">
+            <p className="text-sm text-foreground leading-relaxed">{t("normalOverwriteMsg")}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowOverwriteConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl bg-muted text-muted-foreground font-semibold text-sm hover:bg-muted/80 transition-colors">
+                {t("cancel")}
+              </button>
+              <button onClick={() => { setShowOverwriteConfirm(false); setStep("confirm"); }}
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors">
+                {t("pinOk")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-2xl mx-auto py-8">
         <div className="mb-8 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -300,7 +322,7 @@ export default function PostNew() {
             </select>
             {!spaceType && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
-                普通用户每24小时最多发布10次，今日还可发布 <span className="font-bold">{normalPostsRemaining}</span> 次，仅限个人求职信息。
+                {t("normalPostHint").replace("{n}", String(normalPostsRemaining))}
               </p>
             )}
             {spaceType === "kol" && (
