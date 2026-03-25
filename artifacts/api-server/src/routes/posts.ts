@@ -210,11 +210,11 @@ router.post("/", async (req, res) => {
       }
     }
 
-    // Normal user restrictions: jobs section only + 10 posts per 24h
+    // Normal user restrictions: jobs & community sections only + 10 posts per 24h
     const isNormalUser = !spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer");
     if (isNormalUser) {
-      if (section !== "jobs") {
-        return res.status(403).json({ error: "NORMAL_USER_SECTION_RESTRICTED", message: "普通用户只能发布到求职/招聘分区" });
+      if (!["jobs", "community"].includes(section)) {
+        return res.status(403).json({ error: "NORMAL_USER_SECTION_RESTRICTED", message: "普通用户只能发布到求职或社区聊天分区" });
       }
       const todayStr = new Date().toISOString().slice(0, 10);
       const storedDate = (user as any).normalDailyPostDate ?? null;
@@ -258,9 +258,9 @@ router.post("/", async (req, res) => {
     await db.update(usersTable).set({ lastPostAt: new Date() }).where(eq(usersTable.wallet, lw));
   }
 
-  // Normal user: delete all their previous jobs-section posts so only one is ever visible
+  // Normal user: delete all their previous posts in THIS section so only one per section is ever visible
   if (isNormalPoster) {
-    await db.delete(postsTable).where(and(eq(postsTable.authorWallet, lw), eq(postsTable.section, "jobs")));
+    await db.delete(postsTable).where(and(eq(postsTable.authorWallet, lw), eq(postsTable.section, section)));
   }
 
   // KOL / developer: enforce max 5 posts per section — delete the oldest when posting the 6th

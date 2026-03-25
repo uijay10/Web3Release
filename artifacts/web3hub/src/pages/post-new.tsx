@@ -39,7 +39,7 @@ const DEV_SECTIONS: typeof ALL_SECTIONS[number][] = [
   "developer", "hackathon", "bugbounty", "security", "integration", "jobs", "community",
 ];
 
-const NORMAL_SECTIONS: typeof ALL_SECTIONS[number][] = ["jobs"];
+const NORMAL_SECTIONS: typeof ALL_SECTIONS[number][] = ["jobs", "community"];
 
 const SECTION_LABEL_KEYS: Record<string, string> = {
   testnet: "sTestnetLabel", ido: "sIdoLabel", security: "sSecurityLabel",
