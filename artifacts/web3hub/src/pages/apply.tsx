@@ -93,6 +93,7 @@ export default function ApplySpace() {
   const { address, isConnected } = useWeb3Auth();
   const applyMutation = useApplySpace();
   const [success, setSuccess] = useState(false);
+  const [limitError, setLimitError] = useState("");
   const { t } = useLang();
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
@@ -104,8 +105,15 @@ export default function ApplySpace() {
 
   const onSubmit = (data: FormValues) => {
     if (!address) return alert(t("applyNeedWallet"));
+    setLimitError("");
     applyMutation.mutate({ data: { wallet: address, ...data } }, {
       onSuccess: () => setSuccess(true),
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error ?? err?.message ?? "";
+        if (msg === "DAILY_APPLY_LIMIT") {
+          setLimitError("今日申请次数已达上限（每24小时最多申请2次），请明天再试。");
+        }
+      },
     });
   };
 
@@ -228,6 +236,9 @@ export default function ApplySpace() {
           )}
         </div>
 
+        {limitError && (
+          <p className="text-destructive text-sm text-center font-medium">{limitError}</p>
+        )}
         <button
           type="submit"
           disabled={applyMutation.isPending}

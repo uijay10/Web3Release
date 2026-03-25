@@ -80,11 +80,14 @@ router.post("/applications/:id/approve", requireAdmin, async (req, res) => {
 router.post("/applications/:id/reject", requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
+    const reason = (req.body?.reason ?? "") as string;
     const app = await db.select().from(spaceApplicationsTable).where(eq(spaceApplicationsTable.id, id)).limit(1);
-    await db.update(spaceApplicationsTable).set({ status: "rejected" }).where(eq(spaceApplicationsTable.id, id));
+    await db.update(spaceApplicationsTable)
+      .set({ status: "rejected", rejectReason: reason || null } as any)
+      .where(eq(spaceApplicationsTable.id, id));
     if (app.length) {
       await db.update(usersTable)
-        .set({ spaceStatus: "rejected", spaceRejectedAt: new Date() } as any)
+        .set({ spaceStatus: "rejected", spaceRejectedAt: new Date(), spaceRejectReason: reason || null } as any)
         .where(eq(usersTable.wallet, app[0].wallet));
     }
     res.json({ success: true });

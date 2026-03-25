@@ -68,11 +68,8 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
 }
 
 /* ─── Space Status Badge ────────────────────────────────── */
-function SpaceStatusBadge({ status, rejectedAt }: { status?: string | null; rejectedAt?: string | null }) {
+function SpaceStatusBadge({ status, rejectReason }: { status?: string | null; rejectReason?: string | null }) {
   const { t } = useLang();
-  const reapplyTarget = rejectedAt ? new Date(new Date(rejectedAt).getTime() + 7 * 86_400_000).toISOString() : null;
-  const canReapply = reapplyTarget ? new Date(reapplyTarget).getTime() <= Date.now() : true;
-  const countdown = useCountdown(canReapply ? null : reapplyTarget);
 
   if (!status || status === "none") {
     return (
@@ -98,16 +95,15 @@ function SpaceStatusBadge({ status, rejectedAt }: { status?: string | null; reje
   }
   if (status === "rejected") {
     return (
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
-          {t("spaceRejected")}
-        </span>
-        {canReapply ? (
-          <Link href="/apply" className="text-xs text-primary hover:underline">{t("applySpace")}</Link>
-        ) : (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" /> {t("reapplyIn")} <span className="font-mono font-bold text-foreground">{countdown}</span>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+            {t("spaceRejected")}
           </span>
+          <Link href="/apply" className="text-xs text-primary hover:underline">{t("applySpace")}</Link>
+        </div>
+        {rejectReason && (
+          <p className="text-xs text-muted-foreground ml-1">拒绝理由：{rejectReason}</p>
         )}
       </div>
     );
@@ -440,7 +436,7 @@ export default function Profile() {
 
         {/* 1. 空间用户 */}
         <InfoRow label={t("spaceLabel")}>
-          <SpaceStatusBadge status={me?.spaceStatus} rejectedAt={me?.spaceRejectedAt} />
+          <SpaceStatusBadge status={me?.spaceStatus} rejectReason={(me as any)?.spaceRejectReason} />
         </InfoRow>
 
         {/* 1b. 展示标签 (仅 project 类型团队可选) */}

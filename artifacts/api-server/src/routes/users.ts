@@ -32,6 +32,9 @@ function fmtUser(u: typeof usersTable.$inferSelect) {
     language: u.language,
     pinCount: u.pinCount,
     spaceRejectedAt: (u as any).spaceRejectedAt?.toISOString() ?? null,
+    spaceRejectReason: (u as any).spaceRejectReason ?? null,
+    dailyApplyCount: (u as any).dailyApplyCount ?? 0,
+    lastApplyDate: (u as any).lastApplyDate ?? null,
     tags: (u as any).tags ? JSON.parse((u as any).tags) : [],
     createdAt: u.createdAt.toISOString(),
   };

@@ -14,6 +14,7 @@ export const spaceApplicationsTable = pgTable("space_applications", {
   github: text("github"),
   linkedin: text("linkedin"),
   status: text("status").notNull().default("pending"),
+  rejectReason: text("reject_reason"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
