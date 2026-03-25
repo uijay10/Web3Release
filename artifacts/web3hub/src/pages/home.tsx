@@ -186,29 +186,27 @@ function PostRegularCard({ post, num }: { post: any; num: number }) {
   const sectionLabel = t(`nav_${post.section}` as any) || post.section;
   return (
     <Link href={`/post/${post.id}`}
-      className="flex items-center gap-3 px-5 py-5 rounded-2xl border border-border/30 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all group cursor-pointer">
-      {/* 序号 */}
-      <span className={`text-base font-bold w-9 shrink-0 text-center ${num <= 3 ? "text-red-500" : "text-muted-foreground/50"}`}>{num}</span>
-      {/* 头像 */}
-      <div className="shrink-0">
-        <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
-      </div>
-      {/* 名字 */}
-      <p className="w-28 shrink-0 text-base font-semibold text-foreground truncate">{displayName}</p>
-      {/* 主题 */}
-      <p className="flex-1 min-w-0 text-sm text-muted-foreground truncate">{post.title}</p>
-      {/* 标签 */}
-      {post.authorTags?.length > 0 && (
-        <div className="shrink-0 flex items-center gap-1">
-          {post.authorTags.map((tag: string) => <TagBadge key={tag} tag={tag} />)}
+      className="flex flex-col gap-1.5 px-5 py-4 rounded-2xl border border-border/30 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all group cursor-pointer">
+      {/* 第一行：序号 | 头像 | 名字 | 标签 | 分区 | 查看 */}
+      <div className="flex items-center gap-3">
+        <span className={`text-base font-bold w-9 shrink-0 text-center ${num <= 3 ? "text-red-500" : "text-muted-foreground/50"}`}>{num}</span>
+        <div className="shrink-0">
+          <AuthorAvatar wallet={post.authorWallet} name={post.authorName} avatar={post.authorAvatar} size="lg" />
         </div>
-      )}
-      {/* 区域 */}
-      <span className="shrink-0 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-primary/10 text-primary">{sectionLabel}</span>
-      {/* 查看帖子详情 */}
-      <span className="shrink-0 flex items-center gap-1 text-base text-primary font-semibold group-hover:underline whitespace-nowrap">
-        <Eye className="w-4 h-4" /> {t("view")}
-      </span>
+        <p className="w-28 shrink-0 text-base font-semibold text-foreground truncate">{displayName}</p>
+        <div className="flex-1" />
+        {post.authorTags?.length > 0 && (
+          <div className="shrink-0 flex items-center gap-1">
+            {post.authorTags.map((tag: string) => <TagBadge key={tag} tag={tag} />)}
+          </div>
+        )}
+        <span className="shrink-0 text-sm font-semibold px-3.5 py-1.5 rounded-full bg-primary/10 text-primary">{sectionLabel}</span>
+        <span className="shrink-0 flex items-center gap-1 text-base text-primary font-semibold group-hover:underline whitespace-nowrap">
+          <Eye className="w-4 h-4" /> {t("view")}
+        </span>
+      </div>
+      {/* 第二行：标题（缩进跳过序号） */}
+      <p className="text-sm font-semibold text-foreground truncate pl-12 pr-2">{post.title}</p>
     </Link>
   );
 }
