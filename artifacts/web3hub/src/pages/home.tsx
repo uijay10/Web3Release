@@ -3,7 +3,7 @@ import { useGetPosts, useGetMe } from "@workspace/api-client-react";
 import { useQuery } from "@tanstack/react-query";
 import { useWeb3Auth } from "@/lib/web3";
 import { Search, PenSquare, ChevronLeft, ChevronRight, CheckCircle2, Eye } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useLang } from "@/lib/i18n";
 import { generateGradient } from "@/lib/utils";
 import { TagBadge } from "@/components/post-card";
@@ -223,6 +223,8 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -294,9 +296,18 @@ export default function Home() {
 
       {/* Encouragement + Search */}
       <div className="rounded-2xl px-6 py-5 space-y-4 border border-blue-200/60" style={{background: "linear-gradient(135deg, #dbeafe 0%, #eff6ff 50%, #e0f2fe 100%)"}}>
-        <p className="text-lg sm:text-xl font-bold leading-snug" style={{ color: "#FF69B4" }}>
-          {t("encouragement")}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-lg sm:text-xl font-bold leading-snug flex-1" style={{ color: "#FF69B4" }}>
+            {t("encouragement")}
+          </p>
+          <button
+            type="button"
+            onClick={() => { if (isConnected && address) { setLocation("/profile"); } else { setShowWalletModal(true); } }}
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-300/50 transition-all whitespace-nowrap"
+          >
+            {t("dashboard")}
+          </button>
+        </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
@@ -447,6 +458,28 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* Wallet required modal */}
+      {showWalletModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div
+            className="pointer-events-auto rounded-2xl p-6 max-w-xs w-full text-center"
+            style={{ backgroundColor: "#ffffff", border: "1px solid #bfdbfe", boxShadow: "0 20px 60px rgba(59,130,246,0.15)" }}
+          >
+            <p className="text-base font-bold mb-5" style={{ color: "#1d4ed8" }}>{t("connectWalletFirst")}</p>
+            <button
+              type="button"
+              onClick={() => setShowWalletModal(false)}
+              className="px-8 py-2 rounded-full font-bold text-sm text-white transition-colors"
+              style={{ backgroundColor: "#2563eb" }}
+              onMouseOver={e => (e.currentTarget.style.backgroundColor = "#1d4ed8")}
+              onMouseOut={e => (e.currentTarget.style.backgroundColor = "#2563eb")}
+            >
+              {t("pinOk")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

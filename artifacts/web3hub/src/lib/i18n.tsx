@@ -7,7 +7,7 @@ type Dict = Record<string, string>;
 const TRANSLATIONS: Record<LangCode, Dict> = {
   "zh-CN": {
     home: "首页", profile: "个人资料", connect: "连接钱包", disconnect: "退出登录",
-    dashboard: "个人仪表盘", logout: "退出登录",
+    dashboard: "个人仪表盘", logout: "退出登录", connectWalletFirst: "请先连接钱包",
     apply: "申请创建空间", pinned: "置顶专区", regular: "优质团队",
     view: "查看", new: "新", hotRank: "热度榜 TOP",
     checkin: "签到 +1000积分", points: "积分", energy: "剩余能量",
@@ -150,7 +150,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
-    dashboard: "My Dashboard", logout: "Log Out",
+    dashboard: "My Dashboard", logout: "Log Out", connectWalletFirst: "Please connect your wallet first",
     apply: "Apply for Space", pinned: "Pinned Zone", regular: "Elite Teams",
     view: "View", new: "New", hotRank: "Hot Rank TOP",
     checkin: "Check-in +1000 pts", points: "Points", energy: "Energy",
@@ -294,7 +294,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
-    dashboard: "Mein Dashboard", logout: "Abmelden",
+    dashboard: "Mein Dashboard", logout: "Abmelden", connectWalletFirst: "Bitte verbinde zuerst deine Wallet",
     apply: "Space beantragen", pinned: "Angepinnte Zone", regular: "Projektbereich",
     view: "Ansehen", new: "Neu", hotRank: "Top Ranking",
     checkin: "Einchecken +1000 Pkt.", points: "Punkte", energy: "Energie",
@@ -419,7 +419,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "ru": {
     home: "Главная", profile: "Профиль", connect: "Подключить кошелёк", disconnect: "Отключить",
-    dashboard: "Мой кабинет", logout: "Выйти",
+    dashboard: "Мой кабинет", logout: "Выйти", connectWalletFirst: "Сначала подключите кошелёк",
     apply: "Подать заявку", pinned: "Закреплённые", regular: "Проекты",
     view: "Смотреть", new: "Новый", hotRank: "Топ Рейтинг",
     checkin: "Чекин +1000 очков", points: "Очки", energy: "Энергия",
@@ -544,7 +544,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "fr": {
     home: "Accueil", profile: "Profil", connect: "Connecter le wallet", disconnect: "Déconnecter",
-    dashboard: "Mon tableau de bord", logout: "Se déconnecter",
+    dashboard: "Mon tableau de bord", logout: "Se déconnecter", connectWalletFirst: "Veuillez d'abord connecter votre portefeuille",
     apply: "Demander un espace", pinned: "Zone épinglée", regular: "Zone projets",
     view: "Voir", new: "Nouveau", hotRank: "Top tendances",
     checkin: "Connexion +1000 pts", points: "Points", energy: "Énergie",
@@ -669,7 +669,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "ja": {
     home: "ホーム", profile: "プロフィール", connect: "ウォレット接続", disconnect: "切断",
-    dashboard: "マイダッシュボード", logout: "ログアウト",
+    dashboard: "マイダッシュボード", logout: "ログアウト", connectWalletFirst: "先にウォレットを接続してください",
     apply: "スペース申請", pinned: "固定ゾーン", regular: "プロジェクトゾーン",
     view: "表示", new: "新着", hotRank: "人気ランキング TOP",
     checkin: "チェックイン +1000pt", points: "ポイント", energy: "エネルギー",
@@ -794,7 +794,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "ko": {
     home: "홈", profile: "프로필", connect: "지갑 연결", disconnect: "연결 해제",
-    dashboard: "내 대시보드", logout: "로그아웃",
+    dashboard: "내 대시보드", logout: "로그아웃", connectWalletFirst: "먼저 지갑을 연결하세요",
     apply: "스페이스 신청", pinned: "핀 구역", regular: "프로젝트 구역",
     view: "보기", new: "신규", hotRank: "인기 랭킹 TOP",
     checkin: "체크인 +1000pt", points: "포인트", energy: "에너지",
@@ -919,7 +919,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
   },
   "vi": {
     home: "Trang chủ", profile: "Hồ sơ", connect: "Kết nối ví", disconnect: "Ngắt kết nối",
-    dashboard: "Trang cá nhân", logout: "Đăng xuất",
+    dashboard: "Trang cá nhân", logout: "Đăng xuất", connectWalletFirst: "Vui lòng kết nối ví trước",
     apply: "Đăng ký không gian", pinned: "Vùng ghim", regular: "Vùng dự án",
     view: "Xem", new: "Mới", hotRank: "Bảng xếp hạng TOP",
     checkin: "Điểm danh +1000 điểm", points: "Điểm", energy: "Năng lượng",
