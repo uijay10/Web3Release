@@ -21,7 +21,7 @@ function useCountdown(targetIso: string | null | undefined) {
 }
 import { createPortal } from "react-dom";
 import { filterContent, filterErrorMessage } from "@/lib/content-filter";
-import { Heart, MessageCircle, Copy, Check, Pin, User, Eye, Clock } from "lucide-react";
+import { Heart, MessageCircle, Copy, Check, Pin, User, Eye, Clock, Globe, Twitter as TwitterIcon, Phone, X } from "lucide-react";
 
 const SECTION_KEY_MAP: Record<string, string> = {
   testnet: "sTestnetLabel", ido: "sIdoLabel", security: "sSecurityLabel",
@@ -170,6 +170,127 @@ export function AdminPinModal({ hours, setHours, custom, setCustom, pinning, onC
   );
 }
 
+const ROLE_COLORS_MODAL: Record<string, string> = {
+  developer: "bg-blue-500/10 text-blue-500 border-blue-500/30",
+  project: "bg-violet-500/10 text-violet-500 border-violet-500/30",
+  kol: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+};
+
+function UserInfoModal({ wallet, onClose }: { wallet: string; onClose: () => void }) {
+  const { t } = useLang();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${apiBase}/users/me?wallet=${wallet}`)
+      .then(r => r.json())
+      .then(d => { setUser(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [wallet]);
+
+  const displayName = user?.username || truncateAddress(wallet);
+  const spaceType = user?.spaceType ?? null;
+  const spaceStatus = user?.spaceStatus ?? null;
+  const tags: string[] = user?.tags ?? [];
+  const roleLabel = spaceType === "project" ? t("roleProject")
+    : spaceType === "developer" ? t("roleDeveloper")
+    : spaceType === "kol" ? "KOL"
+    : spaceType;
+  const avatarStyle = user?.avatar
+    ? { backgroundImage: `url(${user.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
+    : { background: generateGradient(wallet) };
+  const copyWallet = () => {
+    navigator.clipboard.writeText(wallet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Header gradient strip */}
+        <div className="h-16 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent relative">
+          <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded-full bg-black/20 hover:bg-black/40 text-white/80 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="px-5 pb-5 -mt-8">
+          {loading ? (
+            <div className="animate-pulse space-y-3 pt-8">
+              <div className="h-5 bg-muted rounded w-1/2" />
+              <div className="h-4 bg-muted rounded w-3/4" />
+            </div>
+          ) : (
+            <>
+              {/* Avatar + name */}
+              <div className="flex items-end gap-3 mb-4">
+                <div className="w-16 h-16 rounded-2xl border-4 border-card shadow-md shrink-0" style={avatarStyle} />
+                <div className="flex-1 min-w-0 pb-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-base truncate">{displayName}</span>
+                    {spaceType && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS_MODAL[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
+                        {roleLabel}
+                      </span>
+                    )}
+                    {spaceStatus === "approved" && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/30 font-semibold">✓ Space</span>
+                    )}
+                  </div>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Info rows */}
+              <div className="space-y-2 text-sm">
+                {/* Wallet */}
+                <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
+                  <span className="font-mono text-xs text-muted-foreground flex-1 truncate">{wallet}</span>
+                  <button onClick={copyWallet} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                    {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
+                {/* Twitter */}
+                {user?.twitter && (
+                  <a href={`https://twitter.com/${user.twitter.replace("@", "")}`} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
+                    <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-sky-500" />
+                    <span className="text-xs truncate">{user.twitter.startsWith("@") ? user.twitter : `@${user.twitter}`}</span>
+                  </a>
+                )}
+
+                {/* Website */}
+                {user?.website && (
+                  <a href={user.website.startsWith("http") ? user.website : `https://${user.website}`} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
+                    <Globe className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                    <span className="text-xs truncate">{user.website}</span>
+                  </a>
+                )}
+
+                {/* Contact (only if public) */}
+                {user?.contact && user?.contactPublic && (
+                  <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
+                    <Phone className="w-3.5 h-3.5 shrink-0 text-primary" />
+                    <span className="text-xs text-foreground select-all flex-1 truncate">{user.contact}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
   const { address, isConnected } = useWeb3Auth();
   const { t, lang } = useLang();
@@ -191,6 +312,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
   const [adminPinHours, setAdminPinHours] = useState<number | "">( 72);
   const [adminPinCustom, setAdminPinCustom] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [userInfoOpen, setUserInfoOpen] = useState(false);
 
   const expiryCountdown = useCountdown(post.expiresAt ?? null);
 
@@ -345,6 +467,12 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
               <Link href={authorHref} className="text-xs font-semibold text-foreground hover:text-primary transition-colors">{displayName}</Link>
               <RoleBadge spaceType={post.authorType} size="xs" />
               {post.authorTags?.map(tag => <TagBadge key={tag} tag={tag} />)}
+              <button
+                onClick={() => setUserInfoOpen(true)}
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              >
+                {t("userInfoBtn")}
+              </button>
               <span className="text-[10px] text-muted-foreground ml-auto">{formatDistanceToNow(new Date(post.createdAt))} ago</span>
             </div>
             <p className="font-semibold text-sm text-foreground line-clamp-1">{post.title}</p>
@@ -430,6 +558,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             </div>
           </div>
         )}
+        {userInfoOpen && <UserInfoModal wallet={post.authorWallet} onClose={() => setUserInfoOpen(false)} />}
       </div>
     );
   }
@@ -463,6 +592,12 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             <Link href={authorHref} className="font-semibold text-sm hover:text-primary transition-colors">{displayName}</Link>
             <RoleBadge spaceType={post.authorType} size="xs" />
             {post.authorTags?.map(tag => <TagBadge key={tag} tag={tag} />)}
+            <button
+              onClick={() => setUserInfoOpen(true)}
+              className="text-xs font-medium px-2 py-0.5 rounded-md border border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            >
+              {t("userInfoBtn")}
+            </button>
             <span className="text-xs text-primary/70 bg-primary/8 px-2 py-0.5 rounded-full ml-auto">#{t(SECTION_KEY_MAP[post.section] ?? post.section) || post.section}</span>
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">{formatDistanceToNow(new Date(post.createdAt))} ago</div>
@@ -561,6 +696,8 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
           </div>
         </div>
       )}
+
+      {userInfoOpen && <UserInfoModal wallet={post.authorWallet} onClose={() => setUserInfoOpen(false)} />}
     </div>
   );
 }
