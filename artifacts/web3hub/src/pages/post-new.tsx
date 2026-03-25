@@ -265,16 +265,23 @@ export default function PostNew() {
 
       {/* Overwrite confirmation dialog for normal users re-posting */}
       {showOverwriteConfirm && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-xl space-y-4">
-            <p className="text-sm text-foreground leading-relaxed">{t("normalOverwriteMsg")}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="pointer-events-auto rounded-2xl p-6 max-w-sm w-full space-y-4"
+            style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", boxShadow: "0 20px 60px rgba(0,0,0,0.18)" }}>
+            <p className="text-sm leading-relaxed" style={{ color: "#111827" }}>{t("normalOverwriteMsg")}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowOverwriteConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl bg-muted text-muted-foreground font-semibold text-sm hover:bg-muted/80 transition-colors">
+                className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+                style={{ backgroundColor: "#f3f4f6", color: "#6b7280" }}
+                onMouseOver={e => (e.currentTarget.style.backgroundColor = "#e5e7eb")}
+                onMouseOut={e => (e.currentTarget.style.backgroundColor = "#f3f4f6")}>
                 {t("cancel")}
               </button>
               <button onClick={() => { setShowOverwriteConfirm(false); setStep("confirm"); }}
-                className="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors">
+                className="flex-1 py-2.5 rounded-xl font-bold text-sm transition-colors"
+                style={{ backgroundColor: "#FF69B4", color: "#ffffff" }}
+                onMouseOver={e => (e.currentTarget.style.backgroundColor = "#ff4da6")}
+                onMouseOut={e => (e.currentTarget.style.backgroundColor = "#FF69B4")}>
                 {t("pinOk")}
               </button>
             </div>
