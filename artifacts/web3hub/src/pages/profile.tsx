@@ -578,17 +578,30 @@ export default function Profile() {
               placeholder="Telegram / WeChat / Email / Phone..."
               className="flex-1 text-sm bg-muted/40 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
-            <button
-              type="button"
-              onClick={() => { setContactPublic(v => !v); setDirty(true); }}
-              className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
-                contactPublic
-                  ? "bg-primary/10 border-primary/40 text-primary"
-                  : "bg-muted/40 border-border text-muted-foreground"
-              }`}
-            >
-              {contactPublic ? t("contactPublicLabel") : t("contactPrivateLabel")}
-            </button>
+            <div className="shrink-0 flex rounded-lg border border-border overflow-hidden text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => { setContactPublic(true); setDirty(true); }}
+                className={`px-3 py-1.5 transition-colors ${
+                  contactPublic
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {t("contactPublicLabel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setContactPublic(false); setDirty(true); }}
+                className={`px-3 py-1.5 border-l border-border transition-colors ${
+                  !contactPublic
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {t("contactPrivateLabel")}
+              </button>
+            </div>
           </div>
         </InfoRow>
 

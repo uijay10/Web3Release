@@ -176,30 +176,38 @@ const ROLE_COLORS_MODAL: Record<string, string> = {
   kol: "bg-amber-500/10 text-amber-500 border-amber-500/30",
 };
 
-function UserInfoModal({ wallet, onClose }: { wallet: string; onClose: () => void }) {
+interface UserInfoModalProps {
+  wallet: string;
+  authorName?: string | null;
+  authorAvatar?: string | null;
+  authorType?: string | null;
+  authorTags?: string[] | null;
+  onClose: () => void;
+}
+
+function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTags, onClose }: UserInfoModalProps) {
   const { t } = useLang();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [extra, setExtra] = useState<any>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     fetch(`${apiBase}/users/me?wallet=${wallet}`)
-      .then(r => r.json())
-      .then(d => { setUser(d); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && !d.error) setExtra(d); })
+      .catch(() => {});
   }, [wallet]);
 
-  const displayName = user?.username || truncateAddress(wallet);
-  const spaceType = user?.spaceType ?? null;
-  const spaceStatus = user?.spaceStatus ?? null;
-  const tags: string[] = user?.tags ?? [];
+  const displayName = authorName || extra?.username || truncateAddress(wallet);
+  const spaceType = extra?.spaceType ?? authorType ?? null;
+  const spaceStatus = extra?.spaceStatus ?? null;
+  const tags: string[] = extra?.tags?.length ? extra.tags : (authorTags ?? []);
   const roleLabel = spaceType === "project" ? t("roleProject")
     : spaceType === "developer" ? t("roleDeveloper")
     : spaceType === "kol" ? "KOL"
     : spaceType;
-  const avatarStyle = user?.avatar
-    ? { backgroundImage: `url(${user.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
+  const avatar = authorAvatar || extra?.avatar || null;
+  const avatarStyle = avatar
+    ? { backgroundImage: `url(${avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
     : { background: generateGradient(wallet) };
   const copyWallet = () => {
     navigator.clipboard.writeText(wallet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
@@ -216,74 +224,65 @@ function UserInfoModal({ wallet, onClose }: { wallet: string; onClose: () => voi
         </div>
 
         <div className="px-5 pb-5 -mt-8">
-          {loading ? (
-            <div className="animate-pulse space-y-3 pt-8">
-              <div className="h-5 bg-muted rounded w-1/2" />
-              <div className="h-4 bg-muted rounded w-3/4" />
+          {/* Avatar + name — shown immediately from post data */}
+          <div className="flex items-end gap-3 mb-4">
+            <div className="w-16 h-16 rounded-2xl border-4 border-card shadow-md shrink-0" style={avatarStyle} />
+            <div className="flex-1 min-w-0 pb-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-bold text-base truncate">{displayName}</span>
+                {spaceType && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS_MODAL[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
+                    {roleLabel}
+                  </span>
+                )}
+                {spaceStatus === "approved" && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/30 font-semibold">✓ Space</span>
+                )}
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+                </div>
+              )}
             </div>
-          ) : (
-            <>
-              {/* Avatar + name */}
-              <div className="flex items-end gap-3 mb-4">
-                <div className="w-16 h-16 rounded-2xl border-4 border-card shadow-md shrink-0" style={avatarStyle} />
-                <div className="flex-1 min-w-0 pb-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-bold text-base truncate">{displayName}</span>
-                    {spaceType && (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${ROLE_COLORS_MODAL[spaceType] ?? "bg-muted text-muted-foreground border-border"}`}>
-                        {roleLabel}
-                      </span>
-                    )}
-                    {spaceStatus === "approved" && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/30 font-semibold">✓ Space</span>
-                    )}
-                  </div>
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {tags.map(tag => <TagBadge key={tag} tag={tag} />)}
-                    </div>
-                  )}
-                </div>
+          </div>
+
+          {/* Info rows */}
+          <div className="space-y-2 text-sm">
+            {/* Wallet */}
+            <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
+              <span className="font-mono text-xs text-muted-foreground flex-1 truncate">{wallet}</span>
+              <button onClick={copyWallet} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {/* Twitter — from API fetch */}
+            {extra?.twitter && (
+              <a href={`https://twitter.com/${extra.twitter.replace("@", "")}`} target="_blank" rel="noreferrer"
+                className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
+                <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-sky-500" />
+                <span className="text-xs truncate">{extra.twitter.startsWith("@") ? extra.twitter : `@${extra.twitter}`}</span>
+              </a>
+            )}
+
+            {/* Website — from API fetch */}
+            {extra?.website && (
+              <a href={extra.website.startsWith("http") ? extra.website : `https://${extra.website}`} target="_blank" rel="noreferrer"
+                className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
+                <Globe className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                <span className="text-xs truncate">{extra.website}</span>
+              </a>
+            )}
+
+            {/* Contact — only if marked public */}
+            {extra?.contact && extra?.contactPublic && (
+              <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
+                <Phone className="w-3.5 h-3.5 shrink-0 text-primary" />
+                <span className="text-xs text-foreground select-all flex-1 truncate">{extra.contact}</span>
               </div>
-
-              {/* Info rows */}
-              <div className="space-y-2 text-sm">
-                {/* Wallet */}
-                <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
-                  <span className="font-mono text-xs text-muted-foreground flex-1 truncate">{wallet}</span>
-                  <button onClick={copyWallet} className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
-                    {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
-
-                {/* Twitter */}
-                {user?.twitter && (
-                  <a href={`https://twitter.com/${user.twitter.replace("@", "")}`} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
-                    <TwitterIcon className="w-3.5 h-3.5 shrink-0 text-sky-500" />
-                    <span className="text-xs truncate">{user.twitter.startsWith("@") ? user.twitter : `@${user.twitter}`}</span>
-                  </a>
-                )}
-
-                {/* Website */}
-                {user?.website && (
-                  <a href={user.website.startsWith("http") ? user.website : `https://${user.website}`} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground">
-                    <Globe className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                    <span className="text-xs truncate">{user.website}</span>
-                  </a>
-                )}
-
-                {/* Contact (only if public) */}
-                {user?.contact && user?.contactPublic && (
-                  <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-3 py-2">
-                    <Phone className="w-3.5 h-3.5 shrink-0 text-primary" />
-                    <span className="text-xs text-foreground select-all flex-1 truncate">{user.contact}</span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>,
@@ -558,7 +557,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             </div>
           </div>
         )}
-        {userInfoOpen && <UserInfoModal wallet={post.authorWallet} onClose={() => setUserInfoOpen(false)} />}
+        {userInfoOpen && <UserInfoModal wallet={post.authorWallet} authorName={post.authorName} authorAvatar={post.authorAvatar} authorType={post.authorType} authorTags={post.authorTags} onClose={() => setUserInfoOpen(false)} />}
       </div>
     );
   }
@@ -697,7 +696,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
         </div>
       )}
 
-      {userInfoOpen && <UserInfoModal wallet={post.authorWallet} onClose={() => setUserInfoOpen(false)} />}
+      {userInfoOpen && <UserInfoModal wallet={post.authorWallet} authorName={post.authorName} authorAvatar={post.authorAvatar} authorType={post.authorType} authorTags={post.authorTags} onClose={() => setUserInfoOpen(false)} />}
     </div>
   );
 }
