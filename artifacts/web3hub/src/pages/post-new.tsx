@@ -115,8 +115,8 @@ export default function PostNew() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!address || !validateForm()) return;
-    // Normal users (no approved space type) skip the energy requirement — they have a 24h posting limit instead
-    if (!isAdminUser && !isNormalPoster && energy <= 0) { setShowRecharge(true); return; }
+    // All users (including normal users) need energy > 0 to post
+    if (!isAdminUser && energy <= 0) { setShowRecharge(true); return; }
     // Show overwrite warning if normal user already posted today
     if (isNormalPoster && normalPostsUsed >= 1) { setShowOverwriteConfirm(true); return; }
     setStep("confirm");
@@ -297,21 +297,21 @@ export default function PostNew() {
             </div>
             <h1 className="text-2xl font-bold">{t("createPostTitle")}</h1>
           </div>
-          {!isAdminUser && !isNormalPoster && (
-            <div className="flex items-center gap-2">
+          {!isAdminUser && (
+            <div className="flex items-center gap-2 flex-wrap">
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
                 energy <= 0 ? "bg-red-100 dark:bg-red-950/30 text-red-600" :
                 energy <= 5 ? "bg-amber-100 dark:bg-amber-950/30 text-amber-600" :
                 "bg-green-100 dark:bg-green-950/30 text-green-600"}`}>
                 <Zap className="w-3.5 h-3.5" />{energy} {t("energyUnit")}
               </div>
-              {pinCount > 0 && (
+              {!isNormalPoster && pinCount > 0 && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-violet-100 dark:bg-violet-950/30 text-violet-600">
                   <Pin className="w-3.5 h-3.5" />{pinCount} {t("pinUnit")}
                 </div>
               )}
               {energy <= 0 && (
-                <button onClick={() => setShowRecharge(true)} className="text-xs text-primary hover:underline font-semibold">{t("recharge")}</button>
+                <button onClick={() => setShowRecharge(true)} className="text-xs text-primary hover:underline font-semibold">{t("noEnergyHint")}</button>
               )}
             </div>
           )}
