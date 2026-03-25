@@ -6,7 +6,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLang } from "@/lib/i18n";
 import { useLocation } from "wouter";
 import { AlertCircle, CheckCircle2, PenSquare, Zap, X, Pin } from "lucide-react";
-import { RechargeModal } from "@/components/recharge-modal";
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -222,8 +221,32 @@ export default function PostNew() {
 
   return (
     <>
-      {showRecharge && address && (
-        <RechargeModal walletAddress={address} onClose={() => setShowRecharge(false)} />
+      {showRecharge && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ pointerEvents: "auto" }}>
+          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} onClick={() => setShowRecharge(false)} />
+          <div
+            className="relative w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4"
+            style={{ backgroundColor: "#0A0C14", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(245,158,11,0.15)" }}>
+                <Zap className="w-5 h-5" style={{ color: "#f59e0b" }} />
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}>
+                {t("noEnergyAlertMsg")}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowRecharge(false)}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              style={{ backgroundColor: "rgba(245,158,11,0.15)", color: "#f59e0b" }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.25)")}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.15)")}
+            >
+              {t("noEnergyAlertBtn")}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ── Energy Confirmation Overlay ── */}
