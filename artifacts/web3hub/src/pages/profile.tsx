@@ -570,38 +570,40 @@ export default function Profile() {
 
         {/* 6b. 个人联系方式 */}
         <InfoRow label={t("contactLabel")}>
-          <div className="flex items-center gap-2 w-full">
-            <input
-              type="text"
-              value={contact}
-              onChange={e => markDirty(setContact)(e.target.value)}
-              placeholder="Telegram / WeChat / Email / Phone..."
-              className="flex-1 text-sm bg-muted/40 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-            <div className="shrink-0 flex rounded-lg border border-border overflow-hidden text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => { setContactPublic(true); setDirty(true); }}
-                className={`px-3 py-1.5 transition-colors ${
-                  contactPublic
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted/40 text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {t("contactPublicLabel")}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setContactPublic(false); setDirty(true); }}
-                className={`px-3 py-1.5 border-l border-border transition-colors ${
-                  !contactPublic
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted/40 text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {t("contactPrivateLabel")}
-              </button>
-            </div>
+          <input
+            type="text"
+            value={contact}
+            onChange={e => markDirty(setContact)(e.target.value)}
+            placeholder="Telegram / WeChat / Email / Phone..."
+            className="w-full text-sm bg-muted/40 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </InfoRow>
+
+        {/* 6c. 联系方式可见性 */}
+        <InfoRow label={t("contactVisibilityLabel")}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => { setContactPublic(true); setDirty(true); }}
+              className={`px-4 py-1.5 rounded-lg border text-sm font-semibold transition-colors ${
+                contactPublic
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-muted/40 text-muted-foreground border-border hover:bg-muted"
+              }`}
+            >
+              {t("contactPublicLabel")}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setContactPublic(false); setDirty(true); }}
+              className={`px-4 py-1.5 rounded-lg border text-sm font-semibold transition-colors ${
+                !contactPublic
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-muted/40 text-muted-foreground border-border hover:bg-muted"
+              }`}
+            >
+              {t("contactPrivateLabel")}
+            </button>
           </div>
         </InfoRow>
 
