@@ -297,8 +297,8 @@ function UserInfoModal({ wallet, authorName, authorAvatar, authorType, authorTag
               </div>
             ) : (
               <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2">
-                <span className="shrink-0 text-[10px] font-black text-gray-300 dark:text-gray-600 leading-none tracking-tight">KIT</span>
-                <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
+                <span className="shrink-0 text-[10px] font-black text-gray-400 dark:text-gray-500 leading-none tracking-tight">KIT</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{t("contactNotPublic")}</span>
               </div>
             ))}
 
