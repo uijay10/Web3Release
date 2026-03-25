@@ -443,9 +443,6 @@ export default function Profile() {
         {isSpaceOwner && spaceType === "project" && (
           <InfoRow label={lang === "zh-CN" ? "展示标签" : "Display Tags"}>
             <div className="space-y-2">
-              <p className="text-[11px] text-muted-foreground">
-                {lang === "zh-CN" ? "最多选2个，将显示在首页帖子和子页面" : "Select up to 2 tags — shown on homepage and post pages"}
-              </p>
               <div className="flex flex-wrap gap-1.5">
                 {["L1","L2","Infrastructure","DePIN","Node","Validator","DeFi","DEX","RWA","SocialFi","NFT","GameFi","AI"].map(tag => {
                   const active = selectedTags.includes(tag);
