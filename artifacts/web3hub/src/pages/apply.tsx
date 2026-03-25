@@ -122,8 +122,7 @@ export default function ApplySpace() {
   if (!isConnected) {
     return (
       <div className="py-32 text-center max-w-md mx-auto">
-        <h2 className="text-2xl font-bold mb-4">{t("applyNeedWallet")}</h2>
-        <p className="text-muted-foreground mb-8">{t("applyNeedWalletDesc")}</p>
+        <h2 className="text-xl font-bold mb-8">{t("applyNeedWallet")}</h2>
       </div>
     );
   }
