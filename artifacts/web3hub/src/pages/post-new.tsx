@@ -27,7 +27,7 @@ const KOL_SECTIONS: typeof ALL_SECTIONS[number][] = [
 ];
 
 const DEV_SECTIONS: typeof ALL_SECTIONS[number][] = [
-  "developer", "hackathon", "bugbounty", "security", "integration", "nodes", "community",
+  "developer", "hackathon", "bugbounty", "security", "integration", "jobs", "community",
 ];
 
 const SECTION_LABEL_KEYS: Record<string, string> = {
