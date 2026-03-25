@@ -9,22 +9,43 @@ const router: IRouter = Router();
 const PIN_SLOTS = 14; // max simultaneous pinned posts on homepage
 
 /**
- * Deterministic auto-view total — fixed per post, based on post id as seed.
- * Project posts: 2000–26000 · KOL/Developer: 300–1500 · Normal: 200–1000.
- * Real views (p.views from DB) are added on top in formatPost.
+ * Deterministic auto-view accumulation over 72 hours.
+ * Each post gets a fixed target (seed = post id) and a random ease-in curve
+ * (power 1.2–2.8) so growth is always slow and never completes before 72 h.
+ * Applies to all user types. Real views (p.views in DB) are added on top.
  */
-function computeAutoViews(id: number, authorType: string | null): number {
-  // Two-step hash for good distribution across small and large ids
-  const h = Math.abs((id * 2654435761 + id * id * 40503) % 100_000);
-  const rand = h / 100_000; // 0–1 deterministic float
+function computeAutoViews(id: number, createdAt: Date, authorType: string | null): number {
+  const DURATION = 72 * 3_600_000; // 72 hours in ms
 
+  // Hash 1 → target magnitude
+  const h1 = Math.abs((id * 2654435761 + id * id * 40503) % 100_000);
+  const rand1 = h1 / 100_000;
+
+  // Hash 2 → curve shape (independent)
+  const h2 = Math.abs((id * 1664525 + 1013904223 + id * id * 22695477) % 100_000);
+  const rand2 = h2 / 100_000;
+
+  let target: number;
   if (authorType === "project") {
-    return 2000 + Math.floor(rand * 24_001); // 2000–26000
+    target = 2000 + Math.floor(rand1 * 24_001);   // 2 000 – 26 000
   } else if (authorType === "kol" || authorType === "developer") {
-    return 300 + Math.floor(rand * 1_201);   // 300–1500
+    target = 300  + Math.floor(rand1 * 1_201);    // 300 – 1 500
   } else {
-    return 200 + Math.floor(rand * 801);     // 200–1000
+    target = 200  + Math.floor(rand1 * 801);      // 200 – 1 000
   }
+
+  const now    = Date.now();
+  const startMs = createdAt.getTime();
+  const endMs   = startMs + DURATION;
+
+  if (now <= startMs) return 0;
+  if (now >= endMs)   return target;
+
+  const progress = (now - startMs) / DURATION; // 0–1, never reaches 1 before 72 h
+
+  // Ease-in (power > 1): slow at start, accelerates — guarantees slow accumulation
+  const power = 1.2 + rand2 * 1.6; // 1.2 – 2.8, unique per post
+  return Math.floor(target * Math.pow(progress, power));
 }
 
 function todayStr() {
@@ -32,7 +53,7 @@ function todayStr() {
 }
 
 function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: string | null; authorAvatarLive?: string | null; authorTagsLive?: string[] | null }) {
-  const autoViews = computeAutoViews(p.id, p.authorType);
+  const autoViews = computeAutoViews(p.id, p.createdAt, p.authorType);
   return {
     id: p.id,
     title: p.title,
