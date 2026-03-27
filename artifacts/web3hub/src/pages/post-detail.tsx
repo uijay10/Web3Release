@@ -79,7 +79,7 @@ export default function PostDetail() {
   const [liked, setLiked] = useState(false);
   const [comments, setComments] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
-  const [commentOpen, setCommentOpen] = useState(false);
+  const [commentOpen, setCommentOpen] = useState(true);
   const [commenting, setCommenting] = useState(false);
   const [commentError, setCommentError] = useState("");
   const [pinning, setPinning] = useState(false);
