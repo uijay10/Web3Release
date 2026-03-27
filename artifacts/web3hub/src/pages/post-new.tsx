@@ -432,7 +432,7 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
                 value={aiInput}
                 onChange={e => setAiInput(e.target.value)}
                 placeholder={aiMode === "post"
-                  ? (lang === "zh-CN" ? "例如：我的项目THQ需要发布测试网，测试代币总共10亿..." : "e.g. My project THQ needs to launch testnet with 1 billion test tokens...")
+                  ? (lang === "zh-CN" ? "例如：我的项目BTC 需要发布测试网，总量2100万..." : "e.g. My project BTC needs to launch testnet, total supply 21 million...")
                   : (lang === "zh-CN" ? "例如：有人点赞了我的测试网帖子，并留言说很感兴趣..." : "e.g. Someone liked my testnet post and commented they're very interested...")}
                 rows={3}
                 className="w-full rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2"
