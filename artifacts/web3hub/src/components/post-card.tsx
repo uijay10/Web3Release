@@ -21,7 +21,7 @@ function useCountdown(targetIso: string | null | undefined) {
 }
 import { createPortal } from "react-dom";
 import { filterContent, filterErrorMessage } from "@/lib/content-filter";
-import { Heart, MessageCircle, Copy, Check, Pin, User, Eye, Clock, Globe, Twitter as TwitterIcon, X } from "lucide-react";
+import { Heart, MessageCircle, Copy, Check, Pin, User, Eye, Clock, Globe, Twitter as TwitterIcon, X, Reply, CornerDownRight } from "lucide-react";
 
 const SECTION_KEY_MAP: Record<string, string> = {
   testnet: "sTestnetLabel", ido: "sIdoLabel", security: "sSecurityLabel",
@@ -342,16 +342,25 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
   const [userInfoOpen, setUserInfoOpen] = useState(false);
   const [commentList, setCommentList] = useState<any[]>([]);
   const [commentLoading, setCommentLoading] = useState(false);
+  const [commentLikes, setCommentLikes] = useState<Record<number, { likes: number; liked: boolean }>>({});
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replying, setReplying] = useState(false);
 
-  useEffect(() => {
-    if (!commentOpen) return;
+  const fetchComments = () => {
     setCommentLoading(true);
-    fetch(`${apiBase}/posts/${post.id}/comments`)
+    const qs = address ? `?wallet=${encodeURIComponent(address)}` : "";
+    fetch(`${apiBase}/posts/${post.id}/comments${qs}`)
       .then(r => r.ok ? r.json() : { comments: [] })
       .then(d => setCommentList(d.comments ?? []))
       .catch(() => {})
       .finally(() => setCommentLoading(false));
-  }, [commentOpen, post.id]);
+  };
+
+  useEffect(() => {
+    if (!commentOpen) return;
+    fetchComments();
+  }, [commentOpen, post.id, address]);
 
   const expiryCountdown = useCountdown(post.expiresAt ?? null);
 
@@ -397,12 +406,45 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
       }
       setComments(data.comments ?? comments + 1);
       setCommentText("");
-      fetch(`${apiBase}/posts/${post.id}/comments`)
-        .then(r => r.ok ? r.json() : { comments: [] })
-        .then(d => setCommentList(d.comments ?? []))
-        .catch(() => {});
+      fetchComments();
     } finally {
       setCommenting(false);
+    }
+  };
+
+  const handleCommentLike = async (commentId: number, currentLiked: boolean, currentLikes: number) => {
+    if (!isConnected) return;
+    setCommentLikes(prev => ({ ...prev, [commentId]: { likes: currentLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1, liked: !currentLiked } }));
+    try {
+      const res = await fetch(`${apiBase}/posts/${post.id}/comments/${commentId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address }),
+      });
+      const d = await res.json();
+      setCommentLikes(prev => ({ ...prev, [commentId]: { likes: d.likes, liked: d.liked } }));
+    } catch {
+      setCommentLikes(prev => ({ ...prev, [commentId]: { likes: currentLikes, liked: currentLiked } }));
+    }
+  };
+
+  const handleCommentReply = async (parentCommentId: number) => {
+    if (!isConnected || !replyText.trim()) return;
+    const filterResult = filterContent(replyText.trim());
+    if (!filterResult.ok) return;
+    setReplying(true);
+    try {
+      await fetch(`${apiBase}/posts/${post.id}/comments/${parentCommentId}/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address, content: replyText.trim() }),
+      });
+      setReplyText("");
+      setReplyingTo(null);
+      setComments(c => c + 1);
+      fetchComments();
+    } finally {
+      setReplying(false);
     }
   };
 
@@ -592,19 +634,68 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
             )}
             {!commentLoading && commentList.length > 0 && (
               <div className="flex flex-col divide-y divide-border/30">
-                {commentList.map((c: any) => (
-                  <div key={c.id} className="flex gap-2 py-2">
-                    <div className="w-6 h-6 rounded-full shrink-0 border border-border/40"
-                      style={{ background: generateGradient(c.wallet) }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[10px] font-semibold text-foreground">{c.authorName ?? truncateAddress(c.wallet)}</span>
-                        <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(c.createdAt))} ago</span>
+                {commentList.map((c: any) => {
+                  const cLike = commentLikes[c.id];
+                  const displayLikes = cLike !== undefined ? cLike.likes : (c.likes ?? 0);
+                  const displayLiked = cLike !== undefined ? cLike.liked : (c.likedByViewer ?? false);
+                  const isReply = !!c.replyTo;
+                  const parent = isReply ? commentList.find((p: any) => p.id === c.replyTo) : null;
+                  return (
+                    <div key={c.id} className={isReply ? "ml-8 border-l-2 border-border/40 pl-2" : ""}>
+                      <div className="flex gap-2 py-2">
+                        <div className="w-6 h-6 rounded-full shrink-0 border border-border/40"
+                          style={{ background: generateGradient(c.wallet) }} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                            <span className="text-[10px] font-semibold text-foreground">{c.authorName ?? truncateAddress(c.wallet)}</span>
+                            {isReply && parent && (
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                <CornerDownRight className="w-2.5 h-2.5" />
+                                {parent.authorName ?? truncateAddress(parent.wallet)}
+                              </span>
+                            )}
+                            <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(c.createdAt))} ago</span>
+                          </div>
+                          <p className="text-xs text-foreground/85 break-words leading-snug" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{c.content}</p>
+                          <div className="flex items-center gap-2.5 mt-1">
+                            <button
+                              onClick={() => handleCommentLike(c.id, displayLiked, displayLikes)}
+                              disabled={!isConnected}
+                              className={`flex items-center gap-1 text-[10px] transition-colors ${displayLiked ? "text-pink-500" : "text-muted-foreground hover:text-pink-500"} disabled:opacity-40`}
+                            >
+                              <Heart className={`w-3 h-3 ${displayLiked ? "fill-pink-500" : ""}`} />
+                              {displayLikes > 0 && <span>{displayLikes}</span>}
+                            </button>
+                            {isConnected && !isReply && (
+                              <button
+                                onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyText(""); }}
+                                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-blue-500 transition-colors"
+                              >
+                                <Reply className="w-3 h-3" />
+                                <span>{lang === "zh-CN" ? "回复" : "Reply"}</span>
+                              </button>
+                            )}
+                          </div>
+                          {replyingTo === c.id && (
+                            <div className="mt-1.5 flex gap-1.5 items-start">
+                              <input
+                                value={replyText}
+                                onChange={e => setReplyText(e.target.value)}
+                                onKeyDown={e => e.key === "Enter" && handleCommentReply(c.id)}
+                                placeholder={lang === "zh-CN" ? `回复 ${c.authorName ?? truncateAddress(c.wallet)}...` : `Reply to ${c.authorName ?? truncateAddress(c.wallet)}...`}
+                                className="flex-1 text-[10px] px-2 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary/20"
+                              />
+                              <button onClick={() => handleCommentReply(c.id)} disabled={replying || !replyText.trim()}
+                                className="px-2 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold disabled:opacity-50">
+                                {replying ? "…" : (lang === "zh-CN" ? "发" : "Send")}
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-foreground/85 break-words leading-snug" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{c.content}</p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
             {commentError && <p className="text-xs text-red-500">{commentError}</p>}
@@ -750,19 +841,68 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
           )}
           {!commentLoading && commentList.length > 0 && (
             <div className="flex flex-col divide-y divide-border/30">
-              {commentList.map((c: any) => (
-                <div key={c.id} className="flex gap-2.5 py-2.5">
-                  <div className="w-7 h-7 rounded-full shrink-0 border border-border/40"
-                    style={{ background: generateGradient(c.wallet) }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs font-semibold text-foreground">{c.authorName ?? truncateAddress(c.wallet)}</span>
-                      <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(c.createdAt))} ago</span>
+              {commentList.map((c: any) => {
+                const cLike = commentLikes[c.id];
+                const displayLikes = cLike !== undefined ? cLike.likes : (c.likes ?? 0);
+                const displayLiked = cLike !== undefined ? cLike.liked : (c.likedByViewer ?? false);
+                const isReply = !!c.replyTo;
+                const parent = isReply ? commentList.find((p: any) => p.id === c.replyTo) : null;
+                return (
+                  <div key={c.id} className={isReply ? "ml-9 border-l-2 border-border/40 pl-3" : ""}>
+                    <div className="flex gap-2.5 py-2.5">
+                      <div className="w-7 h-7 rounded-full shrink-0 border border-border/40"
+                        style={{ background: generateGradient(c.wallet) }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <span className="text-xs font-semibold text-foreground">{c.authorName ?? truncateAddress(c.wallet)}</span>
+                          {isReply && parent && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <CornerDownRight className="w-3 h-3" />
+                              {parent.authorName ?? truncateAddress(parent.wallet)}
+                            </span>
+                          )}
+                          <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(c.createdAt))} ago</span>
+                        </div>
+                        <p className="text-sm text-foreground/85 break-words leading-snug" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{c.content}</p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <button
+                            onClick={() => handleCommentLike(c.id, displayLiked, displayLikes)}
+                            disabled={!isConnected}
+                            className={`flex items-center gap-1 text-xs transition-colors ${displayLiked ? "text-pink-500" : "text-muted-foreground hover:text-pink-500"} disabled:opacity-40`}
+                          >
+                            <Heart className={`w-3.5 h-3.5 ${displayLiked ? "fill-pink-500" : ""}`} />
+                            {displayLikes > 0 && <span>{displayLikes}</span>}
+                          </button>
+                          {isConnected && !isReply && (
+                            <button
+                              onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyText(""); }}
+                              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-blue-500 transition-colors"
+                            >
+                              <Reply className="w-3.5 h-3.5" />
+                              <span>{lang === "zh-CN" ? "回复" : "Reply"}</span>
+                            </button>
+                          )}
+                        </div>
+                        {replyingTo === c.id && (
+                          <div className="mt-2 flex gap-2 items-start">
+                            <input
+                              value={replyText}
+                              onChange={e => setReplyText(e.target.value)}
+                              onKeyDown={e => e.key === "Enter" && handleCommentReply(c.id)}
+                              placeholder={lang === "zh-CN" ? `回复 ${c.authorName ?? truncateAddress(c.wallet)}...` : `Reply to ${c.authorName ?? truncateAddress(c.wallet)}...`}
+                              className="flex-1 text-xs px-3 py-2 rounded-xl border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary/20"
+                            />
+                            <button onClick={() => handleCommentReply(c.id)} disabled={replying || !replyText.trim()}
+                              className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-50">
+                              {replying ? "…" : (lang === "zh-CN" ? "发送" : "Send")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm text-foreground/85 break-words leading-snug" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{c.content}</p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           {commentError && <p className="text-sm text-red-500">{commentError}</p>}
