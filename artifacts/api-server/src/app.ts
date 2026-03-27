@@ -26,7 +26,20 @@ async function ensureTables() {
         author_name TEXT,
         author_avatar TEXT,
         content TEXT NOT NULL,
+        likes INTEGER NOT NULL DEFAULT 0,
+        reply_to INTEGER,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      )
+    `);
+    await db.execute(sql`ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes INTEGER NOT NULL DEFAULT 0`);
+    await db.execute(sql`ALTER TABLE comments ADD COLUMN IF NOT EXISTS reply_to INTEGER`);
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS comment_likes (
+        id SERIAL PRIMARY KEY,
+        comment_id INTEGER NOT NULL,
+        wallet TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        UNIQUE(comment_id, wallet)
       )
     `);
     await db.execute(sql`

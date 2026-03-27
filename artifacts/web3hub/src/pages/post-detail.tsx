@@ -1,6 +1,6 @@
 import { useRoute, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, MessageCircle, ArrowLeft, Pin, Eye, User, Share2 } from "lucide-react";
+import { Heart, MessageCircle, ArrowLeft, Pin, Eye, User, Share2, Reply, CornerDownRight } from "lucide-react";
 import { filterContent, filterErrorMessage } from "@/lib/content-filter";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -63,9 +63,10 @@ export default function PostDetail() {
   });
 
   const { data: commentsData, refetch: refetchComments } = useQuery({
-    queryKey: ["/api/posts/comments", postId],
+    queryKey: ["/api/posts/comments", postId, address],
     queryFn: async () => {
-      const res = await fetch(`${apiBase}/posts/${postId}/comments`);
+      const qs = address ? `?wallet=${encodeURIComponent(address)}` : "";
+      const res = await fetch(`${apiBase}/posts/${postId}/comments${qs}`);
       if (!res.ok) return { comments: [] };
       return res.json();
     },
@@ -82,6 +83,11 @@ export default function PostDetail() {
   const [commentOpen, setCommentOpen] = useState(true);
   const [commenting, setCommenting] = useState(false);
   const [commentError, setCommentError] = useState("");
+  // Comment interactions
+  const [commentLikes, setCommentLikes] = useState<Record<number, { likes: number; liked: boolean }>>({});
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replying, setReplying] = useState(false);
   const [pinning, setPinning] = useState(false);
   const [pinMsg, setPinMsg] = useState("");
   const [pinConfirmOpen, setPinConfirmOpen] = useState(false);
@@ -129,6 +135,44 @@ export default function PostDetail() {
       refetchComments();
     } finally {
       setCommenting(false);
+    }
+  };
+
+  const handleCommentLike = async (commentId: number, currentLiked: boolean, currentLikes: number) => {
+    if (!isConnected || !post) return;
+    // Optimistic update
+    setCommentLikes(prev => ({ ...prev, [commentId]: { likes: currentLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1, liked: !currentLiked } }));
+    try {
+      const res = await fetch(`${apiBase}/posts/${post.id}/comments/${commentId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address }),
+      });
+      const d = await res.json();
+      setCommentLikes(prev => ({ ...prev, [commentId]: { likes: d.likes, liked: d.liked } }));
+    } catch {
+      // Revert on failure
+      setCommentLikes(prev => ({ ...prev, [commentId]: { likes: currentLikes, liked: currentLiked } }));
+    }
+  };
+
+  const handleCommentReply = async (parentCommentId: number) => {
+    if (!isConnected || !replyText.trim() || !post) return;
+    const filterResult = filterContent(replyText.trim());
+    if (!filterResult.ok) return;
+    setReplying(true);
+    try {
+      await fetch(`${apiBase}/posts/${post.id}/comments/${parentCommentId}/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address, content: replyText.trim() }),
+      });
+      setReplyText("");
+      setReplyingTo(null);
+      refetchComments();
+      setComments(prev => (prev ?? commentCount) + 1);
+    } finally {
+      setReplying(false);
     }
   };
 
@@ -477,31 +521,94 @@ export default function PostDetail() {
 
       {/* ── Comment List ── */}
       {commentList.length > 0 && (
-        <div className="px-4 py-3 space-y-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("commentListTitle") || "评论"} ({commentList.length})</p>
-          {commentList.map((c: any) => (
-            <div key={c.id} className="flex gap-3 items-start">
-              <Link href={`/profile/${c.wallet}`} className="shrink-0">
-                <div
-                  className="w-8 h-8 rounded-full border border-border/40 overflow-hidden"
-                  style={c.authorAvatar
-                    ? { backgroundImage: `url(${c.authorAvatar})`, backgroundSize: "cover", backgroundPosition: "center" }
-                    : { background: generateGradient(c.wallet) }}
-                />
-              </Link>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <Link href={`/profile/${c.wallet}`} className="text-sm font-semibold hover:underline truncate max-w-[120px]">
-                    {c.authorName ?? truncateAddress(c.wallet)}
+        <div className="px-4 py-3 space-y-1">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{t("commentListTitle") || "评论"} ({commentList.length})</p>
+          {commentList.map((c: any) => {
+            const cLike = commentLikes[c.id];
+            const displayLikes = cLike !== undefined ? cLike.likes : (c.likes ?? 0);
+            const displayLiked = cLike !== undefined ? cLike.liked : (c.likedByViewer ?? false);
+            const isReply = !!c.replyTo;
+            const parent = isReply ? commentList.find((p: any) => p.id === c.replyTo) : null;
+
+            return (
+              <div key={c.id} className={`group ${isReply ? "ml-10 border-l-2 border-border/40 pl-3" : ""}`}>
+                <div className="flex gap-3 items-start py-2">
+                  <Link href={`/profile/${c.wallet}`} className="shrink-0 mt-0.5">
+                    <div
+                      className="w-8 h-8 rounded-full border border-border/40 overflow-hidden"
+                      style={c.authorAvatar
+                        ? { backgroundImage: `url(${c.authorAvatar})`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : { background: generateGradient(c.wallet) }}
+                    />
                   </Link>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: dateLocale })}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <Link href={`/profile/${c.wallet}`} className="text-sm font-semibold hover:underline truncate max-w-[120px]">
+                        {c.authorName ?? truncateAddress(c.wallet)}
+                      </Link>
+                      {isReply && parent && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <CornerDownRight className="w-3 h-3" />
+                          {parent.authorName ?? truncateAddress(parent.wallet)}
+                        </span>
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: dateLocale })}
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground/85 leading-relaxed mt-0.5 break-words whitespace-pre-wrap">{c.content}</p>
+                    {/* Like + Reply actions */}
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <button
+                        onClick={() => handleCommentLike(c.id, displayLiked, displayLikes)}
+                        disabled={!isConnected}
+                        className={`flex items-center gap-1 text-xs transition-colors ${displayLiked ? "text-pink-500" : "text-muted-foreground hover:text-pink-500"} disabled:opacity-40`}
+                      >
+                        <Heart className={`w-3.5 h-3.5 ${displayLiked ? "fill-pink-500" : ""}`} />
+                        {displayLikes > 0 && <span>{displayLikes}</span>}
+                      </button>
+                      {isConnected && !isReply && (
+                        <button
+                          onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyText(""); }}
+                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-blue-500 transition-colors"
+                        >
+                          <Reply className="w-3.5 h-3.5" />
+                          <span>{lang === "zh-CN" ? "回复" : "Reply"}</span>
+                        </button>
+                      )}
+                    </div>
+                    {/* Inline reply input */}
+                    {replyingTo === c.id && (
+                      <div className="mt-2 flex gap-2 items-start">
+                        <textarea
+                          value={replyText}
+                          onChange={e => setReplyText(e.target.value)}
+                          placeholder={lang === "zh-CN" ? `回复 ${c.authorName ?? truncateAddress(c.wallet)}...` : `Reply to ${c.authorName ?? truncateAddress(c.wallet)}...`}
+                          rows={2}
+                          className="flex-1 text-sm p-2 rounded-lg border border-border bg-muted/40 resize-none focus:outline-none focus:ring-1 focus:ring-primary/30"
+                        />
+                        <div className="flex flex-col gap-1.5">
+                          <button
+                            onClick={() => handleCommentReply(c.id)}
+                            disabled={replying || !replyText.trim()}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-white disabled:opacity-40 transition-opacity"
+                          >
+                            {replying ? "…" : (lang === "zh-CN" ? "发送" : "Send")}
+                          </button>
+                          <button
+                            onClick={() => { setReplyingTo(null); setReplyText(""); }}
+                            className="px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {lang === "zh-CN" ? "取消" : "Cancel"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-foreground/85 leading-relaxed mt-0.5 break-words whitespace-pre-wrap">{c.content}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

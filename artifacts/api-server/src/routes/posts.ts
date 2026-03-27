@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, postsTable, usersTable, commentsTable, notificationsTable } from "@workspace/db";
+import { db, postsTable, usersTable, commentsTable, commentLikesTable, notificationsTable } from "@workspace/db";
 import { eq, and, desc, asc, sql, gte, or, ilike } from "drizzle-orm";
 import { checkContent, filterErrorMessage } from "../content-filter";
 import { awardInviterBonus } from "../lib/invite-bonus";
@@ -318,23 +318,124 @@ router.post("/", async (req, res) => {
 router.get("/:id/comments", async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  const viewerWallet = req.query.wallet ? String(req.query.wallet).toLowerCase() : null;
+
   const rows = await db.select().from(commentsTable)
     .where(eq(commentsTable.postId, id))
-    .orderBy(desc(commentsTable.createdAt))
-    .limit(100);
+    .orderBy(asc(commentsTable.createdAt))
+    .limit(200);
+
   const wallets = [...new Set(rows.map(r => r.wallet))];
   const users = wallets.length
     ? await db.select({ wallet: usersTable.wallet, username: usersTable.username, avatar: usersTable.avatar })
         .from(usersTable).where(sql`${usersTable.wallet} = ANY(ARRAY[${sql.join(wallets.map(w => sql`${w}`), sql`, `)}]::text[])`)
     : [];
   const umap = Object.fromEntries(users.map(u => [u.wallet, u]));
+
+  // Which comments has this viewer already liked?
+  const commentIds = rows.map(r => r.id);
+  let likedSet = new Set<number>();
+  if (viewerWallet && commentIds.length) {
+    const likedRows = await db.select({ commentId: commentLikesTable.commentId })
+      .from(commentLikesTable)
+      .where(and(
+        eq(commentLikesTable.wallet, viewerWallet),
+        sql`${commentLikesTable.commentId} = ANY(ARRAY[${sql.join(commentIds.map(id => sql`${id}`), sql`, `)}]::int[])`
+      ));
+    likedSet = new Set(likedRows.map(r => r.commentId));
+  }
+
   res.json({ comments: rows.map(r => ({
     id: r.id, postId: r.postId, wallet: r.wallet,
     authorName: umap[r.wallet]?.username ?? r.authorName ?? null,
     authorAvatar: umap[r.wallet]?.avatar ?? r.authorAvatar ?? null,
     content: r.content,
+    likes: r.likes ?? 0,
+    replyTo: (r as any).replyTo ?? null,
+    likedByViewer: likedSet.has(r.id),
     createdAt: r.createdAt.toISOString(),
   })) });
+});
+
+// Like / unlike a comment
+router.post("/:id/comments/:commentId/like", async (req, res) => {
+  const postId = parseInt(req.params.id);
+  const commentId = parseInt(req.params.commentId);
+  if (isNaN(postId) || isNaN(commentId)) return res.status(400).json({ error: "Invalid id" });
+  const { wallet } = req.body;
+  if (!wallet) return res.status(400).json({ error: "wallet required" });
+  const lw = wallet.toLowerCase();
+
+  // Check if already liked
+  const existing = await db.select().from(commentLikesTable)
+    .where(and(eq(commentLikesTable.commentId, commentId), eq(commentLikesTable.wallet, lw)))
+    .limit(1);
+
+  if (existing.length) {
+    // Unlike
+    await db.delete(commentLikesTable)
+      .where(and(eq(commentLikesTable.commentId, commentId), eq(commentLikesTable.wallet, lw)));
+    const updated = await db.update(commentsTable)
+      .set({ likes: sql`GREATEST(${commentsTable.likes} - 1, 0)` })
+      .where(eq(commentsTable.id, commentId))
+      .returning({ likes: commentsTable.likes });
+    return res.json({ liked: false, likes: updated[0]?.likes ?? 0 });
+  } else {
+    // Like
+    await db.insert(commentLikesTable).values({ commentId, wallet: lw });
+    const updated = await db.update(commentsTable)
+      .set({ likes: sql`${commentsTable.likes} + 1` })
+      .where(eq(commentsTable.id, commentId))
+      .returning({ likes: commentsTable.likes });
+    return res.json({ liked: true, likes: updated[0]?.likes ?? 0 });
+  }
+});
+
+// Reply to a comment
+router.post("/:id/comments/:commentId/reply", async (req, res) => {
+  const postId = parseInt(req.params.id);
+  const commentId = parseInt(req.params.commentId);
+  if (isNaN(postId) || isNaN(commentId)) return res.status(400).json({ error: "Invalid id" });
+  const { wallet, content } = req.body;
+  if (!wallet || !content?.trim()) return res.status(400).json({ error: "wallet and content required" });
+
+  const contentFilter = checkContent(content.trim());
+  if (contentFilter) return res.status(422).json({ error: "CONTENT_FILTER", reason: contentFilter, message: filterErrorMessage(contentFilter) });
+
+  const lw = wallet.toLowerCase();
+  const userRows = await db.select().from(usersTable).where(eq(usersTable.wallet, lw)).limit(1);
+  const user = userRows[0] ?? null;
+
+  await db.insert(commentsTable).values({
+    postId,
+    wallet: lw,
+    authorName: user?.username ?? null,
+    authorAvatar: user?.avatar ?? null,
+    content: content.trim(),
+    replyTo: commentId,
+  } as any);
+
+  // Bump comment count on post
+  await db.update(postsTable)
+    .set({ comments: sql`${postsTable.comments} + 1` })
+    .where(eq(postsTable.id, postId));
+
+  // Notify the parent comment author
+  const parentRows = await db.select().from(commentsTable).where(eq(commentsTable.id, commentId)).limit(1);
+  const parent = parentRows[0];
+  if (parent && parent.wallet !== lw) {
+    const postRows = await db.select().from(postsTable).where(eq(postsTable.id, postId)).limit(1);
+    await db.insert(notificationsTable).values({
+      recipientWallet: parent.wallet,
+      type: "comment",
+      fromWallet: lw,
+      fromName: user?.username ?? null,
+      postId,
+      postTitle: postRows[0]?.title ?? null,
+    } as any).catch(() => {});
+  }
+
+  res.json({ ok: true });
 });
 
 router.get("/:id", async (req, res) => {
