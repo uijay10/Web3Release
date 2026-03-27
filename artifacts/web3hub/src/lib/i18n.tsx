@@ -156,7 +156,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "复制提示词", aiAssistantCopied: "已复制！", aiAssistantHint: "输入需求后点击生成按钮",
     aiAssistantBtn: "AI助手（免费）", aiPublishBtn: "AI帮您来发布",
-    commentListTitle: "评论", commentLoading: "加载评论中...",
+    commentListTitle: "评论", commentLoading: "加载评论中...", commentNoData: "暂无评论，来发第一条吧",
   },
   "en": {
     home: "Home", profile: "Profile", connect: "Connect Wallet", disconnect: "Disconnect",
@@ -310,7 +310,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "Copy Prompt", aiAssistantCopied: "Copied!", aiAssistantHint: "Enter your need, then click generate",
     aiAssistantBtn: "AI Assistant (Free)", aiPublishBtn: "AI-Powered Publish",
-    commentListTitle: "Comments", commentLoading: "Loading comments...",
+    commentListTitle: "Comments", commentLoading: "Loading comments...", commentNoData: "No comments yet — be the first!",
   },
   "de": {
     home: "Startseite", profile: "Profil", connect: "Wallet verbinden", disconnect: "Trennen",
@@ -445,7 +445,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "Prompt kopieren", aiAssistantCopied: "Kopiert!", aiAssistantHint: "Bedarf eingeben, dann auf Generieren klicken",
     aiAssistantBtn: "KI-Assistent (Kostenlos)", aiPublishBtn: "Mit KI veröffentlichen",
-    commentListTitle: "Kommentare", commentLoading: "Kommentare laden...",
+    commentListTitle: "Kommentare", commentLoading: "Kommentare laden...", commentNoData: "Noch keine Kommentare — sei der Erste!",
   },
   "ru": {
     home: "Главная", profile: "Профиль", connect: "Подключить кошелёк", disconnect: "Отключить",
@@ -580,7 +580,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "Копировать промпт", aiAssistantCopied: "Скопировано!", aiAssistantHint: "Введите задачу и нажмите «Создать»",
     aiAssistantBtn: "ИИ-ассистент (бесплатно)", aiPublishBtn: "Опубликовать с ИИ",
-    commentListTitle: "Комментарии", commentLoading: "Загрузка комментариев...",
+    commentListTitle: "Комментарии", commentLoading: "Загрузка комментариев...", commentNoData: "Комментариев пока нет — будьте первым!",
   },
   "fr": {
     home: "Accueil", profile: "Profil", connect: "Connecter le wallet", disconnect: "Déconnecter",
@@ -715,7 +715,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "Copier le prompt", aiAssistantCopied: "Copié !", aiAssistantHint: "Saisissez votre besoin puis cliquez sur générer",
     aiAssistantBtn: "Assistant IA (Gratuit)", aiPublishBtn: "Publier avec IA",
-    commentListTitle: "Commentaires", commentLoading: "Chargement des commentaires...",
+    commentListTitle: "Commentaires", commentLoading: "Chargement des commentaires...", commentNoData: "Aucun commentaire pour l'instant — soyez le premier !",
   },
   "ja": {
     home: "ホーム", profile: "プロフィール", connect: "ウォレット接続", disconnect: "切断",
@@ -850,7 +850,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "プロンプトをコピー", aiAssistantCopied: "コピー済み！", aiAssistantHint: "ニーズを入力して生成ボタンをクリック",
     aiAssistantBtn: "AIアシスタント（無料）", aiPublishBtn: "AIで投稿する",
-    commentListTitle: "コメント", commentLoading: "コメントを読み込み中...",
+    commentListTitle: "コメント", commentLoading: "コメントを読み込み中...", commentNoData: "まだコメントがありません。最初のコメントをどうぞ！",
   },
   "ko": {
     home: "홈", profile: "프로필", connect: "지갑 연결", disconnect: "연결 해제",
@@ -985,7 +985,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "프롬프트 복사", aiAssistantCopied: "복사됨!", aiAssistantHint: "요구 사항 입력 후 생성 버튼 클릭",
     aiAssistantBtn: "AI 도우미 (무료)", aiPublishBtn: "AI로 게시하기",
-    commentListTitle: "댓글", commentLoading: "댓글 로드 중...",
+    commentListTitle: "댓글", commentLoading: "댓글 로드 중...", commentNoData: "아직 댓글이 없습니다 — 첫 댓글을 남겨보세요!",
   },
   "vi": {
     home: "Trang chủ", profile: "Hồ sơ", connect: "Kết nối ví", disconnect: "Ngắt kết nối",
@@ -1120,7 +1120,7 @@ const TRANSLATIONS: Record<LangCode, Dict> = {
     aiAssistantGenCN: "生成中文提示词", aiAssistantGenEN: "Generate English Prompt",
     aiAssistantCopy: "Sao chép prompt", aiAssistantCopied: "Đã sao chép!", aiAssistantHint: "Nhập nhu cầu rồi nhấn nút tạo",
     aiAssistantBtn: "AI Trợ lý (Miễn phí)", aiPublishBtn: "Đăng với AI",
-    commentListTitle: "Bình luận", commentLoading: "Đang tải bình luận...",
+    commentListTitle: "Bình luận", commentLoading: "Đang tải bình luận...", commentNoData: "Chưa có bình luận — hãy là người đầu tiên!",
   },
 };
 

@@ -126,7 +126,6 @@ export default function PostDetail() {
       }
       setComments(d.comments ?? commentCount + 1);
       setCommentText("");
-      setCommentOpen(false);
       refetchComments();
     } finally {
       setCommenting(false);
@@ -506,8 +505,8 @@ export default function PostDetail() {
         </div>
       )}
 
-      {commentList.length === 0 && commentCount > 0 && (
-        <div className="px-4 py-4 text-center text-sm text-muted-foreground">{t("commentLoading") || "加载评论中..."}</div>
+      {commentList.length === 0 && commentOpen && (
+        <div className="px-4 py-2 text-center text-xs text-muted-foreground/60">{t("commentNoData") || "暂无评论，来发第一条吧"}</div>
       )}
 
     </div>
