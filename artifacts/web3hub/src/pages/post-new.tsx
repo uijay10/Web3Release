@@ -62,7 +62,7 @@ export default function PostNew() {
   const { address, isConnected } = useWeb3Auth();
   const createPost = useCreatePost();
   const queryClient = useQueryClient();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [, setLocation] = useLocation();
 
   const { data: meData, refetch: refetchMe } = useGetMe(
@@ -88,13 +88,90 @@ export default function PostNew() {
 
   // AI Assistant
   const [aiOpen, setAiOpen] = useState(false);
+  const [aiMode, setAiMode] = useState<"post" | "reply">("post");
   const [aiInput, setAiInput] = useState("");
   const [aiResult, setAiResult] = useState("");
   const [aiCopied, setAiCopied] = useState(false);
 
   const buildPrompt = (userInput: string, isEn: boolean) => {
-    if (isEn) return `You are a professional Web3 Release demand-writing assistant, helping users publish high-quality posts on https://web3release.com/\n\nUser requirement: ${userInput}\n\nPlease output in the following format:\n\n**Title** (Short, impactful, keyword-rich, max 120 chars)\n\n**Detailed Content** (Professional, clear, crypto-native tone, highlight project strengths, specific needs, call-to-action, use emojis where appropriate)\n\n**Recommended Tags** (Suitable for platform sections: Testnet, IDO, Security Audit, Recruiting, Airdrop, Events, Funding, Nodes, Hackathon, etc.)\n\nTone: Professional and exciting, suitable for Web3 users, avoid being overly sales-oriented.`;
-    return `你是一个 Web3 Release 专业需求撰写助手，专门帮助用户在 https://web3release.com/ 发布高质量需求帖。\n\n用户的需求：${userInput}\n\n请严格按照以下格式输出：\n\n**标题**（简短有力、吸引眼球，包含关键词，最多 120 字符）\n\n**详细内容**（专业、清晰、crypto-native 语气，突出项目亮点、具体需求、行动号召，适当使用 emoji）\n\n**推荐标签**（适合平台分区：测试网发布、IDO/Launchpad、安全审计、招募、空投、活动奖励、融资轮次、节点招募、黑客松等）\n\n输出语气：专业且兴奋，适合 Web3 用户，避免过于销售化。`;
+    if (aiMode === "reply") {
+      if (isEn) return `You are a Web3 Release professional assistant, dedicated to helping users respond to interactions and message bell notifications on https://web3release.com/.
+
+User interaction received:
+${userInput}
+
+Please strictly follow this format:
+
+**Reply Introduction**
+(Brief and friendly, expressing gratitude immediately)
+
+**Complete Reply**
+(80-180 characters, professional and enthusiastic, crypto-native tone, use emojis appropriately, express gratitude, respond to the other party, include a call to action — e.g. invite them to join the Guild, participate in testing, or further discussion)
+
+**Additional Suggestions**
+(Optional: How to use Energy or Pinned Zone to increase exposure; whether to invite the other party to join the Guild)
+
+Tone: Professional and excited, sincerely community-friendly, suitable for Web3 users, avoid being overly sales-oriented. Maintain a natural conversational feel.`;
+      return `你是 Web3 Release 专业助手，专门帮助用户回复互动消息、处理消息铃通知，平台地址：https://web3release.com/
+
+收到的互动内容：
+${userInput}
+
+请严格按照以下格式输出：
+
+**回复引言**
+（简短友好，立即表达感谢）
+
+**完整回复**
+（80-180 字，专业且兴奋，crypto-native 语气，适当使用 emoji，表达感谢并作出回应，包含行动号召，如邀请对方加入 Guild、参与测试或进一步交流）
+
+**附加建议**
+（可选：如何使用能量或置顶区增加曝光；是否建议邀请对方加入 Guild）
+
+语气：专业且兴奋，真诚社区友好，适合 Web3 用户，避免过于销售化，保持自然对话感。`;
+    }
+
+    if (isEn) return `You are a Web3 Release professional assistant, dedicated to helping users post high-quality requests on https://web3release.com/. This applies to all sections of the platform.
+
+User Input:
+${userInput}
+
+Please strictly adhere to the following format:
+
+**Title**
+(Concise, impactful, and eye-catching, including keywords, maximum 120 characters)
+
+**Detailed Content**
+(150-350 words, professional, clear, crypto-native tone, highlighting project strengths, specific needs, and calls to action; appropriate use of emojis)
+
+**Tags**
+(Suitable for the corresponding section: Testnet Launch, IDO/Launchpad, Security Audit, Recruiting, Integration News, Airdrop Campaign, Events & Rewards, Funding Rounds, Node Recruitment, Ecosystem, Partner Recruitment, Hackathon, AMA Session, Bug Bounty, Community Chat, Developer Zone)
+
+**Additional Suggestions**
+(How to use Energy or Pinned Zone to increase exposure; whether to recommend adding Guild)
+
+Tone: Professional and excited, sincerely community-friendly, suitable for Web3 users, avoid being overly sales-oriented. Maintain a natural conversational feel.`;
+
+    return `你是 Web3 Release 专业助手，专门帮助用户在 https://web3release.com/ 发布高质量需求帖，适用于平台全部分区。
+
+用户输入：
+${userInput}
+
+请严格按照以下格式输出：
+
+**标题**
+（简短有力、吸引眼球，包含关键词，最多 120 字符）
+
+**详细内容**
+（150-350 字，专业、清晰、crypto-native 语气，突出项目亮点、具体需求、行动号召，适当使用 emoji）
+
+**标签**
+（适合对应分区：测试网发布、IDO/Launchpad、安全审计、招募、集成新闻、空投活动、活动奖励、融资轮次、节点招募、生态系统、合作伙伴招募、黑客松、AMA、漏洞赏金、社区聊天、开发者专区）
+
+**附加建议**
+（如何使用能量或置顶区增加曝光；是否建议加入 Guild）
+
+语气：专业且兴奋，真诚社区友好，适合 Web3 用户，避免过于销售化，保持自然对话感。`;
   };
 
   const copyAiPrompt = (text: string) => {
@@ -288,13 +365,34 @@ export default function PostNew() {
             </div>
             {/* Body */}
             <div className="px-5 py-4 space-y-4">
+              {/* Mode tabs */}
+              <div className="flex gap-1.5 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <button
+                  onClick={() => { setAiMode("post"); setAiResult(""); setAiCopied(false); }}
+                  className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  style={aiMode === "post"
+                    ? { background: "rgba(255,215,0,0.2)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.4)" }
+                    : { background: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid transparent" }}
+                >
+                  📝 {lang === "zh-CN" ? "发布新帖" : "New Post"}
+                </button>
+                <button
+                  onClick={() => { setAiMode("reply"); setAiResult(""); setAiCopied(false); }}
+                  className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
+                  style={aiMode === "reply"
+                    ? { background: "rgba(100,220,150,0.18)", color: "#4ade80", border: "1px solid rgba(100,220,150,0.35)" }
+                    : { background: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid transparent" }}
+                >
+                  💬 {lang === "zh-CN" ? "回复互动" : "Reply"}
+                </button>
+              </div>
               <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-                {t("aiAssistantDesc")}
+                {aiMode === "post" ? t("aiAssistantDesc") : (lang === "zh-CN" ? "描述你收到的互动内容（点赞/评论/消息铃通知），生成专业回复提示词后粘贴到 AI 工具使用" : "Describe the interaction you received (like/comment/bell notification), generate a reply prompt to use with any free AI tool")}
               </p>
               <textarea
                 value={aiInput}
                 onChange={e => setAiInput(e.target.value)}
-                placeholder={t("aiAssistantPlaceholder")}
+                placeholder={aiMode === "post" ? t("aiAssistantPlaceholder") : (lang === "zh-CN" ? "例如：有人点赞了我的测试网帖子，并留言说很感兴趣..." : "e.g. Someone liked my testnet post and commented they're very interested...")}
                 rows={3}
                 className="w-full rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2"
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", caretColor: "#FFD700" }}
