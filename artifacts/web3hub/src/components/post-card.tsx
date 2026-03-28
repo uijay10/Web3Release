@@ -677,7 +677,7 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
                             )}
                           </div>
                           {replyingTo === c.id && (
-                            <div className="mt-1.5 flex flex-col gap-1">
+                            <div className="mt-1.5 flex flex-col gap-1.5">
                               <input
                                 value={replyText}
                                 onChange={e => setReplyText(e.target.value)}
@@ -685,14 +685,14 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
                                 placeholder={lang === "zh-CN" ? `回复 ${c.authorName ?? truncateAddress(c.wallet)}...` : `Reply to ${c.authorName ?? truncateAddress(c.wallet)}...`}
                                 className="w-full text-[10px] px-2 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary/20"
                               />
-                              <div className="flex gap-1.5 justify-end">
+                              <div className="flex gap-1.5">
+                                <button onClick={() => handleCommentReply(c.id)} disabled={replying || !replyText.trim()}
+                                  className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold disabled:opacity-50">
+                                  {replying ? "…" : (lang === "zh-CN" ? "✉ 发送" : "✉ Send")}
+                                </button>
                                 <button onClick={() => { setReplyingTo(null); setReplyText(""); }}
                                   className="px-2 py-1 rounded-lg text-[10px] text-muted-foreground hover:text-foreground border border-border/50 transition-colors">
                                   {lang === "zh-CN" ? "取消" : "Cancel"}
-                                </button>
-                                <button onClick={() => handleCommentReply(c.id)} disabled={replying || !replyText.trim()}
-                                  className="px-2 py-1 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold disabled:opacity-50">
-                                  {replying ? "…" : (lang === "zh-CN" ? "发送" : "Send")}
                                 </button>
                               </div>
                             </div>
@@ -898,14 +898,14 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
                               placeholder={lang === "zh-CN" ? `回复 ${c.authorName ?? truncateAddress(c.wallet)}...` : `Reply to ${c.authorName ?? truncateAddress(c.wallet)}...`}
                               className="w-full text-xs px-3 py-2 rounded-xl border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary/20"
                             />
-                            <div className="flex gap-2 justify-end">
+                            <div className="flex gap-2">
+                              <button onClick={() => handleCommentReply(c.id)} disabled={replying || !replyText.trim()}
+                                className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50">
+                                {replying ? "…" : (lang === "zh-CN" ? "✉ 发送" : "✉ Send")}
+                              </button>
                               <button onClick={() => { setReplyingTo(null); setReplyText(""); }}
                                 className="px-3 py-1.5 rounded-xl text-xs text-muted-foreground hover:text-foreground border border-border/50 transition-colors">
                                 {lang === "zh-CN" ? "取消" : "Cancel"}
-                              </button>
-                              <button onClick={() => handleCommentReply(c.id)} disabled={replying || !replyText.trim()}
-                                className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-50">
-                                {replying ? "…" : (lang === "zh-CN" ? "发送" : "Send")}
                               </button>
                             </div>
                           </div>
