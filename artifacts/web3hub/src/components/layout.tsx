@@ -36,6 +36,11 @@ const NAV_ROW1_KEYS = [
 ];
 
 const NAV_ROW2_KEYS = [
+  { key: "nav_ecosystem",  href: "/section/ecosystem" },
+  { key: "nav_partners",   href: "/section/partners" },
+  { key: "nav_hackathon",  href: "/section/hackathon" },
+  { key: "nav_ama",        href: "/section/ama" },
+  { key: "nav_bugbounty",  href: "/section/bugbounty" },
   { key: "nav_developer",  href: "/developer" },
 ];
 
