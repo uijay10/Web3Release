@@ -22,26 +22,19 @@ const DATE_LOCALES_LAYOUT: Record<string, Locale> = {
   "en": enUS, "zh-CN": zhCN, "de": de, "ru": ru, "fr": fr, "ja": ja, "ko": ko, "vi": vi,
 };
 
-const NAV_ROW1_KEYS = [
-  { key: "nav_testnet",     href: "/section/testnet" },
-  { key: "nav_ido",         href: "/section/ido" },
-  { key: "nav_security",    href: "/section/security" },
-  { key: "nav_integration", href: "/section/integration" },
-  { key: "nav_airdrop",     href: "/section/airdrop" },
-  { key: "nav_events",      href: "/section/events" },
-  { key: "nav_funding",     href: "/section/funding" },
-  { key: "nav_jobs",        href: "/section/jobs" },
-  { key: "nav_recruiting",  href: "/section/recruiting" },
-  { key: "nav_nodes",       href: "/section/nodes" },
-];
-
-const NAV_ROW2_KEYS = [
-  { key: "nav_ecosystem",  href: "/section/ecosystem" },
-  { key: "nav_partners",   href: "/section/partners" },
-  { key: "nav_hackathon",  href: "/section/hackathon" },
-  { key: "nav_ama",        href: "/section/ama" },
-  { key: "nav_bugbounty",  href: "/section/bugbounty" },
-  { key: "nav_developer",  href: "/developer" },
+const NAV_KEYS = [
+  { key: "nav_testnet",   href: "/section/testnet" },
+  { key: "nav_ido",       href: "/section/ido" },
+  { key: "nav_presale",   href: "/section/presale" },
+  { key: "nav_funding",   href: "/section/funding" },
+  { key: "nav_airdrop",   href: "/section/airdrop" },
+  { key: "nav_recruiting",href: "/section/recruiting" },
+  { key: "nav_nodes",     href: "/section/nodes" },
+  { key: "nav_mainnet",   href: "/section/mainnet" },
+  { key: "nav_unlock",    href: "/section/unlock" },
+  { key: "nav_exchange",  href: "/section/exchange" },
+  { key: "nav_quest",     href: "/section/quest" },
+  { key: "nav_developer", href: "/developer" },
 ];
 
 const LANGUAGES: { value: LangCode; label: string }[] = [
@@ -345,7 +338,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border/10" style={{background: "#0A0C14"}}>
           <div className="max-w-7xl mx-auto px-2 py-1.5">
             <div className="flex flex-wrap items-center justify-center gap-x-0.5 gap-y-0.5">
-              {[...NAV_ROW1_KEYS, ...NAV_ROW2_KEYS].map(({ key, href }) => (
+              {NAV_KEYS.map(({ key, href }) => (
                 <Link key={key} href={href} className={navLinkClass(href)}>
                   {location !== href && (
                     <span className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 group-hover:scale-105 transition-all duration-200 origin-center" />
