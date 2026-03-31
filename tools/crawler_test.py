@@ -1,5 +1,4 @@
-# crawler_test.py
-# Web3 Release AI 抓取 + LLM 提取测试（稳定版）
+# crawler_test.py  —  Web3 Release AI 抓取 + LLM 提取测试（稳定版，勿覆盖）
 
 import sys
 import os
@@ -19,14 +18,13 @@ def fetch_page(url: str) -> str:
         soup = BeautifulSoup(resp.text, "html.parser")
         for tag in soup(["script", "style", "nav", "footer", "head"]):
             tag.decompose()
-        text = soup.get_text(separator="\n", strip=True)
-        return text[:15000]
+        return soup.get_text(separator="\n", strip=True)[:15000]
     except Exception as e:
         return f"抓取失败: {str(e)}"
 
 
 async def fetch_page_crawl4ai(url: str) -> str:
-    """尝试用 Crawl4AI JS 渲染，失败则回退到 requests"""
+    """尝试 Crawl4AI JS 渲染，失败则回退 requests"""
     try:
         from crawl4ai import AsyncWebCrawler
         async with AsyncWebCrawler(verbose=False) as crawler:
@@ -40,7 +38,7 @@ async def fetch_page_crawl4ai(url: str) -> str:
 
 
 def call_groq(page_text: str, url: str):
-    """调用 Groq LLM 真实提取，无 Key 则返回 None"""
+    """调用 Groq LLM 真实提取，无 Key 返回 None"""
     key = os.environ.get("GROQ_API_KEY", "")
     if not key:
         return None
@@ -70,7 +68,6 @@ def call_groq(page_text: str, url: str):
 
 async def main():
     print("=== Web3 Release AI 抓取 + LLM 提取测试 ===\n")
-
     url = sys.argv[1] if len(sys.argv) > 1 else "https://solana.com"
     print(f"🌐 目标 URL: {url}")
     print("📡 正在抓取网页内容...\n")
@@ -87,7 +84,7 @@ async def main():
         events = [{
             "title": "示例事件（模拟）",
             "project_name": "示例项目",
-            "description": f"已成功从 {url} 抓取 {len(page_text)} 字符。设置 GROQ_API_KEY 后将输出真实 AI 分析结果。",
+            "description": f"已成功从 {url} 抓取 {len(page_text)} 字符。设置 GROQ_API_KEY 后将使用真实 AI 分析。",
             "category": ["测试网"],
             "start_time": None,
             "end_time": None,
