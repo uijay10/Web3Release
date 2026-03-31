@@ -1,19 +1,18 @@
 [
   {
-    "title": "从抓取内容提取的示例事件",
-    "project_name": "测试项目",
-    "description": "这是从 https://solana.com 抓取的内容中提取的事件示例。实际运行时会根据真实网页内容生成更准确的结果。",
+    "title": "示例：从真实网页抓取后提取的事件",
+    "project_name": "示例项目",
+    "description": "已成功从 https://solana.com 抓取 4748 字符内容。设置 GROQ_API_KEY 后将使用真实 AI 分析。",
     "category": [
       "测试网"
     ],
-    "start_time": "2026-04-15T00:00:00Z",
+    "start_time": null,
     "end_time": null,
     "source_url": "https://solana.com",
-    "importance": "high",
-    "ai_confidence": 0.85,
+    "importance": "medium",
+    "ai_confidence": 0.0,
     "tags": [
-      "Web3",
-      "Testnet"
+      "Web3"
     ]
   }
 ]
