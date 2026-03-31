@@ -53,7 +53,7 @@ function todayStr() {
 }
 
 function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: string | null; authorAvatarLive?: string | null; authorTagsLive?: string[] | null; authorTypeLive?: string | null }) {
-  const liveType = p.authorTypeLive !== undefined ? p.authorTypeLive : p.authorType;
+  const liveType = p.authorTypeLive != null ? p.authorTypeLive : p.authorType;
   const autoViews = computeAutoViews(p.id, p.createdAt, liveType);
   return {
     id: p.id,
