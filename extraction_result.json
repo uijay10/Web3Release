@@ -1,0 +1,20 @@
+[
+  {
+    "title": "XYZ Project on Solana Testnet is About to Launch",
+    "project_name": "XYZ",
+    "description": "The XYZ project on Solana will launch its testnet on April 15, 2026, lasting until April 30. Participants have a chance to receive airdrop rewards. This testnet focuses on Layer2 performance testing.",
+    "category": [
+      "Testnet"
+    ],
+    "start_time": "2026-04-15T00:00:00Z",
+    "end_time": "2026-04-30T23:59:59Z",
+    "source_url": "https://xyz.solana.com/testnet",
+    "importance": "high",
+    "ai_confidence": 0.88,
+    "tags": [
+      "Solana",
+      "Layer2",
+      "Testnet"
+    ]
+  }
+]
