@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { verifyAdminToken } from "./admin-token";
 
 export const ADMIN_WALLETS = new Set([
   "0xbe4548c1458be01838f1faafd69d335f0567399a",
@@ -18,8 +19,26 @@ export const ADMIN_WALLETS = new Set([
   "0xa0adb22151b7555c2d9c178e6da0e975d65b6013",
 ]);
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const wallet = (req.query.adminWallet ?? (req.body as any)?.adminWallet ?? "") as string;
+function extractWalletFromBody(body: unknown): string {
+  if (body && typeof body === "object" && "adminWallet" in body) {
+    return String((body as Record<string, unknown>).adminWallet ?? "");
+  }
+  return "";
+}
+
+export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization ?? "";
+  if (authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const wallet = verifyAdminToken(token);
+    if (wallet && ADMIN_WALLETS.has(wallet)) {
+      next();
+      return;
+    }
+    res.status(403).json({ error: "Forbidden: invalid or expired admin token" });
+    return;
+  }
+  const wallet = String(req.query.adminWallet ?? extractWalletFromBody(req.body) ?? "");
   if (!wallet || !ADMIN_WALLETS.has(wallet.toLowerCase())) {
     res.status(403).json({ error: "Forbidden: admin only" });
     return;
