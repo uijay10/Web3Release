@@ -21,17 +21,30 @@
         <div class="max-w-5xl mx-auto px-6 py-5 flex flex-wrap gap-3 justify-center" id="nav-bar"></div>
     </nav>
 
-    <div class="max-w-4xl mx-auto px-6 py-8">
+    <div class="max-w-4xl mx-auto px-6 pt-6 pb-4">
+        <div class="relative">
+            <input
+                id="search-input"
+                type="text"
+                placeholder="搜索事件标题、描述或标签..."
+                class="w-full px-5 py-3 pl-12 bg-white border border-slate-200 rounded-3xl focus:outline-none focus:border-blue-500 text-base shadow-sm">
+            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-6">
         <div class="flex justify-between items-center mb-6 px-1">
             <span id="result-count" class="text-slate-500 text-sm font-medium">共 0 条事件</span>
             <span id="expire-info" class="text-xs text-slate-400"></span>
         </div>
-        <div id="event-list" class="space-y-8"></div>
+        <div id="event-list" class="space-y-8 pb-12"></div>
     </div>
 
     <script>
         let allEvents = [];
         let claimedEvents = JSON.parse(localStorage.getItem('claimedEvents') || '[]');
+        let currentCategory = '全部';
+        let currentSearchTerm = '';
 
         const categories = [
             "全部", "测试网", "IDO/Launchpad", "预售", "融资公告",
@@ -79,8 +92,7 @@
                 claimedEvents.push(eventTitle);
             }
             localStorage.setItem('claimedEvents', JSON.stringify(claimedEvents));
-            const currentCategory = document.querySelector('#nav-bar button.bg-blue-600')?.dataset.category || '全部';
-            filterEvents(currentCategory);
+            refreshCurrentView();
         }
 
         function createNavBar() {
@@ -102,34 +114,58 @@
                     });
                     btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
                     btn.classList.remove('bg-white', 'border', 'border-slate-200');
-                    filterEvents(cat);
+                    currentCategory = cat;
+                    refreshCurrentView();
                 });
 
                 nav.appendChild(btn);
             });
         }
 
-        function filterEvents(selectedCategory) {
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', () => {
+                currentSearchTerm = searchInput.value.toLowerCase().trim();
+                refreshCurrentView();
+            });
+        }
+
+        function refreshCurrentView() {
             const container = document.getElementById('event-list');
             container.innerHTML = '';
 
             let filtered = allEvents.filter(event => isWithinRetention(event.start_time));
 
-            if (selectedCategory !== '全部') {
+            if (currentCategory !== '全部') {
                 filtered = filtered.filter(event => {
                     const cats = Array.isArray(event.category) ? event.category : [event.category || ''];
-                    return cats.some(c => c === selectedCategory);
+                    return cats.some(c => c === currentCategory);
+                });
+            }
+
+            if (currentSearchTerm) {
+                filtered = filtered.filter(event => {
+                    const title = (event.title || '').toLowerCase();
+                    const desc = (event.description || event.content || '').toLowerCase();
+                    const tags = Array.isArray(event.tags) ? event.tags.join(' ').toLowerCase() : '';
+                    const source = (event.project_name || event.source || '').toLowerCase();
+                    return title.includes(currentSearchTerm) ||
+                           desc.includes(currentSearchTerm) ||
+                           tags.includes(currentSearchTerm) ||
+                           source.includes(currentSearchTerm);
                 });
             }
 
             document.getElementById('result-count').textContent = `共 ${filtered.length} 条事件`;
-            document.getElementById('expire-info').textContent = `（已过滤过期活动，保留期 ${RETENTION_DAYS} 天）`;
+            document.getElementById('expire-info').textContent = currentSearchTerm
+                ? `（搜索: "${currentSearchTerm}"）`
+                : `（已过滤过期活动，保留期 ${RETENTION_DAYS} 天）`;
 
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-20 text-slate-500">
-                        暂无符合条件的活动<br>
-                        <span class="text-xs">（当前栏目或保留期内没有匹配事件）</span>
+                        没有找到匹配的内容<br>
+                        <span class="text-xs">尝试修改搜索关键词或切换栏目</span>
                     </div>`;
                 return;
             }
@@ -150,11 +186,9 @@
                 let importanceHTML = '';
                 if (event.importance) {
                     const imp = event.importance.toLowerCase();
-                    if (imp.includes('high') || imp.includes('重要')) {
-                        importanceHTML = `<span class="px-4 py-1 text-xs font-medium rounded-2xl bg-red-100 text-red-700">重要</span>`;
-                    } else {
-                        importanceHTML = `<span class="px-4 py-1 text-xs font-medium rounded-2xl bg-amber-100 text-amber-700">一般</span>`;
-                    }
+                    importanceHTML = imp.includes('high') || imp.includes('重要')
+                        ? `<span class="px-4 py-1 text-xs font-medium rounded-2xl bg-red-100 text-red-700">重要</span>`
+                        : `<span class="px-4 py-1 text-xs font-medium rounded-2xl bg-amber-100 text-amber-700">一般</span>`;
                 }
 
                 const claimed = isClaimed(event.title);
@@ -216,7 +250,7 @@
                 allEvents = await res.json();
                 console.log('加载成功，共', allEvents.length, '条');
 
-                filterEvents('全部');
+                refreshCurrentView();
             } catch (err) {
                 console.error(err);
                 document.getElementById('event-list').innerHTML = `<div class="text-red-500 text-center py-20">数据加载失败</div>`;
@@ -225,6 +259,7 @@
 
         window.onload = () => {
             createNavBar();
+            setupSearch();
             loadEvents();
         };
     </script>
