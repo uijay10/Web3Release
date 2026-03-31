@@ -102,7 +102,7 @@
         ];
 
         function loadClaims() {
-            const submitted = JSON.parse(localStorage.getItem('projectClaimSubmissions') || '[]');
+            const submitted = JSON.parse(localStorage.getItem('projectApplications') || '[]');
             return [...submitted, ...mockClaims];
         }
 
@@ -152,8 +152,8 @@
         }
 
         function saveLocalClaims() {
-            const submitted = claims.filter(c => !c.id.startsWith('mock_'));
-            localStorage.setItem('projectClaimSubmissions', JSON.stringify(submitted));
+            const submitted = claims.filter(c => !String(c.id).startsWith('mock_'));
+            localStorage.setItem('projectApplications', JSON.stringify(submitted));
         }
 
         function renderClaims(filteredClaims) {
