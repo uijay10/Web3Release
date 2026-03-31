@@ -5,9 +5,10 @@ import { useGetMe } from "@workspace/api-client-react";
 import { useLang, type LangCode } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { DISCLAIMER_CONTENT } from "@/lib/disclaimer-content";
-import { LogOut, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare, FileText, X, Bell } from "lucide-react";
+import { LogOut, ChevronDown, LayoutDashboard, ShieldCheck, PenSquare, FileText, X, Bell, Star } from "lucide-react";
 import { cn, truncateAddress, generateGradient } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
+import { useEventFilter, NAV_KEY_TO_CATEGORY } from "@/lib/event-filter-context";
 import { formatDistanceToNow } from "date-fns";
 import { enUS, zhCN } from "date-fns/locale";
 
@@ -47,8 +48,10 @@ const DONATE_ADDR = "0xbe4548c1458be01838f1faafd69d335f0567399a";
 export function Layout({ children }: { children: React.ReactNode }) {
   const { address, isConnected, user, disconnect } = useWeb3Auth();
   const { data: meData } = useGetMe({ wallet: address ?? "" }, { query: { enabled: !!address } });
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { activeCategory, setActiveCategory, showWatchedOnly, setShowWatchedOnly, watchedCount } = useEventFilter();
+  const isHome = location === "/";
   const [addrCopied, setAddrCopied] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [whitepaperOpen, setWhitepaperOpen] = useState(false);
@@ -154,12 +157,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const navLinkClass = (href: string) => cn(
-    "relative px-2.5 py-1 rounded-full text-[11px] font-normal whitespace-nowrap transition-all duration-200 group",
-    location === href
-      ? "text-white bg-white/15"
-      : "text-white/90 hover:text-white"
-  );
+  const navLinkClass = (href: string, navKey?: string) => {
+    const cat = navKey ? NAV_KEY_TO_CATEGORY[navKey] : undefined;
+    const isActive = isHome
+      ? (cat ? activeCategory === cat && !showWatchedOnly : false)
+      : location === href;
+    return cn(
+      "relative px-2.5 py-1 rounded-full text-[11px] font-normal whitespace-nowrap transition-all duration-200 group cursor-pointer",
+      isActive
+        ? "text-white bg-white/20 ring-1 ring-white/40"
+        : "text-white/80 hover:text-white hover:bg-white/10"
+    );
+  };
+
+  const handleNavClick = (e: React.MouseEvent, href: string, navKey: string) => {
+    const cat = NAV_KEY_TO_CATEGORY[navKey];
+    if (isHome && cat) {
+      e.preventDefault();
+      setActiveCategory(cat);
+      setShowWatchedOnly(false);
+    } else if (!isHome) {
+      navigate(href);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col dark:bg-background" style={isDark ? {} : {background: "#EEF5FF"}}>
@@ -332,14 +352,48 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border/10" style={{background: "#0A0C14"}}>
           <div className="max-w-7xl mx-auto px-2 py-1.5">
             <div className="flex flex-wrap items-center justify-center gap-x-0.5 gap-y-0.5">
-              {NAV_KEYS.map(({ key, href }) => (
-                <Link key={key} href={href} className={navLinkClass(href)}>
-                  {location !== href && (
-                    <span className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-white/10 group-hover:scale-105 transition-all duration-200 origin-center" />
+              {/* All events shortcut - only on home */}
+              {isHome && (
+                <button
+                  onClick={() => { setActiveCategory("全部"); setShowWatchedOnly(false); }}
+                  className={cn(
+                    "relative px-2.5 py-1 rounded-full text-[11px] font-normal whitespace-nowrap transition-all duration-200 cursor-pointer",
+                    activeCategory === "全部" && !showWatchedOnly
+                      ? "text-white bg-white/20 ring-1 ring-white/40"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
+                >
+                  全部
+                </button>
+              )}
+              {NAV_KEYS.map(({ key, href }) => (
+                <a
+                  key={key}
+                  href={isHome ? "#" : href}
+                  onClick={(e) => handleNavClick(e, href, key)}
+                  className={navLinkClass(href, key)}
+                >
                   <span className="relative z-10">{t(key)}</span>
-                </Link>
+                </a>
               ))}
+              {/* ⭐ Watched button */}
+              <button
+                onClick={() => { setShowWatchedOnly(true); setActiveCategory("全部"); if (!isHome) navigate("/"); }}
+                className={cn(
+                  "relative px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1",
+                  showWatchedOnly && isHome
+                    ? "text-amber-300 bg-amber-500/20 ring-1 ring-amber-400/40"
+                    : "text-amber-300/80 hover:text-amber-300 hover:bg-amber-500/10"
+                )}
+              >
+                <Star className="w-3 h-3" />
+                {t("navWatched") || "我已关注"}
+                {watchedCount > 0 && (
+                  <span className="ml-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold bg-amber-400 text-amber-900 px-1">
+                    {watchedCount}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </div>

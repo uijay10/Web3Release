@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, Star, Building2, CheckCircle, ExternalLink, Clock } from "lucide-react";
+import { Search, Building2, CheckCircle, ExternalLink, Clock, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   type Web3Event,
-  CATEGORIES,
   isEventExpired,
   formatEventDate,
   submitClaim,
@@ -14,6 +13,7 @@ import {
   loadWatched,
   toggleWatched,
 } from "@/lib/events";
+import { useEventFilter } from "@/lib/event-filter-context";
 
 function getEventBase() {
   const base = import.meta.env.BASE_URL ?? "/";
