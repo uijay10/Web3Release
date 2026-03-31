@@ -6,65 +6,64 @@
     <title>管理后台 - 项目事件认领审核</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .status-pending {
-            background-color: #fef3c7;
-            color: #d97706;
+        .status-pending  { background-color: #fef3c7; color: #d97706; }
+        .status-approved { background-color: #d1fae5; color: #10b981; }
+        .status-rejected { background-color: #fee2e2; color: #ef4444; }
+        .claim-card { transition: all 0.3s ease; }
+        .claim-card:hover { transform: translateY(-3px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08); }
+        #toast {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            opacity: 0; pointer-events: none; z-index: 9999;
         }
-        .status-approved {
-            background-color: #d1fae5;
-            color: #10b981;
-        }
-        .status-rejected {
-            background-color: #fee2e2;
-            color: #ef4444;
-        }
-        .claim-card {
-            transition: all 0.3s ease;
-        }
-        .claim-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body class="bg-slate-50">
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="px-6 py-3 rounded-2xl text-white text-sm font-medium shadow-lg"></div>
+
     <div class="min-h-screen">
         <header class="bg-white border-b sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
+            <div class="max-w-7xl mx-auto px-8 py-5 flex flex-wrap justify-between items-center gap-3">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-800">项目事件认领管理后台</h1>
                     <p class="text-slate-500 text-sm">共 <span id="total-count" class="font-medium text-slate-700">0</span> 条申请</p>
                 </div>
-                <button onclick="refreshData()"
-                        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition-colors">
-                    刷新数据
-                </button>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="batchApprove()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-2xl transition-colors">批量通过</button>
+                    <button onclick="batchReject()"  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-2xl transition-colors">批量拒绝</button>
+                    <button onclick="refreshData()"  class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-2xl transition-colors">刷新数据</button>
+                </div>
             </div>
         </header>
 
+        <!-- 统计卡片 -->
         <div class="max-w-7xl mx-auto px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 cursor-pointer hover:border-amber-300 transition-colors" onclick="filterByStatus('pending')">
                 <div class="text-amber-600 text-sm font-medium">待审核</div>
                 <div id="pending-count" class="text-5xl font-bold text-slate-800 mt-3">0</div>
             </div>
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 cursor-pointer hover:border-emerald-300 transition-colors" onclick="filterByStatus('approved')">
                 <div class="text-emerald-600 text-sm font-medium">已通过</div>
                 <div id="approved-count" class="text-5xl font-bold text-slate-800 mt-3">0</div>
             </div>
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 cursor-pointer hover:border-red-300 transition-colors" onclick="filterByStatus('rejected')">
                 <div class="text-red-600 text-sm font-medium">已拒绝</div>
                 <div id="rejected-count" class="text-5xl font-bold text-slate-800 mt-3">0</div>
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto px-8 pb-12">
-            <div class="flex flex-wrap justify-between items-center mb-8 gap-3">
-                <h2 class="text-xl font-semibold text-slate-800">认领申请列表</h2>
-                <input
-                    id="search-input"
-                    type="text"
-                    placeholder="搜索项目名称或事件标题..."
-                    class="w-full md:w-96 px-5 py-3 border border-slate-300 rounded-3xl focus:outline-none focus:border-blue-500 text-base">
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-semibold text-slate-800">认领申请列表</h2>
+                    <button onclick="filterByStatus('all')" id="show-all-btn"
+                            class="text-xs text-blue-600 hover:underline hidden">显示全部</button>
+                </div>
+                <input id="search-input" type="text" placeholder="搜索项目名称或事件标题..."
+                       class="w-full md:w-96 px-5 py-3 border border-slate-300 rounded-3xl focus:outline-none focus:border-blue-500 text-base">
             </div>
 
             <div id="claims-list" class="space-y-6"></div>
@@ -72,9 +71,12 @@
     </div>
 
     <script>
-        let claims = [
+        let statusFilter = 'all';
+
+        // 从 localStorage 加载前端提交的申请，合并模拟数据
+        const mockClaims = [
             {
-                id: 1,
+                id: 'mock_001',
                 eventTitle: "Colosseum Frontier 黑客松",
                 projectName: "Solana 中文社区",
                 contact: "@solana_cn",
@@ -82,10 +84,11 @@
                 eventLink: "#",
                 status: "pending",
                 submitTime: "2026-04-01 14:30",
-                reviewTime: ""
+                reviewTime: "",
+                reviewNote: ""
             },
             {
-                id: 2,
+                id: 'mock_002',
                 eventTitle: "Solana Accelerate USA",
                 projectName: "Ocean Ventures",
                 contact: "hello@ocean.ventures",
@@ -93,31 +96,70 @@
                 eventLink: "#",
                 status: "approved",
                 submitTime: "2026-03-28 09:15",
-                reviewTime: "2026-03-29 10:20"
+                reviewTime: "2026-03-29 10:20",
+                reviewNote: "资源对接方向与活动匹配，已通过。"
             }
         ];
 
+        function loadClaims() {
+            const submitted = JSON.parse(localStorage.getItem('projectClaimSubmissions') || '[]');
+            return [...submitted, ...mockClaims];
+        }
+
+        let claims = loadClaims();
+
+        function showToast(msg, color = '#10b981') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.backgroundColor = color;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
         function getStatusHTML(status) {
-            if (status === 'pending') {
-                return `<span class="status-pending px-5 py-1.5 rounded-2xl text-sm font-medium">待审核</span>`;
-            } else if (status === 'approved') {
-                return `<span class="status-approved px-5 py-1.5 rounded-2xl text-sm font-medium">已通过</span>`;
-            } else {
-                return `<span class="status-rejected px-5 py-1.5 rounded-2xl text-sm font-medium">已拒绝</span>`;
-            }
+            const map = {
+                pending:  `<span class="status-pending px-4 py-1 rounded-2xl text-sm font-medium">待审核</span>`,
+                approved: `<span class="status-approved px-4 py-1 rounded-2xl text-sm font-medium">已通过</span>`,
+                rejected: `<span class="status-rejected px-4 py-1 rounded-2xl text-sm font-medium">已拒绝</span>`
+            };
+            return map[status] || '';
         }
 
         function updateStats() {
+            claims = loadClaims();
             document.getElementById('total-count').textContent = claims.length;
-            document.getElementById('pending-count').textContent = claims.filter(c => c.status === 'pending').length;
+            document.getElementById('pending-count').textContent  = claims.filter(c => c.status === 'pending').length;
             document.getElementById('approved-count').textContent = claims.filter(c => c.status === 'approved').length;
             document.getElementById('rejected-count').textContent = claims.filter(c => c.status === 'rejected').length;
         }
 
+        function filterByStatus(status) {
+            statusFilter = status;
+            document.getElementById('show-all-btn').classList.toggle('hidden', status === 'all');
+            renderClaims(getFiltered());
+        }
+
+        function getFiltered() {
+            const term = document.getElementById('search-input').value.toLowerCase().trim();
+            let list = statusFilter === 'all' ? claims : claims.filter(c => c.status === statusFilter);
+            if (term) {
+                list = list.filter(c =>
+                    c.projectName.toLowerCase().includes(term) ||
+                    c.eventTitle.toLowerCase().includes(term)
+                );
+            }
+            return list;
+        }
+
+        function saveLocalClaims() {
+            const submitted = claims.filter(c => !c.id.startsWith('mock_'));
+            localStorage.setItem('projectClaimSubmissions', JSON.stringify(submitted));
+        }
+
         function renderClaims(filteredClaims) {
+            updateStats();
             const container = document.getElementById('claims-list');
             container.innerHTML = '';
-            updateStats();
 
             if (filteredClaims.length === 0) {
                 container.innerHTML = `<div class="text-center py-20 text-slate-400">暂无匹配的申请</div>`;
@@ -125,35 +167,52 @@
             }
 
             filteredClaims.forEach(claim => {
+                const detailId = `detail-${claim.id}`;
+                const noteId   = `note-${claim.id}`;
                 const html = `
                     <div class="claim-card bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-start">
+                        <div class="flex items-start gap-4">
+                            ${claim.status === 'pending' ? `<input type="checkbox" class="batch-cb mt-1.5 w-4 h-4 accent-blue-600 flex-shrink-0" data-id="${claim.id}">` : '<div class="w-4 flex-shrink-0"></div>'}
                             <div class="flex-1 min-w-0">
-                                <div class="flex flex-wrap items-center gap-3">
+                                <div class="flex flex-wrap items-center gap-3 mb-3">
                                     <h3 class="font-semibold text-xl text-slate-900">${claim.eventTitle}</h3>
                                     ${getStatusHTML(claim.status)}
                                 </div>
-                                <p class="mt-3 text-slate-700"><strong>申请方：</strong>${claim.projectName}</p>
+                                <p class="text-slate-700"><strong>申请方：</strong>${claim.projectName}</p>
                                 <p class="text-slate-600"><strong>联系方式：</strong>${claim.contact}</p>
                                 <p class="text-xs text-slate-500 mt-1">提交时间：${claim.submitTime}</p>
                                 ${claim.reviewTime ? `<p class="text-xs text-slate-500">审核时间：${claim.reviewTime}</p>` : ''}
                             </div>
                         </div>
 
-                        <div class="mt-6 bg-slate-50 p-6 rounded-2xl text-slate-700 leading-relaxed">
-                            <strong class="block mb-2">认领理由：</strong>
-                            ${claim.reason}
+                        <!-- 可展开详情 -->
+                        <div class="mt-5">
+                            <button onclick="toggleDetail('${detailId}')"
+                                    class="text-sm text-blue-600 hover:underline">展开认领详情 ▾</button>
+                            <div id="${detailId}" class="hidden mt-4 bg-slate-50 p-5 rounded-2xl text-slate-700 leading-relaxed">
+                                <strong class="block mb-2">认领理由：</strong>
+                                ${claim.reason}
+                                ${claim.reviewNote ? `<div class="mt-4 pt-4 border-t border-slate-200"><strong>审核备注：</strong>${claim.reviewNote}</div>` : ''}
+                            </div>
                         </div>
 
-                        <div class="mt-8 flex flex-wrap gap-4 items-center">
-                            <a href="${claim.eventLink}" target="_blank"
-                               class="text-blue-600 hover:text-blue-700 font-medium">查看原事件 →</a>
+                        ${claim.status === 'pending' ? `
+                        <!-- 审核备注 -->
+                        <div class="mt-5">
+                            <textarea id="${noteId}" rows="2"
+                                      placeholder="填写审核备注（可选）..."
+                                      class="w-full px-4 py-3 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-blue-400 resize-none">${claim.reviewNote || ''}</textarea>
+                        </div>
+                        ` : ''}
 
+                        <div class="mt-6 flex flex-wrap gap-3 items-center">
+                            <a href="${claim.eventLink || '#'}" target="_blank"
+                               class="text-blue-600 hover:text-blue-700 text-sm font-medium">查看原事件 →</a>
                             ${claim.status === 'pending' ? `
-                                <button onclick="approveClaim(${claim.id})"
-                                        class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl transition-colors">通过审核</button>
-                                <button onclick="rejectClaim(${claim.id})"
-                                        class="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl transition-colors">拒绝申请</button>
+                                <button onclick="approveClaim('${claim.id}', '${noteId}')"
+                                        class="px-7 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-2xl transition-colors">✓ 通过审核</button>
+                                <button onclick="rejectClaim('${claim.id}', '${noteId}')"
+                                        class="px-7 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-2xl transition-colors">✕ 拒绝申请</button>
                             ` : ''}
                         </div>
                     </div>
@@ -162,37 +221,73 @@
             });
         }
 
-        function approveClaim(id) {
-            const claim = claims.find(c => c.id === id);
-            if (claim) {
-                claim.status = 'approved';
-                claim.reviewTime = new Date().toLocaleString('zh-CN');
-                // TODO: await fetch('/api/claims/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'approved' }) });
-                renderClaims(getFiltered());
-            }
+        function toggleDetail(id) {
+            const el = document.getElementById(id);
+            const btn = el.previousElementSibling;
+            const hidden = el.classList.toggle('hidden');
+            btn.textContent = hidden ? '展开认领详情 ▾' : '收起详情 ▴';
         }
 
-        function rejectClaim(id) {
+        function approveClaim(id, noteId) {
             const claim = claims.find(c => c.id === id);
-            if (claim) {
-                claim.status = 'rejected';
-                claim.reviewTime = new Date().toLocaleString('zh-CN');
-                // TODO: await fetch('/api/claims/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'rejected' }) });
-                renderClaims(getFiltered());
-            }
+            if (!claim) return;
+            const noteEl = document.getElementById(noteId);
+            claim.status = 'approved';
+            claim.reviewTime = new Date().toLocaleString('zh-CN').slice(0, 16);
+            claim.reviewNote = noteEl ? noteEl.value.trim() : '';
+            // TODO: await fetch('/api/claims/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'approved', reviewNote: claim.reviewNote }) });
+            saveLocalClaims();
+            showToast(`✅ 已通过「${claim.projectName}」的认领申请`);
+            renderClaims(getFiltered());
         }
 
-        function getFiltered() {
-            const term = document.getElementById('search-input').value.toLowerCase().trim();
-            if (!term) return claims;
-            return claims.filter(c =>
-                c.projectName.toLowerCase().includes(term) ||
-                c.eventTitle.toLowerCase().includes(term)
-            );
+        function rejectClaim(id, noteId) {
+            const claim = claims.find(c => c.id === id);
+            if (!claim) return;
+            const noteEl = document.getElementById(noteId);
+            claim.status = 'rejected';
+            claim.reviewTime = new Date().toLocaleString('zh-CN').slice(0, 16);
+            claim.reviewNote = noteEl ? noteEl.value.trim() : '';
+            // TODO: await fetch('/api/claims/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'rejected', reviewNote: claim.reviewNote }) });
+            saveLocalClaims();
+            showToast(`❌ 已拒绝「${claim.projectName}」的认领申请`, '#ef4444');
+            renderClaims(getFiltered());
+        }
+
+        function batchApprove() {
+            const checked = [...document.querySelectorAll('.batch-cb:checked')].map(el => el.dataset.id);
+            if (checked.length === 0) { showToast('请先勾选待审核的申请', '#f59e0b'); return; }
+            checked.forEach(id => {
+                const c = claims.find(x => x.id === id);
+                if (c && c.status === 'pending') {
+                    c.status = 'approved';
+                    c.reviewTime = new Date().toLocaleString('zh-CN').slice(0, 16);
+                }
+            });
+            saveLocalClaims();
+            showToast(`✅ 已批量通过 ${checked.length} 条申请`);
+            renderClaims(getFiltered());
+        }
+
+        function batchReject() {
+            const checked = [...document.querySelectorAll('.batch-cb:checked')].map(el => el.dataset.id);
+            if (checked.length === 0) { showToast('请先勾选待审核的申请', '#f59e0b'); return; }
+            checked.forEach(id => {
+                const c = claims.find(x => x.id === id);
+                if (c && c.status === 'pending') {
+                    c.status = 'rejected';
+                    c.reviewTime = new Date().toLocaleString('zh-CN').slice(0, 16);
+                }
+            });
+            saveLocalClaims();
+            showToast(`❌ 已批量拒绝 ${checked.length} 条申请`, '#ef4444');
+            renderClaims(getFiltered());
         }
 
         function refreshData() {
-            alert("实际项目中此处会从 Supabase 等后端拉取最新数据");
+            claims = loadClaims();
+            // TODO: const res = await fetch('/api/claims'); claims = await res.json();
+            showToast('数据已刷新');
             renderClaims(getFiltered());
         }
 
