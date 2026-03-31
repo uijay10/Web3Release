@@ -380,7 +380,7 @@
 
         async function loadEvents() {
             try {
-                const res = await fetch('/extraction_result.json');
+                const res = await fetch('./extraction_result.json');
                 if (!res.ok) throw new Error('加载失败');
                 allEvents = await res.json();
                 console.log('加载成功，共', allEvents.length, '条');
