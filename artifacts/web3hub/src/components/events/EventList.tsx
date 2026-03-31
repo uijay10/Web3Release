@@ -246,13 +246,12 @@ function ClaimModal({
 }
 
 export function EventList() {
+  const { activeCategory, showWatchedOnly, refreshWatched } = useEventFilter();
   const [allEvents, setAllEvents] = useState<Web3Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeCategory, setActiveCategory] = useState("全部");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"time" | "importance">("time");
-  const [showWatchedOnly, setShowWatchedOnly] = useState(false);
   const [watched, setWatched] = useState<string[]>([]);
   const [claimedMap, setClaimedMap] = useState<Record<string, boolean>>({});
   const [submittedMap, setSubmittedMap] = useState<Record<string, boolean>>({});
@@ -285,8 +284,9 @@ export function EventList() {
   const handleWatch = useCallback((event: Web3Event) => {
     const nowWatched = toggleWatched(event.title);
     setWatched(loadWatched());
+    refreshWatched();
     return nowWatched;
-  }, []);
+  }, [refreshWatched]);
 
   const handleClaim = useCallback((event: Web3Event) => {
     setClaimTarget(event);
@@ -358,32 +358,15 @@ export function EventList() {
         />
       </div>
 
-      {/* Category nav */}
-      <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat}
-            onClick={() => { setActiveCategory(cat); setShowWatchedOnly(false); }}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              activeCategory === cat && !showWatchedOnly
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "border border-border hover:border-primary/50 hover:text-primary text-muted-foreground"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-        <button
-          onClick={() => { setShowWatchedOnly(true); setActiveCategory("全部"); }}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-            showWatchedOnly
-              ? "bg-blue-600 text-white shadow-sm"
-              : "border border-border hover:border-blue-400 hover:text-blue-600 text-muted-foreground"
-          }`}
-        >
-          ⭐ 我已关注 {watched.length > 0 ? `(${watched.length})` : ""}
-        </button>
-      </div>
+      {/* Active filter hint */}
+      {(activeCategory !== "全部" || showWatchedOnly) && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>当前筛选：</span>
+          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
+            {showWatchedOnly ? <><Star className="w-3 h-3" /> 我已关注</> : activeCategory}
+          </span>
+        </div>
+      )}
 
       {/* Content */}
       {loading && (

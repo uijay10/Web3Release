@@ -2,6 +2,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { Web3Provider } from "@/lib/web3";
 import { LanguageProvider } from "@/lib/i18n";
 import { Layout } from "@/components/layout";
+import { EventFilterProvider } from "@/lib/event-filter-context";
 
 import Home from "@/pages/home";
 import Showcase from "@/pages/showcase";
@@ -47,11 +48,13 @@ function App() {
   return (
     <Web3Provider>
       <LanguageProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Layout>
-            <Router />
-          </Layout>
-        </WouterRouter>
+        <EventFilterProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Layout>
+              <Router />
+            </Layout>
+          </WouterRouter>
+        </EventFilterProvider>
       </LanguageProvider>
     </Web3Provider>
   );

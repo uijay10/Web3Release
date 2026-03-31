@@ -387,7 +387,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Star className="w-3 h-3" />
-                {t("navWatched") || "我已关注"}
+                我已关注
                 {watchedCount > 0 && (
                   <span className="ml-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold bg-amber-400 text-amber-900 px-1">
                     {watchedCount}
