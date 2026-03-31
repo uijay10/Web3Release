@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 项目事件聚合</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            content: [],
-            theme: { extend: {} }
-        };
-    </script>
 </head>
 <body class="bg-slate-50 font-sans">
     <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-10 shadow-lg">
@@ -25,27 +19,35 @@
     </nav>
 
     <div class="max-w-4xl mx-auto px-6 py-10">
+        <div id="status" class="text-center py-4 text-slate-400 text-sm"></div>
         <div id="event-list" class="space-y-6"></div>
     </div>
 
     <script>
-        const categories = ["全部", "测试网", "IDO/Launchpad", "预售", "融资公告", "空投", "招聘", "节点招募", "主网上线", "代币解锁", "交易所上线", "链上任务", "开发者专区"];
-        let allEvents = [];
-        let activeCategory = '全部';
+        var allEvents = [];
+        var activeCategory = "全部";
+        var categories = ["全部","测试网","IDO/Launchpad","预售","融资公告","空投","招聘","节点招募","主网上线","代币解锁","交易所上线","链上任务","开发者专区"];
+
+        function formatDate(s) {
+            if (!s) return "日期待定";
+            try { return new Date(s).toLocaleDateString("zh-CN", {year:"numeric",month:"long",day:"numeric"}); }
+            catch(e) { return s; }
+        }
 
         function createNavBar() {
-            const nav = document.getElementById('nav-bar');
-            nav.innerHTML = '';
-            categories.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = `px-6 py-2.5 rounded-full text-sm font-medium transition-all ${cat === activeCategory ? 'bg-blue-600 text-white shadow-md' : 'bg-white hover:bg-slate-100 border border-slate-200'}`;
+            var nav = document.getElementById("nav-bar");
+            nav.innerHTML = "";
+            categories.forEach(function(cat) {
+                var btn = document.createElement("button");
+                var active = cat === activeCategory;
+                btn.className = "px-5 py-2 rounded-full text-sm font-medium transition-all " + (active ? "bg-blue-600 text-white shadow" : "bg-white border border-slate-200 hover:bg-slate-100");
                 btn.textContent = cat;
-                btn.onclick = () => {
+                btn.onclick = function() {
                     activeCategory = cat;
                     createNavBar();
-                    const filtered = cat === '全部' ? allEvents : allEvents.filter(e => {
-                        const cats = Array.isArray(e.category) ? e.category : [e.category];
-                        return cats.some(c => c && c.includes(cat));
+                    var filtered = cat === "全部" ? allEvents : allEvents.filter(function(e) {
+                        var cats = Array.isArray(e.category) ? e.category : [e.category || ""];
+                        return cats.some(function(c) { return c && c.indexOf(cat) >= 0; });
                     });
                     renderEvents(filtered);
                 };
@@ -53,88 +55,70 @@
             });
         }
 
-        function formatDate(isoStr) {
-            if (!isoStr) return '日期待定';
-            try {
-                const d = new Date(isoStr);
-                return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-            } catch {
-                return isoStr;
-            }
-        }
-
         function renderEvents(events) {
-            const container = document.getElementById('event-list');
-            container.innerHTML = '';
-
+            var container = document.getElementById("event-list");
+            var status = document.getElementById("status");
+            container.innerHTML = "";
             if (!events || events.length === 0) {
-                container.innerHTML = '<div class="text-center py-20 text-slate-500">暂无事件数据</div>';
+                container.innerHTML = '<div class="text-center py-20 text-slate-400">暂无事件数据</div>';
                 return;
             }
+            status.textContent = "共 " + events.length + " 条事件";
+            events.forEach(function(ev) {
+                var title = ev.title || "未命名事件";
+                var cats = Array.isArray(ev.category) ? ev.category : [ev.category || "其他"];
+                var catLabel = cats.join(" · ");
+                var date = formatDate(ev.start_time);
+                var desc = (ev.description || "暂无描述").substring(0, 180);
+                var link = ev.source_url || ev.link || "#";
+                var tags = Array.isArray(ev.tags) ? ev.tags : [];
+                var imp = ev.importance || "medium";
+                var impClass = imp === "high" ? "bg-red-100 text-red-700" : imp === "medium" ? "bg-yellow-100 text-yellow-700" : "bg-slate-100 text-slate-500";
+                var impLabel = imp === "high" ? "🔥 重要" : imp === "medium" ? "📌 一般" : "💡 低";
+                var tagHtml = tags.map(function(t) { return '<span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">#' + t + '</span>'; }).join("");
 
-            events.forEach(event => {
-                const title = event.title || '未命名事件';
-                const cats = Array.isArray(event.category) ? event.category : [event.category || '其他'];
-                const categoryLabel = cats.join(' · ');
-                const dateStr = event.start_time ? formatDate(event.start_time) : (event.end_time ? formatDate(event.end_time) : '日期待定');
-                const desc = event.description || '暂无描述';
-                const shortDesc = desc.length > 180 ? desc.substring(0, 177) + '...' : desc;
-                const link = event.source_url || event.link || '#';
-                const tags = Array.isArray(event.tags) ? event.tags : [];
-                const importance = event.importance || 'medium';
-                const importanceBadge = importance === 'high' ? 'bg-red-100 text-red-700' : importance === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-500';
-                const importanceLabel = importance === 'high' ? '🔥 重要' : importance === 'medium' ? '📌 一般' : '💡 低';
-
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100";
-                card.innerHTML = `
-                    <div class="p-7">
-                        <div class="flex items-center justify-between mb-5">
-                            <div class="flex gap-2 flex-wrap">
-                                <span class="px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-2xl">${categoryLabel}</span>
-                                <span class="px-4 py-1.5 ${importanceBadge} text-xs font-semibold rounded-2xl">${importanceLabel}</span>
-                            </div>
-                            <span class="text-slate-500 text-sm">${dateStr}</span>
-                        </div>
-
-                        <h2 class="text-2xl font-semibold leading-tight mb-4 text-slate-900">
-                            <a href="${link}" target="_blank" class="hover:text-blue-600 transition-colors">${title}</a>
-                        </h2>
-
-                        <p class="text-slate-600 leading-relaxed mb-6">${shortDesc}</p>
-
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            ${tags.map(t => `<span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">#${t}</span>`).join('')}
-                        </div>
-
-                        <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-4">
-                            <span class="text-slate-400">来源：${event.project_name || '未知'}</span>
-                            <a href="${link}" target="_blank" class="text-blue-600 hover:underline font-medium">查看详情 →</a>
-                        </div>
-                    </div>
-                `;
+                var card = document.createElement("div");
+                card.className = "bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all border border-slate-100 p-6";
+                card.innerHTML =
+                    '<div class="flex items-center justify-between mb-4">' +
+                        '<div class="flex gap-2 flex-wrap">' +
+                            '<span class="px-4 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">' + catLabel + '</span>' +
+                            '<span class="px-4 py-1 ' + impClass + ' text-xs font-semibold rounded-full">' + impLabel + '</span>' +
+                        '</div>' +
+                        '<span class="text-slate-400 text-sm">' + date + '</span>' +
+                    '</div>' +
+                    '<h2 class="text-xl font-bold mb-3 text-slate-900">' +
+                        '<a href="' + link + '" target="_blank" class="hover:text-blue-600">' + title + '</a>' +
+                    '</h2>' +
+                    '<p class="text-slate-600 leading-relaxed mb-4">' + desc + '</p>' +
+                    '<div class="flex flex-wrap gap-2 mb-4">' + tagHtml + '</div>' +
+                    '<div class="flex justify-between items-center text-sm border-t border-slate-100 pt-4">' +
+                        '<span class="text-slate-400">来源：' + (ev.project_name || "未知") + '</span>' +
+                        '<a href="' + link + '" target="_blank" class="text-blue-600 hover:underline font-medium">查看详情 →</a>' +
+                    '</div>';
                 container.appendChild(card);
             });
         }
 
         async function loadEvents() {
-            const container = document.getElementById('event-list');
+            var status = document.getElementById("status");
+            var container = document.getElementById("event-list");
             container.innerHTML = '<div class="text-center py-20 text-slate-400">加载中...</div>';
             try {
-                const res = await fetch('/extraction_result.json');
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const text = await res.text();
-                if (text.trim().startsWith('<')) throw new Error('返回的是 HTML，不是 JSON');
+                var res = await fetch("/extraction_result.json");
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                var text = await res.text();
+                if (text.trim()[0] === "<") throw new Error("返回的是 HTML 而非 JSON，请确认文件路径");
                 allEvents = JSON.parse(text);
                 createNavBar();
                 renderEvents(allEvents);
-            } catch (err) {
-                console.error('加载失败:', err.message);
-                container.innerHTML = `<div class="text-center py-20 text-red-400">加载失败：${err.message}</div>`;
+            } catch(err) {
+                container.innerHTML = '<div class="text-center py-20 text-red-500">加载失败：' + err.message + '</div>';
+                console.error("loadEvents 失败:", err);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener("DOMContentLoaded", function() {
             createNavBar();
             loadEvents();
         });
