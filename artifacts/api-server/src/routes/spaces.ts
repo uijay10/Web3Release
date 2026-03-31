@@ -45,8 +45,24 @@ router.post("/apply", async (req, res) => {
   const existingCount = (user as any)?.dailyApplyCount ?? 0;
   const newCount = existingDate === today ? existingCount + 1 : 1;
 
+  const profileUpdate: Record<string, unknown> = {
+    spaceStatus: "pending",
+    dailyApplyCount: newCount,
+    lastApplyDate: today,
+  };
+  if (projectName) profileUpdate.username = projectName;
+  if (projectTwitter || twitter) profileUpdate.twitter = projectTwitter ?? twitter;
+  const wb = (req.body as any).website;
+  const dc = (req.body as any).discord;
+  const tg = (req.body as any).telegram;
+  const wp = (req.body as any).whitepaper;
+  if (wb) profileUpdate.website = wb;
+  if (dc) profileUpdate.discord = dc;
+  if (tg) profileUpdate.telegram = tg;
+  if (wp) profileUpdate.whitepaper = wp;
+
   await db.update(usersTable)
-    .set({ spaceStatus: "pending", dailyApplyCount: newCount, lastApplyDate: today } as any)
+    .set(profileUpdate as any)
     .where(eq(usersTable.wallet, lw));
 
   res.json({ message: "Application submitted. Review will be completed within 24 hours." });

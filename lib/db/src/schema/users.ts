@@ -37,6 +37,7 @@ export const usersTable = pgTable("users", {
   normalDailyPostCount: integer("normal_daily_post_count").notNull().default(0),
   normalDailyPostDate: text("normal_daily_post_date"),
   whitepaper: text("whitepaper"),
+  bio: text("bio"),
   tags: text("tags"),
   subscriptions: text("subscriptions"),
   contact: text("contact"),

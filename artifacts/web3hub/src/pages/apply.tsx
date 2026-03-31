@@ -1,251 +1,539 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useWeb3Auth } from "@/lib/web3";
-import { useApplySpace } from "@workspace/api-client-react";
-import { ApplySpaceRequestType } from "@workspace/api-client-react";
-import { Building2, Code2, Megaphone, CheckCircle2, Copy, Check } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { useLocation } from "wouter";
+import {
+  Building2, User, Globe, Twitter, MessageCircle, Send,
+  BookOpen, CheckCircle2, ArrowRight, Loader2, AlertTriangle,
+  Sparkles, ChevronRight,
+} from "lucide-react";
 
-const REQUIRED = "必填";
-
-const schema = z.object({
-  type: z.nativeEnum(ApplySpaceRequestType),
-  twitter: z.string().optional(),
-  tweetLink: z.string().optional(),
-  projectName: z.string().optional(),
-  projectTwitter: z.string().optional(),
-  docsLink: z.string().optional(),
-  github: z.string().optional(),
-  linkedin: z.string().optional(),
-}).superRefine((data, ctx) => {
-  const req = (field: keyof typeof data, path: string) => {
-    const val = data[field] as string | undefined;
-    if (!val || val.trim() === "") {
-      ctx.addIssue({ code: "custom", path: [path], message: REQUIRED });
-    }
-  };
-  if (data.type === ApplySpaceRequestType.project) {
-    req("projectName", "projectName");
-    req("projectTwitter", "projectTwitter");
-    req("twitter", "twitter");
-    req("tweetLink", "tweetLink");
-    req("docsLink", "docsLink");
-  }
-  if (data.type === ApplySpaceRequestType.kol) {
-    req("twitter", "twitter");
-    req("tweetLink", "tweetLink");
-  }
-  if (data.type === ApplySpaceRequestType.developer) {
-    req("twitter", "twitter");
-    req("tweetLink", "tweetLink");
-    req("github", "github");
-    req("linkedin", "linkedin");
-  }
-});
-
-type FormValues = z.infer<typeof schema>;
-
-function Field({ label, note, error, children }: {
-  label: string; note?: string; error?: string; children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-semibold mb-1.5 text-foreground">{label}</label>
-      {note && <p className="text-xs text-muted-foreground mb-2 leading-relaxed">{note}</p>}
-      {children}
-      {error && <p className="text-destructive text-xs mt-1">{error}</p>}
-    </div>
-  );
+function getApiBase() {
+  const base = import.meta.env.BASE_URL ?? "/";
+  const parts = base.replace(/\/$/, "").split("/");
+  parts.pop();
+  return parts.join("/") + "/api";
 }
+const apiBase = getApiBase();
 
-function ArticleTemplate({ template, xLinkLabel, register, error }: { template: string; xLinkLabel: string; register: any; error?: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(template).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-  return (
-    <div className="space-y-3">
-      <div className="relative bg-muted/60 dark:bg-slate-800/60 border border-border dark:border-slate-700 rounded-xl p-4 pr-10">
-        <p className="text-sm text-foreground dark:text-slate-200 leading-relaxed break-words">{template}</p>
-        <button type="button" onClick={copy}
-          className="absolute top-3 right-3 p-1.5 rounded-lg bg-background dark:bg-slate-700 hover:bg-muted dark:hover:bg-slate-600 border border-border/50 transition-colors"
-          title="Copy template">
-          {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
-        </button>
-      </div>
-      <input
-        {...register("tweetLink")}
-        className="w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-        placeholder="https://x.com/..."
-      />
-      <p className="text-xs text-muted-foreground">← {xLinkLabel}</p>
-      {error && <p className="text-destructive text-xs mt-1">{error}</p>}
-    </div>
-  );
+type Role = "project" | "participant";
+type SubmitState = "idle" | "submitting" | "success" | "error";
+
+const T = {
+  "zh-CN": {
+    title: "完善你的信息",
+    subtitle: "请选择你的身份，完成设置后即可使用平台全部功能",
+    chooseRole: "选择你的身份",
+    roleProject: "项目方",
+    roleProjectDesc: "我是项目团队 / 创始人，想认领公告、管理需求",
+    roleParticipant: "参与者",
+    roleParticipantDesc: "我是开发者 / 社区用户，想浏览公告、订阅内容、申请机会",
+    fillInfo: "填写信息",
+    projectName: "项目名称",
+    projectNamePh: "请输入项目名称",
+    projectTwitter: "项目官方 X / Twitter",
+    projectTwitterPh: "@YourProject 或完整链接",
+    website: "官网链接",
+    websitePh: "https://yourproject.xyz（可选）",
+    discord: "Discord 链接",
+    discordPh: "https://discord.gg/...（可选）",
+    telegram: "Telegram 链接",
+    telegramPh: "https://t.me/...（可选）",
+    whitepaper: "白皮书 / 文档链接",
+    whitepaperPh: "https://docs.yourproject.xyz（可选）",
+    displayName: "显示名称",
+    displayNamePh: "你想展示的名字",
+    personalTwitter: "X / Twitter（可选）",
+    personalTwitterPh: "@YourHandle 或完整链接",
+    bio: "个人简介（可选）",
+    bioPh: "简短介绍你自己，不超过 100 字",
+    required: "必填",
+    optional: "选填",
+    cta: "完成设置并进入平台",
+    submitting: "正在提交...",
+    successProject: "申请已提交！",
+    successProjectMsg: "感谢你的申请，我们将在 24 小时内完成审核。审核通过后，你将获得项目方权限，可以认领公告、发布需求。",
+    successParticipant: "设置完成！",
+    successParticipantMsg: "欢迎加入 Web3 Release！你现在可以浏览全平台公告，订阅感兴趣的栏目，申请匹配机会。",
+    goHome: "进入平台 →",
+    errNeedWallet: "请先连接钱包",
+    errRequired: "此字段为必填",
+    errDailyLimit: "今日申请次数已达上限（每 24 小时最多 2 次），请明天再试",
+    errGeneric: "提交失败，请稍后重试",
+    pendingNote: "审核期间你仍可浏览平台，功能不受影响",
+    connectFirst: "请连接钱包后再进行操作",
+  },
+  en: {
+    title: "Complete Your Profile",
+    subtitle: "Choose your role and complete setup to unlock all platform features",
+    chooseRole: "Choose Your Role",
+    roleProject: "Project Owner",
+    roleProjectDesc: "I'm a project team / founder — I want to claim announcements and manage demands",
+    roleParticipant: "Participant",
+    roleParticipantDesc: "I'm a developer / community user — I want to browse, subscribe, and apply",
+    fillInfo: "Fill in Your Info",
+    projectName: "Project Name",
+    projectNamePh: "Enter your project name",
+    projectTwitter: "Project X / Twitter",
+    projectTwitterPh: "@YourProject or full URL",
+    website: "Website",
+    websitePh: "https://yourproject.xyz (optional)",
+    discord: "Discord",
+    discordPh: "https://discord.gg/... (optional)",
+    telegram: "Telegram",
+    telegramPh: "https://t.me/... (optional)",
+    whitepaper: "Whitepaper / Docs",
+    whitepaperPh: "https://docs.yourproject.xyz (optional)",
+    displayName: "Display Name",
+    displayNamePh: "Your display name",
+    personalTwitter: "X / Twitter (optional)",
+    personalTwitterPh: "@YourHandle or full URL",
+    bio: "Short Bio (optional)",
+    bioPh: "A brief introduction, max 100 characters",
+    required: "Required",
+    optional: "Optional",
+    cta: "Complete Setup & Enter Platform",
+    submitting: "Submitting...",
+    successProject: "Application Submitted!",
+    successProjectMsg: "Thank you for applying. We'll review your application within 24 hours. Once approved, you'll unlock project owner features.",
+    successParticipant: "Setup Complete!",
+    successParticipantMsg: "Welcome to Web3 Release! You can now browse all announcements, subscribe to sections, and apply for opportunities.",
+    goHome: "Enter Platform →",
+    errNeedWallet: "Please connect your wallet first",
+    errRequired: "This field is required",
+    errDailyLimit: "Daily apply limit reached (max 2 per 24h). Please try again tomorrow.",
+    errGeneric: "Submission failed, please try again",
+    pendingNote: "You can browse the platform during review — no features blocked",
+    connectFirst: "Please connect your wallet to continue",
+  },
+};
+
+function inputCls(err?: string) {
+  return `w-full px-4 py-3 rounded-xl border text-sm transition-all outline-none focus:ring-2 bg-background text-foreground placeholder:text-muted-foreground/60 ${
+    err
+      ? "border-red-400 focus:ring-red-200 dark:focus:ring-red-900"
+      : "border-border focus:ring-primary/20 focus:border-primary/50"
+  }`;
 }
 
 export default function ApplySpace() {
   const { address, isConnected } = useWeb3Auth();
-  const applyMutation = useApplySpace();
-  const [success, setSuccess] = useState(false);
-  const [limitError, setLimitError] = useState("");
-  const { t } = useLang();
+  const { lang } = useLang();
+  const [, navigate] = useLocation();
+  const tx = T[lang as keyof typeof T] ?? T.en;
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { type: ApplySpaceRequestType.project },
-  });
+  const [role, setRole] = useState<Role | null>(null);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [apiError, setApiError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const selectedType = watch("type");
+  /* Project Owner fields */
+  const [projectName, setProjectName] = useState("");
+  const [projectTwitter, setProjectTwitter] = useState("");
+  const [website, setWebsite] = useState("");
+  const [discord, setDiscord] = useState("");
+  const [telegram, setTelegram] = useState("");
+  const [whitepaper, setWhitepaper] = useState("");
 
-  const onSubmit = (data: FormValues) => {
-    if (!address) return alert(t("applyNeedWallet"));
-    setLimitError("");
-    applyMutation.mutate({ data: { wallet: address, ...data } }, {
-      onSuccess: () => setSuccess(true),
-      onError: (err: any) => {
-        const msg = err?.response?.data?.error ?? err?.message ?? "";
-        if (msg === "DAILY_APPLY_LIMIT") {
-          setLimitError("今日申请次数已达上限（每24小时最多申请2次），请明天再试。");
-        }
-      },
-    });
+  /* Participant fields */
+  const [displayName, setDisplayName] = useState("");
+  const [personalTwitter, setPersonalTwitter] = useState("");
+  const [bio, setBio] = useState("");
+
+  const validate = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (role === "project") {
+      if (!projectName.trim()) errs.projectName = tx.errRequired;
+      if (!projectTwitter.trim()) errs.projectTwitter = tx.errRequired;
+    }
+    if (role === "participant") {
+      if (!displayName.trim()) errs.displayName = tx.errRequired;
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
-  const inputCls = "w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground";
+  const handleSubmit = async () => {
+    if (!address) return setApiError(tx.errNeedWallet);
+    if (!role) return;
+    if (!validate()) return;
 
+    setSubmitState("submitting");
+    setApiError("");
+
+    try {
+      if (role === "participant") {
+        const res = await fetch(`${apiBase}/users/upsert`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            wallet: address,
+            username: displayName.trim(),
+            twitter: personalTwitter.trim() || undefined,
+            bio: bio.trim() || undefined,
+          }),
+        });
+        if (!res.ok) throw new Error("upsert failed");
+        setSubmitState("success");
+      } else {
+        const res = await fetch(`${apiBase}/spaces/apply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            wallet: address,
+            type: "project",
+            projectName: projectName.trim(),
+            projectTwitter: projectTwitter.trim(),
+            website: website.trim() || undefined,
+            discord: discord.trim() || undefined,
+            telegram: telegram.trim() || undefined,
+            whitepaper: whitepaper.trim() || undefined,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if (data.error === "DAILY_APPLY_LIMIT") throw new Error("DAILY_LIMIT");
+          throw new Error(data.error ?? "apply failed");
+        }
+        setSubmitState("success");
+      }
+    } catch (e: any) {
+      setSubmitState("error");
+      if (e.message === "DAILY_LIMIT") {
+        setApiError(tx.errDailyLimit);
+      } else {
+        setApiError(tx.errGeneric);
+      }
+    }
+  };
+
+  /* ── Not connected ── */
   if (!isConnected) {
     return (
-      <div className="py-32 text-center max-w-md mx-auto">
-        <h2 className="text-xl font-bold mb-8">{t("applyNeedWallet")}</h2>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 py-20">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
+          <User className="w-8 h-8 text-muted-foreground/40" />
+        </div>
+        <p className="text-muted-foreground text-sm">{tx.connectFirst}</p>
       </div>
     );
   }
 
-  if (success) {
+  /* ── Success Screen ── */
+  if (submitState === "success") {
+    const isProject = role === "project";
     return (
-      <div className="py-32 text-center max-w-md mx-auto animate-in zoom-in">
-        <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-6" />
-        <h2 className="text-3xl font-bold mb-4">{t("applySuccess")}</h2>
-        <p className="text-muted-foreground mb-8">{t("applySuccessMsg")}</p>
+      <div className="max-w-md mx-auto py-16 text-center px-4">
+        <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-10 h-10 text-green-500" />
+        </div>
+        <h2 className="text-2xl font-extrabold mb-3">
+          {isProject ? tx.successProject : tx.successParticipant}
+        </h2>
+        <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+          {isProject ? tx.successProjectMsg : tx.successParticipantMsg}
+        </p>
+        {isProject && (
+          <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-6 text-left">
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-700 dark:text-amber-300">{tx.pendingNote}</p>
+          </div>
+        )}
+        <button onClick={() => navigate("/")}
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+          {tx.goHome} <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     );
   }
 
-  const typeCards = [
-    { value: ApplySpaceRequestType.project,   icon: <Building2 className="w-8 h-8" />, labelKey: "applyProject" },
-    { value: ApplySpaceRequestType.kol,       icon: <Megaphone className="w-8 h-8" />, labelKey: "applyKol" },
-    { value: ApplySpaceRequestType.developer, icon: <Code2 className="w-8 h-8" />,     labelKey: "applyDeveloper" },
-  ];
-
-  const articleTemplate = t("applyPostArticleTemplate");
-  const articleInstr = t("applyPostArticleInstr");
-  const xLinkLabel = t("applyPostXLink");
-
+  /* ── Main Form ── */
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <div className="mb-10 text-center">
-        <h1 className="text-3xl font-bold mb-3">{t("applyTitle")}</h1>
-        <p className="text-muted-foreground">{t("applySubtitle")}</p>
+    <div className="max-w-2xl mx-auto py-10 px-4">
+
+      {/* Header */}
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-4">
+          <Sparkles className="w-3.5 h-3.5" />
+          Web3 Release · Onboarding
+        </div>
+        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">{tx.title}</h1>
+        <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">{tx.subtitle}</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 bg-card p-8 rounded-3xl border border-border shadow-sm">
+      {/* Step 1 — Role Selection */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">1</div>
+          <span className="text-sm font-semibold">{tx.chooseRole}</span>
+        </div>
 
-        {/* Type Selection */}
-        <div className="space-y-3">
-          <label className="text-sm font-semibold">{t("applyTypeLabel")}</label>
-          <div className="grid grid-cols-3 gap-4">
-            {typeCards.map(({ value, icon, labelKey }) => {
-              const active = selectedType === value;
-              return (
-                <label
-                  key={value}
-                  className={`cursor-pointer rounded-xl border-2 p-4 flex flex-col items-center gap-3 transition-all ${
-                    active
-                      ? "border-green-500 bg-green-50 dark:bg-green-950/30"
-                      : "border-border hover:border-green-400/60 hover:bg-green-50/30"
-                  }`}
-                >
-                  <input type="radio" value={value} {...register("type")} className="sr-only" />
-                  <span className={active ? "text-green-500" : "text-muted-foreground"}>{icon}</span>
-                  <span className={`font-bold text-sm ${active ? "text-green-600" : ""}`}>{t(labelKey)}</span>
-                </label>
-              );
-            })}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Project Owner Card */}
+          <button
+            type="button"
+            onClick={() => setRole("project")}
+            className={`relative text-left rounded-2xl border-2 p-5 transition-all duration-200 group ${
+              role === "project"
+                ? "border-green-500 bg-green-50 dark:bg-green-950/30 shadow-md shadow-green-200/40 dark:shadow-green-900/20"
+                : "border-border hover:border-green-400/60 hover:bg-green-50/30 dark:hover:bg-green-950/10"
+            }`}
+          >
+            {role === "project" && (
+              <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+              </div>
+            )}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+              role === "project" ? "bg-green-500" : "bg-muted group-hover:bg-green-100 dark:group-hover:bg-green-950/30"
+            }`}>
+              <Building2 className={`w-6 h-6 ${role === "project" ? "text-white" : "text-muted-foreground group-hover:text-green-600"}`} />
+            </div>
+            <p className={`font-bold text-base mb-1.5 ${role === "project" ? "text-green-700 dark:text-green-400" : ""}`}>
+              {tx.roleProject}
+            </p>
+            <p className={`text-xs leading-relaxed ${role === "project" ? "text-green-600/80 dark:text-green-400/70" : "text-muted-foreground"}`}>
+              {tx.roleProjectDesc}
+            </p>
+          </button>
+
+          {/* Participant Card */}
+          <button
+            type="button"
+            onClick={() => setRole("participant")}
+            className={`relative text-left rounded-2xl border-2 p-5 transition-all duration-200 group ${
+              role === "participant"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-md shadow-blue-200/40 dark:shadow-blue-900/20"
+                : "border-border hover:border-blue-400/60 hover:bg-blue-50/30 dark:hover:bg-blue-950/10"
+            }`}
+          >
+            {role === "participant" && (
+              <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+              </div>
+            )}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+              role === "participant" ? "bg-blue-500" : "bg-muted group-hover:bg-blue-100 dark:group-hover:bg-blue-950/30"
+            }`}>
+              <User className={`w-6 h-6 ${role === "participant" ? "text-white" : "text-muted-foreground group-hover:text-blue-600"}`} />
+            </div>
+            <p className={`font-bold text-base mb-1.5 ${role === "participant" ? "text-blue-700 dark:text-blue-400" : ""}`}>
+              {tx.roleParticipant}
+            </p>
+            <p className={`text-xs leading-relaxed ${role === "participant" ? "text-blue-600/80 dark:text-blue-400/70" : "text-muted-foreground"}`}>
+              {tx.roleParticipantDesc}
+            </p>
+          </button>
+        </div>
+      </div>
+
+      {/* Step 2 — Dynamic Form */}
+      {role && (
+        <div className="animate-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">2</div>
+            <span className="text-sm font-semibold">{tx.fillInfo}</span>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
+
+            {/* ── Project Owner Fields ── */}
+            {role === "project" && (
+              <>
+                {/* Project Name */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold">{tx.projectName}</label>
+                    <span className="text-xs font-medium text-red-500">{tx.required}</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={projectName}
+                    onChange={e => { setProjectName(e.target.value); setFieldErrors(p => ({ ...p, projectName: "" })); }}
+                    placeholder={tx.projectNamePh}
+                    maxLength={64}
+                    className={inputCls(fieldErrors.projectName)}
+                  />
+                  {fieldErrors.projectName && <p className="text-red-500 text-xs mt-1">{fieldErrors.projectName}</p>}
+                </div>
+
+                {/* Project Twitter */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold flex items-center gap-1.5">
+                      <Twitter className="w-4 h-4 text-sky-500" />
+                      {tx.projectTwitter}
+                    </label>
+                    <span className="text-xs font-medium text-red-500">{tx.required}</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={projectTwitter}
+                    onChange={e => { setProjectTwitter(e.target.value); setFieldErrors(p => ({ ...p, projectTwitter: "" })); }}
+                    placeholder={tx.projectTwitterPh}
+                    className={inputCls(fieldErrors.projectTwitter)}
+                  />
+                  {fieldErrors.projectTwitter && <p className="text-red-500 text-xs mt-1">{fieldErrors.projectTwitter}</p>}
+                </div>
+
+                <div className="border-t border-border/60 pt-1">
+                  <p className="text-xs text-muted-foreground mb-4">{lang === "zh-CN" ? "以下为可选字段，填写越完整，审核越快通过" : "Optional fields — more info means faster approval"}</p>
+
+                  {/* Website */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+                        <Globe className="w-4 h-4 text-green-500" />
+                        {tx.website}
+                        <span className="text-xs font-normal text-muted-foreground ml-1">{tx.optional}</span>
+                      </label>
+                      <input type="url" value={website} onChange={e => setWebsite(e.target.value)}
+                        placeholder={tx.websitePh} className={inputCls()} />
+                    </div>
+
+                    {/* Discord */}
+                    <div>
+                      <label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+                        <MessageCircle className="w-4 h-4 text-indigo-500" />
+                        {tx.discord}
+                        <span className="text-xs font-normal text-muted-foreground ml-1">{tx.optional}</span>
+                      </label>
+                      <input type="url" value={discord} onChange={e => setDiscord(e.target.value)}
+                        placeholder={tx.discordPh} className={inputCls()} />
+                    </div>
+
+                    {/* Telegram */}
+                    <div>
+                      <label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+                        <Send className="w-4 h-4 text-blue-400" />
+                        {tx.telegram}
+                        <span className="text-xs font-normal text-muted-foreground ml-1">{tx.optional}</span>
+                      </label>
+                      <input type="url" value={telegram} onChange={e => setTelegram(e.target.value)}
+                        placeholder={tx.telegramPh} className={inputCls()} />
+                    </div>
+
+                    {/* Whitepaper */}
+                    <div>
+                      <label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+                        <BookOpen className="w-4 h-4 text-amber-500" />
+                        {tx.whitepaper}
+                        <span className="text-xs font-normal text-muted-foreground ml-1">{tx.optional}</span>
+                      </label>
+                      <input type="url" value={whitepaper} onChange={e => setWhitepaper(e.target.value)}
+                        placeholder={tx.whitepaperPh} className={inputCls()} />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── Participant Fields ── */}
+            {role === "participant" && (
+              <>
+                {/* Display Name */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold">{tx.displayName}</label>
+                    <span className="text-xs font-medium text-red-500">{tx.required}</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={e => { setDisplayName(e.target.value); setFieldErrors(p => ({ ...p, displayName: "" })); }}
+                    placeholder={tx.displayNamePh}
+                    maxLength={32}
+                    className={inputCls(fieldErrors.displayName)}
+                  />
+                  {fieldErrors.displayName && <p className="text-red-500 text-xs mt-1">{fieldErrors.displayName}</p>}
+                </div>
+
+                {/* Personal Twitter */}
+                <div>
+                  <label className="text-sm font-semibold flex items-center gap-1.5 mb-1.5">
+                    <Twitter className="w-4 h-4 text-sky-500" />
+                    {tx.personalTwitter}
+                    <span className="text-xs font-normal text-muted-foreground ml-1">{tx.optional}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={personalTwitter}
+                    onChange={e => setPersonalTwitter(e.target.value)}
+                    placeholder={tx.personalTwitterPh}
+                    className={inputCls()}
+                  />
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <label className="text-sm font-semibold mb-1.5 block">
+                    {tx.bio}
+                  </label>
+                  <textarea
+                    value={bio}
+                    onChange={e => setBio(e.target.value.slice(0, 100))}
+                    placeholder={tx.bioPh}
+                    rows={3}
+                    className={`${inputCls()} resize-none`}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 text-right">{bio.length}/100</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
+      )}
 
-        {/* Dynamic fields */}
-        <div className="space-y-5 pt-4 border-t border-border">
-
-          {/* Project fields */}
-          {selectedType === ApplySpaceRequestType.project && (
-            <>
-              <Field label={`${t("applyProjectName")} *`} error={errors.projectName?.message}>
-                <input {...register("projectName")} className={inputCls} placeholder="Web3 Release" />
-              </Field>
-              <Field label={`${t("applyProjectTwitter")} *`} error={errors.projectTwitter?.message}>
-                <input {...register("projectTwitter")} className={inputCls} placeholder="@YourProject" />
-              </Field>
-              <Field label={`${t("applyPersonalTwitter")} *`} error={errors.twitter?.message}>
-                <input {...register("twitter")} className={inputCls} placeholder="@YourHandle" />
-              </Field>
-              <Field label={`${t("applyPostArticle")} *`} note={articleInstr}>
-                <ArticleTemplate template={articleTemplate} xLinkLabel={xLinkLabel} register={register} error={errors.tweetLink?.message} />
-              </Field>
-              <Field label={`${t("applyDocs")} *`} error={errors.docsLink?.message}>
-                <input {...register("docsLink")} className={inputCls} placeholder="https://..." />
-              </Field>
-            </>
-          )}
-
-          {/* KOL fields */}
-          {selectedType === ApplySpaceRequestType.kol && (
-            <>
-              <Field label={`${t("applyPersonalTwitter")} *`} error={errors.twitter?.message}>
-                <input {...register("twitter")} className={inputCls} placeholder="@YourHandle" />
-              </Field>
-              <Field label={`${t("applyPostArticle")} *`} note={articleInstr}>
-                <ArticleTemplate template={articleTemplate} xLinkLabel={xLinkLabel} register={register} error={errors.tweetLink?.message} />
-              </Field>
-            </>
-          )}
-
-          {/* Developer fields */}
-          {selectedType === ApplySpaceRequestType.developer && (
-            <>
-              <Field label={`${t("applyPersonalTwitter")} *`} error={errors.twitter?.message}>
-                <input {...register("twitter")} className={inputCls} placeholder="@YourHandle" />
-              </Field>
-              <Field label={`${t("applyPostArticle")} *`} note={articleInstr}>
-                <ArticleTemplate template={articleTemplate} xLinkLabel={xLinkLabel} register={register} error={errors.tweetLink?.message} />
-              </Field>
-              <Field label={`${t("applyGithub")} *`} error={errors.github?.message}>
-                <input {...register("github")} className={inputCls} placeholder="https://github.com/..." />
-              </Field>
-              <Field label={`${t("applyLinkedin")} *`} error={errors.linkedin?.message}>
-                <input {...register("linkedin")} className={inputCls} placeholder="https://linkedin.com/in/..." />
-              </Field>
-            </>
-          )}
+      {/* Error */}
+      {apiError && (
+        <div className="mt-4 flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
+          <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-red-600 dark:text-red-400">{apiError}</p>
         </div>
+      )}
 
-        {limitError && (
-          <p className="text-destructive text-sm text-center font-medium">{limitError}</p>
-        )}
-        <button
-          type="submit"
-          disabled={applyMutation.isPending}
-          className="w-full py-4 rounded-xl font-bold text-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-50"
-        >
-          {applyMutation.isPending ? t("applySubmitting") : t("applySubmit")}
-        </button>
-      </form>
+      {/* CTA Button */}
+      {role && (
+        <div className="mt-6 animate-in slide-in-from-bottom-2 duration-300">
+          {/* Preview of what's next */}
+          {role === "project" && (
+            <div className="flex items-start gap-2 mb-4 text-xs text-muted-foreground bg-muted/40 rounded-xl p-3">
+              <ChevronRight className="w-3.5 h-3.5 mt-0.5 text-muted-foreground/60 shrink-0" />
+              <span>{lang === "zh-CN"
+                ? "提交后进入审核流程（通常 24 小时内），审核期间不影响正常浏览"
+                : "Your application will be reviewed within 24 hours. You can browse the platform while waiting."}</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitState === "submitting"}
+            className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-bold text-base transition-all ${
+              role === "project"
+                ? "bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-600/25 active:scale-[0.99]"
+                : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 active:scale-[0.99]"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
+          >
+            {submitState === "submitting" ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {tx.submitting}
+              </>
+            ) : (
+              <>
+                {tx.cta}
+                <ArrowRight className="w-5 h-5" />
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Footer */}
+      <p className="text-center text-xs text-muted-foreground mt-8">
+        Web3 Release · {new Date().getFullYear()}
+      </p>
     </div>
   );
 }

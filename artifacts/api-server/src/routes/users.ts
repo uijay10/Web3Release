@@ -124,6 +124,7 @@ router.post("/upsert", async (req, res) => {
   if ((req.body as any).discord !== undefined) updateData.discord = (req.body as any).discord;
   if ((req.body as any).telegram !== undefined) updateData.telegram = (req.body as any).telegram;
   if ((req.body as any).whitepaper !== undefined) updateData.whitepaper = (req.body as any).whitepaper;
+  if ((req.body as any).bio !== undefined) updateData.bio = (req.body as any).bio;
   if (language !== undefined) updateData.language = language;
   if (tags !== undefined) updateData.tags = Array.isArray(tags) ? JSON.stringify(tags.slice(0, 2)) : null;
   const subs = (req.body as any).subscriptions;
