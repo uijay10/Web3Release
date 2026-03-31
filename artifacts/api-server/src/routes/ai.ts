@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, postsTable } from "@workspace/db";
 import { requireAdmin } from "../lib/admin-check";
-import { extractEvents, type ExtractedEvent } from "../lib/ai-extractor";
+import { extractEvents, CATEGORY_MAP, type ExtractedEvent } from "../lib/ai-extractor";
 
 const router: IRouter = Router();
 
@@ -9,14 +9,28 @@ const AI_SYSTEM_WALLET = "ai-system";
 const AI_SYSTEM_NAME = "AI精选";
 const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
 
+const PRIVATE_IP_RE = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1$|fc|fd)/i;
+const ALLOWED_SECTIONS = new Set(Object.values(CATEGORY_MAP));
+
+function validateExtractUrl(raw: unknown): string | null {
+  if (!raw || typeof raw !== "string") return null;
+  let parsed: URL;
+  try { parsed = new URL(raw); } catch { return null; }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+  const host = parsed.hostname;
+  if (PRIVATE_IP_RE.test(host)) return null;
+  if (host === "localhost") return null;
+  return parsed.href;
+}
+
 router.post("/extract", requireAdmin, async (req, res) => {
   try {
-    const { url } = req.body as { url?: string };
-    if (!url || typeof url !== "string" || !url.startsWith("http")) {
-      res.status(400).json({ error: "url is required and must start with http" });
+    const safe = validateExtractUrl(req.body?.url);
+    if (!safe) {
+      res.status(400).json({ error: "url must be a public http(s) URL" });
       return;
     }
-    const events = await extractEvents(url);
+    const events = await extractEvents(safe);
     res.json({ events, total: events.length });
   } catch (e: any) {
     console.error("[ai/extract] error:", e);
@@ -37,11 +51,13 @@ router.post("/publish", requireAdmin, async (req, res) => {
 
     const inserted: number[] = [];
     for (const ev of events) {
-      if (!ev?.title || !ev?.section) continue;
+      if (!ev?.title) continue;
+      const section = ev.section && ALLOWED_SECTIONS.has(ev.section) ? ev.section : null;
+      if (!section) continue;
       const rows = await db.insert(postsTable).values({
         title: ev.title.slice(0, 200),
         content: ev.description?.slice(0, 2000) ?? "",
-        section: ev.section,
+        section,
         authorWallet: AI_SYSTEM_WALLET,
         authorName: ev.project_name?.slice(0, 100) || AI_SYSTEM_NAME,
         authorType: "ai",

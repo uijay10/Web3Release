@@ -76,6 +76,11 @@ function formatPost(p: typeof postsTable.$inferSelect & { authorNameLive?: strin
     pinQueuedAt: p.pinQueuedAt ? p.pinQueuedAt.toISOString() : null,
     expiresAt: (p as any).expiresAt ? (p as any).expiresAt.toISOString() : null,
     createdAt: p.createdAt.toISOString(),
+    sourceUrl: p.sourceUrl ?? null,
+    aiConfidence: p.aiConfidence ?? null,
+    importance: p.importance ?? null,
+    eventStartTime: p.eventStartTime ? p.eventStartTime.toISOString() : null,
+    eventEndTime: p.eventEndTime ? p.eventEndTime.toISOString() : null,
   };
 }
 
