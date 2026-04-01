@@ -36,20 +36,22 @@ export function formatEventDate(dateStr?: string): string {
   }
 }
 
-export function formatRelativeTime(dateStr?: string): string {
+export function formatRelativeTime(dateStr?: string, lang = "zh-CN"): string {
   if (!dateStr) return "";
+  const zh = lang === "zh-CN";
   try {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "刚刚";
-    if (mins < 60) return `${mins}分钟前`;
+    if (mins < 1) return zh ? "刚刚" : "Just now";
+    if (mins < 60) return zh ? `${mins}分钟前` : `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}小时前`;
+    if (hrs < 24) return zh ? `${hrs}小时前` : `${hrs}h ago`;
     const days = Math.floor(hrs / 24);
-    if (days === 1) return "昨天";
-    if (days < 7) return `${days}天前`;
-    if (days < 30) return `${Math.floor(days / 7)}周前`;
-    return new Date(dateStr).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
+    if (days === 1) return zh ? "昨天" : "Yesterday";
+    if (days < 7) return zh ? `${days}天前` : `${days}d ago`;
+    if (days < 30) return zh ? `${Math.floor(days / 7)}周前` : `${Math.floor(days / 7)}w ago`;
+    const locale = zh ? "zh-CN" : "en-US";
+    return new Date(dateStr).toLocaleDateString(locale, { month: "short", day: "numeric" });
   } catch {
     return "";
   }
