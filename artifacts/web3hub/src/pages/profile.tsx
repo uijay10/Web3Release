@@ -15,6 +15,7 @@ import { useLang } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
 import { ScrapePanel } from "@/components/admin/ScrapePanel";
+import { PointsPanel } from "@/components/admin/PointsPanel";
 import { SlotMachine } from "@/components/slot-machine";
 import { Link } from "wouter";
 
@@ -35,7 +36,8 @@ type NavTab =
   | "stats"
   | "settings"
   | "admin"
-  | "scrape";
+  | "scrape"
+  | "points";
 
 const ALL_SECTIONS = [
   "测试网","IDO/Launchpad","预售","融资公告","空投",
@@ -258,6 +260,7 @@ export default function Profile() {
     { tab: "settings", icon: <Settings className="w-4 h-4" />, label: zh ? "账号设置" : "Settings" },
     ...(admin ? [
       { tab: "admin"  as NavTab, icon: <ShieldCheck className="w-4 h-4" />, label: "申请审核" },
+      { tab: "points" as NavTab, icon: <Coins className="w-4 h-4" />,       label: "积分管理" },
       { tab: "scrape" as NavTab, icon: <Wrench className="w-4 h-4" />,      label: "内容抓取" },
     ] : []),
   ];
@@ -539,6 +542,21 @@ export default function Profile() {
             </div>
           </div>
           <ClaimsPanel adminWallet={address ?? ""} />
+        </div>
+      ) : null;
+
+      case "points": return admin ? (
+        <div className="space-y-4">
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-3 flex items-center gap-3">
+            <Coins className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">积分管理 · 仅管理员可见</p>
+              <p className="text-xs text-amber-600/70 dark:text-amber-400/60 mt-0.5">手动调整用户的 Token / 积分 / 能量数值</p>
+            </div>
+          </div>
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <PointsPanel adminWallet={address ?? ""} />
+          </div>
         </div>
       ) : null;
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { CheckCircle, XCircle, RefreshCw, Search, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, XCircle, RefreshCw, Search, ExternalLink, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 function getApiBase() {
@@ -55,6 +55,7 @@ export function ClaimsPanel({ adminWallet }: { adminWallet?: string }) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [rejectReasons, setRejectReasons] = useState<Record<number, string>>({});
   const [processing, setProcessing] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -107,6 +108,23 @@ export function ClaimsPanel({ adminWallet }: { adminWallet?: string }) {
       setProcessing(null);
     }
   }, [apiBase, adminWallet, rejectReasons, toast, reload]);
+
+  const deleteApp = useCallback(async (id: number) => {
+    setProcessing(id);
+    setConfirmDeleteId(null);
+    try {
+      const url = `${apiBase}/admin/applications/${id}${adminWallet ? `?adminWallet=${adminWallet}` : ""}`;
+      const res = await fetch(url, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      toast({ title: "🗑️ 申请已删除" });
+      setExpandedId(null);
+      await reload();
+    } catch (e) {
+      toast({ title: `❌ 删除失败：${String(e)}`, variant: "destructive" });
+    } finally {
+      setProcessing(null);
+    }
+  }, [apiBase, adminWallet, toast, reload]);
 
   const pending  = apps.filter(a => a.status === "pending").length;
   const approved = apps.filter(a => a.status === "approved").length;
@@ -269,6 +287,28 @@ export function ClaimsPanel({ adminWallet }: { adminWallet?: string }) {
                       </div>
                     </div>
                   )}
+
+                  {/* Delete — available for all statuses, 2-step confirm */}
+                  <div className="pt-2 border-t border-border/50 flex items-center gap-2">
+                    {confirmDeleteId === app.id ? (
+                      <>
+                        <span className="text-xs text-red-600 dark:text-red-400 font-medium">确认删除此申请记录？</span>
+                        <button onClick={() => deleteApp(app.id)} disabled={processing === app.id}
+                          className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-60">
+                          确认删除
+                        </button>
+                        <button onClick={() => setConfirmDeleteId(null)}
+                          className="px-3 py-1.5 border border-border rounded-lg text-xs text-muted-foreground hover:bg-muted transition-colors">
+                          取消
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => setConfirmDeleteId(app.id)} disabled={processing === app.id}
+                        className="flex items-center gap-1.5 px-3 py-1.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-xs font-medium hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-60">
+                        <Trash2 className="w-3 h-3" /> 删除申请
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
