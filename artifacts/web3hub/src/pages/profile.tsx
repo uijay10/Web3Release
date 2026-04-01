@@ -439,7 +439,6 @@ export default function Profile() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { label: zh ? "积分" : "Points",  value: (me as any)?.points ?? 0,    color: "text-amber-500" },
-              { label: zh ? "能量" : "Energy",  value: (me as any)?.energy ?? 0,    color: "text-blue-500" },
               { label: zh ? "代币" : "Tokens",  value: (me as any)?.tokens ?? 0,    color: "text-violet-500" },
               { label: zh ? "置顶次数" : "Pins", value: (me as any)?.pinCount ?? 0,  color: "text-rose-500" },
             ].map(item => (

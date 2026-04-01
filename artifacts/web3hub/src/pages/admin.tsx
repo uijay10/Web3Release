@@ -5,7 +5,7 @@ import { isAdmin } from "@/lib/admin";
 import { useLang } from "@/lib/i18n";
 import { useLocation } from "wouter";
 import {
-  Users, ClipboardList, Zap, Star, Ban, Download,
+  Users, ClipboardList, Star, Ban, Download,
   CheckCircle, XCircle, RefreshCw, Pin, Send,
   ChevronDown, AlertCircle, ShieldOff, Cpu, Trash2, Calendar,
   Globe, Sparkles, ExternalLink, Handshake
@@ -89,7 +89,7 @@ interface DialogState {
 
 interface SendState {
   wallet: string;
-  field: "tokens" | "energy" | "pinCount";
+  field: "tokens" | "pinCount";
   amount: string;
 }
 
@@ -428,7 +428,7 @@ export default function AdminPage() {
             <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
               <h3 className="font-bold text-sm">
                 发送至：{sendState.wallet.slice(0,12)}...（
-                {sendState.field === "tokens" ? "代币" : sendState.field === "energy" ? "能量" : "置顶次数"}
+                {sendState.field === "tokens" ? "代币" : "置顶次数"}
                 ）
               </h3>
               <div className="flex gap-2 items-center">
@@ -448,7 +448,6 @@ export default function AdminPage() {
                     <th className="p-3 text-left">钱包地址</th>
                     <th className="p-3 text-left">用户名</th>
                     <th className="p-3 text-right">代币</th>
-                    <th className="p-3 text-right">{t("energy")}</th>
                     <th className="p-3 text-right">置顶次数</th>
                     <th className="p-3 text-left">身份类型</th>
                     <th className="p-3 text-left">状态</th>
@@ -457,13 +456,12 @@ export default function AdminPage() {
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {filteredUsers.length === 0 ? (
-                    <tr><td colSpan={8} className="p-10 text-center text-muted-foreground">暂无用户</td></tr>
+                    <tr><td colSpan={7} className="p-10 text-center text-muted-foreground">暂无用户</td></tr>
                   ) : filteredUsers.map(u => (
                     <tr key={u.id} className={`hover:bg-muted/20 ${u.isBanned ? "opacity-50" : ""}`}>
                       <td className="p-3 font-mono text-xs">{u.wallet.slice(0,8)}...{u.wallet.slice(-4)}</td>
                       <td className="p-3 text-xs">{u.username ?? "-"}</td>
                       <td className="p-3 text-right font-semibold">{(u.tokens ?? 0).toLocaleString()}</td>
-                      <td className="p-3 text-right">{u.energy?.toLocaleString()}</td>
                       <td className="p-3 text-right">{u.pinCount ?? 0}</td>
                       <td className="p-3 text-xs">{u.spaceType ? <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">{u.spaceType}</span> : "-"}</td>
                       <td className="p-3 text-xs">
@@ -474,10 +472,6 @@ export default function AdminPage() {
                           <button onClick={() => setSendState({ wallet: u.wallet, field: "tokens", amount: "" })}
                             className="px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs hover:bg-amber-200 transition-colors">
                             代币
-                          </button>
-                          <button onClick={() => setSendState({ wallet: u.wallet, field: "energy", amount: "" })}
-                            className="px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs hover:bg-blue-200 transition-colors">
-                            能量
                           </button>
                           <button onClick={() => setSendState({ wallet: u.wallet, field: "pinCount", amount: "" })}
                             className="px-2 py-1 rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs hover:bg-violet-200 transition-colors">
@@ -510,10 +504,10 @@ export default function AdminPage() {
           {/* Send to specific wallet */}
           <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
             <h3 className="font-bold">发送至指定钱包</h3>
-            {(["tokens","energy","pinCount"] as const).map(field => (
+            {(["tokens","pinCount"] as const).map(field => (
               <div key={field} className="space-y-2">
                 <label className="text-sm font-semibold">
-                  {field === "tokens" ? "发送代币" : field === "energy" ? "发送能量" : "发送置顶次数"}
+                  {field === "tokens" ? "发送代币" : "发送置顶次数"}
                 </label>
                 <div className="flex gap-2 flex-wrap">
                   <input
@@ -538,7 +532,7 @@ export default function AdminPage() {
                       if (res.error) {
                         flash(`✗ 失败：${res.error}`);
                       } else {
-                        flash(`✓ 已向 ${wallet.slice(0,8)}... 发送 ${amount} ${field === "tokens" ? "代币" : field === "energy" ? "能量" : "置顶次数"}`);
+                        flash(`✓ 已向 ${wallet.slice(0,8)}... 发送 ${amount} ${field === "tokens" ? "代币" : "置顶次数"}`);
                       }
                       (document.getElementById(`wallet_${field}`) as HTMLInputElement).value = "";
                       (document.getElementById(`amount_${field}`) as HTMLInputElement).value = "";

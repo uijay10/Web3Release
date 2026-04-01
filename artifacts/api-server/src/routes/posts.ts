@@ -199,33 +199,10 @@ router.post("/", async (req, res) => {
   }
 
   const spaceType = user.spaceType ?? "";
-  const isAdmin = (user.energy ?? 0) >= 99_000_000_000_000;
+  const isAdmin = ADMIN_WALLETS_SET.has(lw);
   const isNormalPoster = !spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer");
 
   if (!isAdmin) {
-    // All users (including normal users) need energy > 0 to post
-    if ((user.energy ?? 0) <= 0) {
-      return res.status(402).json({ error: "INSUFFICIENT_ENERGY" });
-    }
-
-    // KOL 48h inactivity penalty
-    if (spaceType === "kol") {
-      const lastPostRows = await db.select({ createdAt: postsTable.createdAt })
-        .from(postsTable).where(eq(postsTable.authorWallet, lw)).orderBy(desc(postsTable.createdAt)).limit(1);
-      if (lastPostRows.length > 0) {
-        const hoursSinceLast = (Date.now() - new Date(lastPostRows[0].createdAt).getTime()) / 3_600_000;
-        if (hoursSinceLast > 48) {
-          const penalty = Math.min(user.energy ?? 0, 100);
-          const penaltyEnergy = (user.energy ?? 0) - penalty;
-          await db.update(usersTable).set({ energy: penaltyEnergy }).where(eq(usersTable.wallet, lw));
-          user = { ...user, energy: penaltyEnergy };
-          if (penaltyEnergy <= 0) {
-            return res.status(402).json({ error: "INSUFFICIENT_ENERGY", penaltyApplied: penalty });
-          }
-        }
-      }
-    }
-
     // Normal user restrictions: jobs & community sections only + 10 posts per 24h
     const isNormalUser = !spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer");
     if (isNormalUser) {
@@ -239,7 +216,6 @@ router.post("/", async (req, res) => {
       if (usedToday >= NORMAL_DAILY_MAX) {
         return res.status(429).json({ error: "NORMAL_DAILY_LIMIT", used: usedToday, limit: NORMAL_DAILY_MAX });
       }
-      // Store updated count on user after successful insert (done below)
       (req as any)._normalPostUsed = usedToday;
       (req as any)._normalPostTodayStr = todayStr;
     }
@@ -255,9 +231,6 @@ router.post("/", async (req, res) => {
         return res.status(429).json({ error: "DAILY_LIMIT", limit: dailyLimit });
       }
     }
-
-    // Deduct 1 energy for all users (including normal users)
-    await db.update(usersTable).set({ energy: (user.energy ?? 1) - 1 }).where(eq(usersTable.wallet, lw));
   }
 
   // Update lastPostAt + increment normal user daily post counter
@@ -696,7 +669,7 @@ router.post("/:id/pin", async (req, res) => {
   const user = userRows[0];
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  const isAdminUser = ADMIN_WALLETS_SET.has(lw) || (user.energy ?? 0) >= 99_000_000_000_000;
+  const isAdminUser = ADMIN_WALLETS_SET.has(lw);
 
   // ── ADMIN PATH: free pin, any post, custom duration, immediate ──
   if (isAdminUser) {

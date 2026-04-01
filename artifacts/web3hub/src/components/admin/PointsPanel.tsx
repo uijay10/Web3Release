@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Search, Plus, Minus, RotateCcw, Coins, Zap, Trophy, Loader2, Check } from "lucide-react";
+import { Search, Plus, Minus, RotateCcw, Coins, Trophy, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 function getApiBase() {
@@ -14,16 +14,14 @@ interface UserInfo {
   username?: string | null;
   tokens: number;
   points: number;
-  energy: number;
   spaceType?: string | null;
 }
 
-type Field = "tokens" | "points" | "energy";
+type Field = "tokens" | "points";
 
 const FIELD_CONFIG: Record<Field, { label: string; icon: React.ReactNode; color: string }> = {
   tokens: { label: "$WBR Token",  icon: <Coins className="w-4 h-4" />,  color: "text-amber-500" },
   points: { label: "积分 Points", icon: <Trophy className="w-4 h-4" />, color: "text-blue-500" },
-  energy: { label: "能量 Energy", icon: <Zap className="w-4 h-4" />,    color: "text-emerald-500" },
 };
 
 export function PointsPanel({ adminWallet }: { adminWallet?: string }) {
@@ -149,8 +147,8 @@ export function PointsPanel({ adminWallet }: { adminWallet?: string }) {
           </div>
 
           {/* Balance summary */}
-          <div className="grid grid-cols-3 gap-3">
-            {(["tokens", "points", "energy"] as Field[]).map(f => (
+          <div className="grid grid-cols-2 gap-3">
+            {(["tokens", "points"] as Field[]).map(f => (
               <div key={f} className={`rounded-xl p-3 border transition-all cursor-pointer ${field === f ? "border-primary/50 bg-primary/5" : "border-border hover:border-primary/30"}`}
                 onClick={() => setField(f)}>
                 <div className={`flex items-center gap-1.5 mb-1 ${FIELD_CONFIG[f].color}`}>

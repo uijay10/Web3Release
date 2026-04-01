@@ -5,7 +5,7 @@ import { useCreatePost, useGetMe } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLang } from "@/lib/i18n";
 import { useLocation } from "wouter";
-import { AlertCircle, CheckCircle2, PenSquare, Zap, X, Pin, Sparkles, Copy, Check } from "lucide-react";
+import { AlertCircle, CheckCircle2, PenSquare, X, Pin, Sparkles, Copy, Check } from "lucide-react";
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -70,10 +70,8 @@ export default function PostNew() {
     { query: { enabled: !!address && isConnected } }
   );
   const me = (meData as any)?.user ?? meData;
-  const energy = me?.energy ?? 0;
   const pinCount = me?.pinCount ?? 0;
   const spaceType = me?.spaceType ?? "";
-  const isAdminUser = energy >= 99_000_000_000_000;
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -81,7 +79,6 @@ export default function PostNew() {
   const [wantToPin, setWantToPin] = useState(false);
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
-  const [showRecharge, setShowRecharge] = useState(false);
   const [pinQueued, setPinQueued] = useState(false);
   const [pinQueuedEstimate, setPinQueuedEstimate] = useState<string | null>(null);
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
@@ -135,7 +132,6 @@ export default function PostNew() {
 
 ━━━━━━━━━━━━━
 💡 运营建议：
-• 用能量（Energy）置顶您的帖子，获取首页更多曝光
 • 可邀请对方加入您的 Guild，建立长期合作关系`;
       }
       return `💬 Reply Draft
@@ -146,7 +142,6 @@ We're pushing hard on ${projectName !== "Our Project" ? projectName : "our proje
 
 ━━━━━━━━━━━━━
 💡 Growth Tips:
-• Use Energy to pin your post for maximum homepage exposure
 • Invite them to your Guild to build a long-term relationship`;
     }
 
@@ -185,7 +180,6 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
 
 ━━━━━━━━━━━━━
 💡 运营建议
-• 发布后使用能量（Energy）置顶帖子，登上首页获取最大曝光
 • 建议同步创建 Guild 并在帖子中邀请社区加入`;
     }
 
@@ -207,7 +201,6 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
 
 ━━━━━━━━━━━━━
 💡 Growth Tips
-• After posting, use Energy to pin your post to the homepage for maximum exposure
 • Create a Guild and invite community members directly from your post`;
   };
 
@@ -246,8 +239,6 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!address || !validateForm()) return;
-    // All users (including normal users) need energy > 0 to post
-    if (!isAdminUser && energy <= 0) { setShowRecharge(true); return; }
     // Show overwrite warning if normal user already posted today
     if (isNormalPoster && normalPostsUsed >= 1) { setShowOverwriteConfirm(true); return; }
     setStep("confirm");
@@ -287,8 +278,6 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
           const errCode = body?.error ?? String(e?.message ?? "");
           if (errCode === "BANNED") {
             setStep("form"); setError(t("bannedError"));
-          } else if (errCode === "INSUFFICIENT_ENERGY") {
-            setStep("form"); setShowRecharge(true);
           } else if (errCode === "DAILY_LIMIT") {
             setStep("form"); setError(t("postErrDailyLimit").replace("{n}", String(body?.limit ?? "")));
           } else if (errCode === "NORMAL_DAILY_LIMIT") {
@@ -345,41 +334,12 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
     );
   }
 
-  const confirmEnergyText = isAdminUser
-    ? t("postConfirmAdmin")
-    : (withPin
-        ? t("postConfirmEnergyPin").replace("{energy}", String(energy)).replace("{pin}", String(pinCount))
-        : t("postConfirmEnergy").replace("{energy}", String(energy)).replace("{pin}", String(pinCount)));
+  const confirmText = withPin
+    ? (lang === "zh" ? `这将消耗 1 置顶次数。当前剩余：${pinCount} 次置顶` : `This will use 1 pin slot. Current balance: ${pinCount} pins`)
+    : (lang === "zh" ? "确认发布此内容？" : "Confirm to publish this post?");
 
   return (
     <>
-      {showRecharge && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ pointerEvents: "auto" }}>
-          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} onClick={() => setShowRecharge(false)} />
-          <div
-            className="relative w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4"
-            style={{ backgroundColor: "#0A0C14", border: "1px solid rgba(255,255,255,0.1)" }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(245,158,11,0.15)" }}>
-                <Zap className="w-5 h-5" style={{ color: "#f59e0b" }} />
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}>
-                {t("noEnergyAlertMsg")}
-              </p>
-            </div>
-            <button
-              onClick={() => setShowRecharge(false)}
-              className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
-              style={{ backgroundColor: "rgba(245,158,11,0.15)", color: "#f59e0b" }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.25)")}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.15)")}
-            >
-              {t("noEnergyAlertBtn")}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── AI Assistant Modal ── */}
       {aiOpen && (
@@ -471,7 +431,7 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
         </div>
       )}
 
-      {/* ── Energy Confirmation Overlay ── */}
+      {/* ── Post Confirmation Overlay ── */}
       {step === "confirm" && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setStep("form")} />
@@ -480,11 +440,11 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
               <X className="w-4 h-4" />
             </button>
             <div className="flex flex-col items-center text-center gap-2">
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-1">
-                <Zap className="w-7 h-7 text-amber-500" />
+              <div className="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-1">
+                <CheckCircle2 className="w-7 h-7 text-green-500" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">{t("postConfirmTitle")}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{confirmEnergyText}</p>
+              <p className="text-sm text-gray-500 leading-relaxed">{confirmText}</p>
             </div>
             <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-1.5 text-left">
               <p className="text-xs text-gray-400">
@@ -542,22 +502,9 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
             </div>
             <h1 className="text-2xl font-bold">{t("createPostTitle")}</h1>
           </div>
-          {!isAdminUser && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
-                energy <= 0 ? "bg-red-100 dark:bg-red-950/30 text-red-600" :
-                energy <= 5 ? "bg-amber-100 dark:bg-amber-950/30 text-amber-600" :
-                "bg-green-100 dark:bg-green-950/30 text-green-600"}`}>
-                <Zap className="w-3.5 h-3.5" />{energy} {t("energyUnit")}
-              </div>
-              {!isNormalPoster && pinCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-violet-100 dark:bg-violet-950/30 text-violet-600">
-                  <Pin className="w-3.5 h-3.5" />{pinCount} {t("pinUnit")}
-                </div>
-              )}
-              {energy <= 0 && (
-                <button onClick={() => setShowRecharge(true)} className="text-xs text-primary hover:underline font-semibold">{t("noEnergyHint")}</button>
-              )}
+          {!isNormalPoster && pinCount > 0 && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-violet-100 dark:bg-violet-950/30 text-violet-600">
+              <Pin className="w-3.5 h-3.5" />{pinCount} {t("pinUnit")}
             </div>
           )}
         </div>
@@ -631,12 +578,6 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
             <div className="px-4 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">{error}</div>
           )}
 
-          {!isAdminUser && energy > 0 && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Zap className="w-3 h-3 text-amber-400" />
-              {(withPin ? t("postEnergyNotePin") : t("postEnergyNote")).replace("{energy}", String(energy))}
-            </p>
-          )}
 
           <button type="submit" disabled={createPost.isPending}
             className="w-full py-4 rounded-xl font-bold text-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-50">
