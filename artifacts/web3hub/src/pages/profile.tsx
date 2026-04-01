@@ -640,8 +640,7 @@ export default function Profile() {
         <main className="flex-1 min-w-0 space-y-5">
 
           {/* Always-visible Slot Machine */}
-          <div className="rounded-2xl p-5"
-            style={{ background: "linear-gradient(135deg, #1e40af 0%, #4f46e5 50%, #7c3aed 100%)" }}>
+          <div className="rounded-2xl p-5 bg-card border border-border">
             <SlotMachine
               wallet={address ?? ""}
               tokens={me?.tokens ?? 0}
