@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLang } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
+import { SlotMachine } from "@/components/slot-machine";
 import { Link } from "wouter";
 
 function getApiBase() {
@@ -63,14 +64,6 @@ function timeAgo(iso: string, zh: boolean): string {
   return zh ? `${days}天前` : `${days}d ago`;
 }
 
-function getSlotCountdown(lastPull: string) {
-  const diff = new Date(lastPull).getTime() + 24 * 3600 * 1000 - Date.now();
-  if (diff <= 0) return "";
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
 
 export default function Profile() {
   const { address, isConnected, disconnect } = useWeb3Auth() as any;
@@ -115,9 +108,6 @@ export default function Profile() {
   const [editWhitepaper, setEditWhitepaper] = useState("");
   const [editSaving, setEditSaving]       = useState(false);
 
-  const [slotCd, setSlotCd] = useState("");
-  const [slotPulling, setSlotPulling] = useState(false);
-  const [slotResult, setSlotResult] = useState<string | null>(null);
 
   useEffect(() => {
     if (!me) return;
@@ -130,13 +120,6 @@ export default function Profile() {
     setSubscriptions((me as any).subscriptions ?? []);
   }, [me]);
 
-  useEffect(() => {
-    if (!me?.lastSlotPull) { setSlotCd(""); return; }
-    const tick = () => setSlotCd(getSlotCountdown(me.lastSlotPull));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [me?.lastSlotPull]);
 
   const fetchNotifs = useCallback(async () => {
     if (!address) return;
@@ -239,23 +222,6 @@ export default function Profile() {
     } catch {} finally { setEditSaving(false); }
   };
 
-  const handleSlotPull = async () => {
-    if (!address || slotPulling || slotCd) return;
-    setSlotPulling(true);
-    setSlotResult(null);
-    try {
-      const res = await fetch(`${apiBase}/users/slot-pull`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: address }),
-      });
-      const data = await res.json();
-      if (data.amount) {
-        setSlotResult(zh ? `🎉 恭喜获得 ${data.amount} $WBR！` : `🎉 You won ${data.amount} $WBR!`);
-        queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
-      }
-    } catch {} finally { setSlotPulling(false); }
-  };
 
   if (!isConnected) {
     return (
@@ -674,36 +640,14 @@ export default function Profile() {
         <main className="flex-1 min-w-0 space-y-5">
 
           {/* Always-visible Slot Machine */}
-          <div className="rounded-2xl p-6 text-center space-y-4"
+          <div className="rounded-2xl p-5"
             style={{ background: "linear-gradient(135deg, #1e40af 0%, #4f46e5 50%, #7c3aed 100%)" }}>
-            <div className="text-3xl mb-1">🎰</div>
-            <h2 className="text-xl font-extrabold text-white">
-              {zh ? "每日拉霸机抽奖" : "Daily Slot Machine"}
-            </h2>
-            <p className="text-sm text-white/70">
-              {zh ? "每日一次 · 奖励 100~1000 $WBR · TGE 按 1:1 兑换"
-                  : "Once daily · Win 100~1000 $WBR · 1:1 at TGE"}
-            </p>
-            {slotResult && (
-              <div className="mx-auto max-w-xs py-2.5 px-4 rounded-full bg-white/20 text-white font-bold text-sm">
-                {slotResult}
-              </div>
-            )}
-            {slotCd ? (
-              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white/70 text-sm font-mono select-none">
-                ⏳ {zh ? "今日已抽" : "Come back in"} · {slotCd}
-              </div>
-            ) : (
-              <button
-                onClick={handleSlotPull}
-                disabled={slotPulling}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-violet-700 font-extrabold text-base shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {slotPulling
-                  ? (zh ? "抽取中..." : "Pulling...")
-                  : (zh ? "🎲 立即抽取" : "🎲 Pull Now")}
-              </button>
-            )}
+            <SlotMachine
+              wallet={address ?? ""}
+              tokens={me?.tokens ?? 0}
+              lastSlotPull={(me as any)?.lastSlotPull ?? null}
+              onSuccess={() => { queryClient.invalidateQueries({ queryKey: ["/api/users/me"] }); }}
+            />
           </div>
 
           {/* Tab content */}
