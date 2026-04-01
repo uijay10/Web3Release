@@ -534,7 +534,12 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
       <div className={`bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-all ${post.isPinned ? "ring-1 ring-violet-400/50 bg-violet-50/20 dark:bg-violet-950/10" : ""}`}>
         {post.isPinned && (
           <div className="flex items-center gap-1 text-violet-500 text-xs font-semibold mb-2">
-            <Pin className="w-3 h-3" /> {t("pinCount")}
+            <Pin className="w-3 h-3" /> {lang === "zh-CN" ? "已置顶" : "Pinned"}
+            {post.pinnedUntil && (
+              <span className="ml-1 opacity-60 font-normal">
+                ({lang === "zh-CN" ? "还剩" : "expires"} {formatDistanceToNow(new Date(post.pinnedUntil))})
+              </span>
+            )}
           </div>
         )}
         {expiryCountdown && (
@@ -731,8 +736,8 @@ export function PostCard({ post, onRefresh, showPin, compact }: PostCardProps) {
     <div className={`bg-card border border-border rounded-2xl p-5 hover:border-primary/30 transition-all ${post.isPinned ? "ring-1 ring-violet-400/50 bg-violet-50/20 dark:bg-violet-950/10" : ""}`}>
       {post.isPinned && (
         <div className="flex items-center gap-1 text-violet-500 text-xs font-semibold mb-3">
-          <Pin className="w-3.5 h-3.5" /> {t("pinned")}
-          {post.pinnedUntil && <span className="ml-1 opacity-60 font-normal">(expires {formatDistanceToNow(new Date(post.pinnedUntil))})</span>}
+          <Pin className="w-3.5 h-3.5" /> {lang === "zh-CN" ? "已置顶" : "Pinned"}
+          {post.pinnedUntil && <span className="ml-1 opacity-60 font-normal">({lang === "zh-CN" ? "还剩" : "expires"} {formatDistanceToNow(new Date(post.pinnedUntil))})</span>}
         </div>
       )}
       {expiryCountdown && (

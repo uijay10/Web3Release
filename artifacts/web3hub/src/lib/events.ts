@@ -11,6 +11,8 @@ export interface Web3Event {
   importance?: string;
   category?: string[];
   ai_confidence?: number;
+  isPinned?: boolean;
+  pinnedUntil?: string | null;
 }
 
 export const CATEGORIES = [

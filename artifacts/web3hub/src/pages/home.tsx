@@ -243,11 +243,11 @@ export default function Home() {
 
   useEffect(() => { setPage(1); }, [debouncedSearch]);
 
-  // Pinned posts (project-type only)
+  // Pinned posts (all types — admin can pin any post)
   const { data: pinnedData } = useQuery({
     queryKey: ["/api/posts", "pinned-home"],
     queryFn: async () => {
-      const res = await fetch(`${getApiBase()}/posts?pinned=1&authorType=project&limit=${PIN_SLOTS}`);
+      const res = await fetch(`${getApiBase()}/posts?pinned=1&limit=${PIN_SLOTS}`);
       return res.json() as Promise<{ posts: any[] }>;
     },
     staleTime: 30_000,

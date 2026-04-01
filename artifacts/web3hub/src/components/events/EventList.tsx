@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Search, ExternalLink } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Search, ExternalLink, Pin } from "lucide-react";
+import { createPortal } from "react-dom";
 import {
   type Web3Event,
   isEventExpired,
@@ -8,6 +9,9 @@ import {
 } from "@/lib/events";
 import { useEventFilter } from "@/lib/event-filter-context";
 import { useLang } from "@/lib/i18n";
+import { useWeb3Auth } from "@/lib/web3";
+import { isAdmin } from "@/lib/admin";
+import { AdminPinModal, PostCard } from "@/components/post-card";
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -31,7 +35,6 @@ const SECTION_TO_ZH: Record<string, string> = {
   developer: "开发者专区",
 };
 
-/* Map from stored Chinese category key → i18n key */
 const CAT_I18N: Record<string, string> = {
   "测试网":     "nav_testnet",
   "IDO/Launchpad": "nav_ido",
@@ -55,7 +58,19 @@ function importanceDot(importance?: string) {
   }
 }
 
-function EventRow({ event, lang, tFn }: { event: Web3Event; lang: string; tFn: (k: string) => string }) {
+function EventRow({
+  event,
+  lang,
+  tFn,
+  adminUser,
+  onPinRequest,
+}: {
+  event: Web3Event;
+  lang: string;
+  tFn: (k: string) => string;
+  adminUser: boolean;
+  onPinRequest: (id: number | string) => void;
+}) {
   const zh = lang === "zh-CN";
   const cats = event.category ?? [];
   const srcLabel = formatSourceLabel(event.source_url);
@@ -70,20 +85,24 @@ function EventRow({ event, lang, tFn }: { event: Web3Event; lang: string; tFn: (
     : "";
 
   return (
-    <li className="py-4 border-b border-slate-200 dark:border-slate-700 last:border-0 group list-none">
-      {/* Row 1: crawl time left only */}
-      <div className="flex items-center mb-1.5">
-        <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">
-          {relTime}
-        </span>
+    <li className={`py-4 border-b border-slate-200 dark:border-slate-700 last:border-0 group list-none`}>
+      <div className="flex items-center mb-1.5 gap-2">
+        <span className="text-xs text-slate-400 dark:text-slate-500 font-mono flex-1">{relTime}</span>
+        {adminUser && event.id != null && (
+          <button
+            onClick={() => onPinRequest(event.id!)}
+            title={zh ? "管理员置顶" : "Admin pin"}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-violet-100 dark:hover:bg-violet-900/30 text-slate-400 hover:text-violet-500"
+          >
+            <Pin className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
-      {/* Row 2: title */}
       <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 leading-snug mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
         {event.title}
       </h3>
 
-      {/* Row 3: categories + importance inline */}
       {(cats.length > 0 || iLabel) && (
         <div className="flex flex-wrap items-center gap-1.5 mb-2">
           {cats.map(c => (
@@ -100,14 +119,12 @@ function EventRow({ event, lang, tFn }: { event: Web3Event; lang: string; tFn: (
         </div>
       )}
 
-      {/* Row 4: description */}
       {event.description && (
         <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2.5 line-clamp-2">
           {event.description}
         </p>
       )}
 
-      {/* Row 5: tags + source */}
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex flex-wrap gap-1">
           {(event.tags ?? []).map(tag => (
@@ -142,19 +159,40 @@ export function EventList() {
   const { activeCategory } = useEventFilter();
   const { t, lang } = useLang();
   const zh = lang === "zh-CN";
+  const { address } = useWeb3Auth();
+  const adminUser = isAdmin(address);
 
   const [allEvents, setAllEvents] = useState<Web3Event[]>([]);
+  const [pinnedPosts, setPinnedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"time" | "importance">("time");
+  const [fetchTick, setFetchTick] = useState(0);
+
+  const [pinTargetId, setPinTargetId] = useState<number | string | null>(null);
+  const [pinHours, setPinHours] = useState<number | "">(72);
+  const [pinCustom, setPinCustom] = useState(false);
+  const [pinning, setPinning] = useState(false);
+  const [pinMsg, setPinMsg] = useState("");
+
+  const refetch = useCallback(() => setFetchTick(t => t + 1), []);
 
   useEffect(() => {
-    fetch(`${getApiBase()}/posts?authorType=ai&limit=200`)
-      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-      .then((data: { posts?: Array<Record<string, unknown>> }) => {
-        const posts = Array.isArray(data.posts) ? data.posts : [];
-        const events: Web3Event[] = posts.map((p) => ({
+    setLoading(true);
+    setError("");
+    Promise.all([
+      fetch(`${getApiBase()}/posts?authorType=ai&limit=200`).then(r => r.ok ? r.json() : { posts: [] }),
+      fetch(`${getApiBase()}/posts?pinned=1&limit=16`).then(r => r.ok ? r.json() : { posts: [] }),
+    ]).then(([aiData, pinnedData]) => {
+      const aiPosts: Array<Record<string, unknown>> = Array.isArray(aiData.posts) ? aiData.posts : [];
+      const pinned: any[] = Array.isArray(pinnedData.posts) ? pinnedData.posts : [];
+      setPinnedPosts(pinned);
+
+      const pinnedIds = new Set(pinned.map((p: any) => p.id));
+      const events: Web3Event[] = aiPosts
+        .filter(p => !pinnedIds.has(p.id))
+        .map((p) => ({
           id: p.id as number,
           title: p.title as string,
           description: p.content as string,
@@ -166,12 +204,16 @@ export function EventList() {
           end_time: (p.eventEndTime as string) ?? undefined,
           crawl_time: p.createdAt as string,
           ai_confidence: p.aiConfidence as number,
+          isPinned: p.isPinned as boolean,
+          pinnedUntil: p.pinnedUntil as string | null,
         }));
-        setAllEvents(events);
-        setLoading(false);
-      })
-      .catch(() => { setError(zh ? "数据加载失败，请刷新重试" : "Failed to load data, please refresh"); setLoading(false); });
-  }, []);
+      setAllEvents(events);
+      setLoading(false);
+    }).catch(() => {
+      setError(zh ? "数据加载失败，请刷新重试" : "Failed to load data, please refresh");
+      setLoading(false);
+    });
+  }, [fetchTick]);
 
   const importanceOrder: Record<string, number> = { "高": 0, "high": 0, "中": 1, "medium": 1 };
 
@@ -201,10 +243,52 @@ export function EventList() {
       return db - da;
     });
 
+  const doAdminPin = async () => {
+    if (!address || !pinTargetId) return;
+    const hours = Number(pinHours);
+    if (!hours || hours < 1) return;
+    setPinning(true);
+    setPinMsg("");
+    try {
+      const res = await fetch(`${getApiBase()}/posts/${pinTargetId}/pin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address, durationHours: hours }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        setPinMsg(`❌ ${d.error}`);
+      } else {
+        setPinMsg(zh
+          ? `✅ 置顶成功！有效期 ${hours >= 24 ? Math.round(hours / 24) + " 天" : hours + " 小时"}`
+          : `✅ Pinned for ${hours >= 24 ? Math.round(hours / 24) + "d" : hours + "h"}`);
+        refetch();
+      }
+    } finally {
+      setPinning(false);
+      setPinTargetId(null);
+    }
+  };
+
   return (
     <div>
-      <div>
+      {/* Pinned posts section */}
+      {pinnedPosts.length > 0 && (
+        <div className="mb-6 space-y-3">
+          <div className="flex items-center gap-2">
+            <Pin className="w-4 h-4 text-violet-500" />
+            <span className="text-sm font-semibold text-violet-600 dark:text-violet-400">
+              {zh ? "置顶公告" : "Pinned Announcements"}
+            </span>
+            <span className="text-xs text-violet-400/70">({pinnedPosts.length})</span>
+          </div>
+          {pinnedPosts.map((post: any) => (
+            <PostCard key={post.id} post={post} onRefresh={refetch} compact />
+          ))}
+        </div>
+      )}
 
+      <div>
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
@@ -236,7 +320,6 @@ export function EventList() {
           />
         </div>
 
-        {/* Active category hint */}
         {activeCategory !== "全部" && (
           <div className="flex items-center gap-1.5 mb-3 text-xs text-slate-500 dark:text-slate-400">
             <span>{zh ? "筛选：" : "Filter:"}</span>
@@ -246,7 +329,6 @@ export function EventList() {
           </div>
         )}
 
-        {/* Loading skeleton */}
         {loading && (
           <ul className="space-y-0">
             {[1, 2, 3].map(i => (
@@ -277,11 +359,40 @@ export function EventList() {
         {!loading && !error && (
           <ul className="space-y-0">
             {filtered.map((event, idx) => (
-              <EventRow key={event.id ?? idx} event={event} lang={lang} tFn={(k) => t(k as any)} />
+              <EventRow
+                key={event.id ?? idx}
+                event={event}
+                lang={lang}
+                tFn={(k) => t(k as any)}
+                adminUser={adminUser}
+                onPinRequest={(id) => {
+                  setPinTargetId(id);
+                  setPinHours(72);
+                  setPinCustom(false);
+                  setPinMsg("");
+                }}
+              />
             ))}
           </ul>
         )}
       </div>
+
+      {/* Admin pin modal (portal) */}
+      {pinTargetId != null && createPortal(
+        <AdminPinModal
+          hours={pinHours}
+          setHours={setPinHours}
+          custom={pinCustom}
+          setCustom={setPinCustom}
+          pinning={pinning}
+          onConfirm={doAdminPin}
+          onClose={() => { setPinTargetId(null); setPinMsg(""); }}
+        />,
+        document.body
+      )}
+      {pinMsg && pinTargetId == null && (
+        <p className="text-sm mt-3 text-violet-500 font-medium text-center">{pinMsg}</p>
+      )}
     </div>
   );
 }

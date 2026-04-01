@@ -257,12 +257,10 @@ router.post("/", async (req, res) => {
     }
   }
 
-  // Expiry: normal users 3 days, KOL/dev 15 days, project unlimited
-  const postExpiresAt = isNormalPoster
-    ? new Date(Date.now() + 3 * 24 * 3600_000)
-    : isKolOrDev
-      ? new Date(Date.now() + 15 * 24 * 3600_000)
-      : null;
+  // Expiry: all non-project/non-admin users 60 days, project/admin unlimited
+  const postExpiresAt = (isNormalPoster || isKolOrDev)
+    ? new Date(Date.now() + 60 * 24 * 3600_000)
+    : null;
 
   // Admin who hasn't set a spaceType still posts as "project" so it appears on the home feed
   const resolvedAuthorType = user?.spaceType ?? (isAdmin ? "project" : null);
