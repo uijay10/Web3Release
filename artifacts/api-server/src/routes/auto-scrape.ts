@@ -3,11 +3,9 @@ import { db } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { requireAdmin, ADMIN_WALLETS } from "../lib/admin-check";
 import { verifyAdminToken } from "../lib/admin-token";
-import { runAutoScrape, DEFAULT_SOURCES, DEFAULT_KEYWORDS } from "../lib/auto-scraper";
+import { runAutoScrape, isScrapeRunning, DEFAULT_SOURCES, DEFAULT_KEYWORDS } from "../lib/auto-scraper";
 
 const router: IRouter = Router();
-
-let scrapeRunning = false;
 
 router.post("/run", (req, res, next) => {
   const key = req.headers["x-scrape-key"] ?? req.query.key;
@@ -26,28 +24,20 @@ router.post("/run", (req, res, next) => {
   res.status(403).json({ error: "Forbidden: missing scrape key or admin credentials" });
 }, async (req, res) => {
 
-  if (scrapeRunning) {
+  if (isScrapeRunning()) {
     res.status(409).json({ error: "Scrape already running" });
     return;
   }
 
-  scrapeRunning = true;
   runAutoScrape()
-    .then(summary => {
-      console.log("[auto-scrape] /run done:", summary);
-    })
-    .catch(e => {
-      console.error("[auto-scrape] /run error:", e);
-    })
-    .finally(() => {
-      scrapeRunning = false;
-    });
+    .then(summary => { console.log("[auto-scrape] /run done:", summary); })
+    .catch(e => { console.error("[auto-scrape] /run error:", e); });
 
   res.json({ ok: true, message: "Scrape started in background" });
 });
 
 router.get("/status", requireAdmin, async (_req, res) => {
-  res.json({ running: scrapeRunning });
+  res.json({ running: isScrapeRunning() });
 });
 
 router.get("/logs", requireAdmin, async (req, res) => {

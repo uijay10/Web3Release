@@ -427,79 +427,95 @@ export async function getSourcesFromDb(): Promise<ScrapeSource[]> {
   }
 }
 
+let globalScrapeRunning = false;
+
+export function isScrapeRunning(): boolean { return globalScrapeRunning; }
+
 export async function runAutoScrape(): Promise<ScrapeRunSummary> {
+  if (globalScrapeRunning) {
+    console.warn("[auto-scrape] Skipping run — another scrape is already in progress");
+    return { runId: "skipped", totalSources: 0, totalItemsFound: 0, totalItemsSaved: 0, errors: 0, durationMs: 0 };
+  }
+  globalScrapeRunning = true;
   const runId = `run_${Date.now()}`;
   const startMs = Date.now();
   console.log(`[auto-scrape] Starting run ${runId}`);
 
-  const [sources, keywords] = await Promise.all([getSourcesFromDb(), getKeywordsFromDb()]);
+  let sources: ScrapeSource[] = [];
   let totalItemsFound = 0;
   let totalItemsSaved = 0;
   let errors = 0;
 
-  for (const source of sources) {
-    try {
-      const feed = await fetchRssWithRetry(source.url);
-      if (!feed || !Array.isArray(feed.items) || feed.items.length === 0) {
-        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: 0, itemsSaved: 0, errorMsg: "No feed items" });
-        continue;
-      }
+  try {
+    const [srcs, keywords] = await Promise.all([getSourcesFromDb(), getKeywordsFromDb()]);
+    sources = srcs;
 
-      const candidates = feed.items
-        .slice(0, 30)
-        .filter(item => {
-          const text = `${item.title ?? ""} ${item.contentSnippet ?? item.summary ?? item.content ?? ""}`;
-          return passesKeywordFilter(text, keywords);
-        })
-        .map(item => ({
-          title: (item.title ?? "").replace(/<[^>]+>/g, "").trim(),
-          description: (item.contentSnippet ?? item.summary ?? item.content ?? "").replace(/<[^>]+>/g, "").slice(0, 800).trim(),
-          link: item.link ?? item.guid ?? source.url,
-          pubDate: item.pubDate ?? item.isoDate,
-        }))
-        .filter(c => c.title && c.link);
-
-      if (candidates.length === 0) {
-        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: 0, itemsSaved: 0, errorMsg: "All filtered out by keywords" });
-        continue;
-      }
-
-      const allLinks = candidates.map(c => c.link);
-      const existingUrls = await getExistingUrls(allLinks);
-      const newCandidates = candidates.filter(c => !existingUrls.has(c.link));
-
-      if (newCandidates.length === 0) {
-        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: candidates.length, itemsSaved: 0, errorMsg: "All already in DB" });
-        continue;
-      }
-
-      totalItemsFound += newCandidates.length;
-      let savedCount = 0;
-
-      for (let i = 0; i < newCandidates.length; i += BATCH_SIZE) {
-        const batch = newCandidates.slice(i, i + BATCH_SIZE);
-        const events = await processBatchWithDeepSeek(batch);
-
-        for (const ev of events) {
-          const section = mapCategory(Array.isArray(ev.category) ? ev.category : []);
-          if (!section) continue;
-          const saved = await insertPost(ev, section);
-          if (saved) savedCount++;
+    for (const source of sources) {
+      try {
+        const feed = await fetchRssWithRetry(source.url);
+        if (!feed || !Array.isArray(feed.items) || feed.items.length === 0) {
+          await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: 0, itemsSaved: 0, errorMsg: "No feed items" });
+          continue;
         }
 
-        if (i + BATCH_SIZE < newCandidates.length) await sleep(1000);
+        const candidates = feed.items
+          .slice(0, 30)
+          .filter(item => {
+            const text = `${item.title ?? ""} ${item.contentSnippet ?? item.summary ?? item.content ?? ""}`;
+            return passesKeywordFilter(text, keywords);
+          })
+          .map(item => ({
+            title: (item.title ?? "").replace(/<[^>]+>/g, "").trim(),
+            description: (item.contentSnippet ?? item.summary ?? item.content ?? "").replace(/<[^>]+>/g, "").slice(0, 800).trim(),
+            link: item.link ?? item.guid ?? source.url,
+            pubDate: item.pubDate ?? item.isoDate,
+          }))
+          .filter(c => c.title && c.link);
+
+        if (candidates.length === 0) {
+          await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: 0, itemsSaved: 0, errorMsg: "All filtered out by keywords" });
+          continue;
+        }
+
+        const allLinks = candidates.map(c => c.link);
+        const existingUrls = await getExistingUrls(allLinks);
+        const newCandidates = candidates.filter(c => !existingUrls.has(c.link));
+
+        if (newCandidates.length === 0) {
+          await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: candidates.length, itemsSaved: 0, errorMsg: "All already in DB" });
+          continue;
+        }
+
+        totalItemsFound += newCandidates.length;
+        let savedCount = 0;
+
+        for (let i = 0; i < newCandidates.length; i += BATCH_SIZE) {
+          const batch = newCandidates.slice(i, i + BATCH_SIZE);
+          const events = await processBatchWithDeepSeek(batch);
+
+          for (const ev of events) {
+            const section = mapCategory(Array.isArray(ev.category) ? ev.category : []);
+            if (!section) continue;
+            const saved = await insertPost(ev, section);
+            if (saved) savedCount++;
+          }
+
+          if (i + BATCH_SIZE < newCandidates.length) await sleep(1000);
+        }
+
+        totalItemsSaved += savedCount;
+        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "ok", itemsFound: newCandidates.length, itemsSaved: savedCount });
+      } catch (e: unknown) {
+        errors++;
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error(`[auto-scrape] source ${source.name} error:`, msg);
+        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "error", itemsFound: 0, itemsSaved: 0, errorMsg: msg.slice(0, 500) });
       }
 
-      totalItemsSaved += savedCount;
-      await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "ok", itemsFound: newCandidates.length, itemsSaved: savedCount });
-    } catch (e: unknown) {
-      errors++;
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`[auto-scrape] source ${source.name} error:`, msg);
-      await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "error", itemsFound: 0, itemsSaved: 0, errorMsg: msg.slice(0, 500) });
+      await sleep(300);
     }
-
-    await sleep(300);
+  } finally {
+    globalScrapeRunning = false;
   }
 
   const durationMs = Date.now() - startMs;

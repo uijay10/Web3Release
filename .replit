@@ -27,3 +27,9 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.development]
+SCRAPE_CRON_SCHEDULE = "*/10 * * * *"
+SCRAPE_INTERNAL_KEY = "web3release-scrape-2026"

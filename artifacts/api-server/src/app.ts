@@ -103,8 +103,9 @@ ensureTables();
 
 // Auto-scrape cron job: every 2 hours
 if (process.env.NODE_ENV !== "test") {
-  cron.schedule("0 */2 * * *", async () => {
-    console.log("[cron] Starting scheduled auto-scrape");
+  const SCRAPE_CRON = process.env.SCRAPE_CRON_SCHEDULE ?? "0 */2 * * *";
+  cron.schedule(SCRAPE_CRON, async () => {
+    console.log(`[cron] Starting scheduled auto-scrape (schedule: ${SCRAPE_CRON})`);
     try {
       const { runAutoScrape } = await import("./lib/auto-scraper");
       const summary = await runAutoScrape();
@@ -113,7 +114,7 @@ if (process.env.NODE_ENV !== "test") {
       console.error("[cron] Auto-scrape error:", e);
     }
   });
-  console.log("[cron] Auto-scrape scheduled every 2 hours");
+  console.log(`[cron] Auto-scrape scheduled: ${SCRAPE_CRON}`);
 }
 
 export default app;
