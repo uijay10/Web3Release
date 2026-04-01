@@ -173,9 +173,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavClick = (e: React.MouseEvent, href: string, navKey: string) => {
+    e.preventDefault();
     const cat = NAV_KEY_TO_CATEGORY[navKey];
     if (isHome && cat) {
-      e.preventDefault();
       setActiveCategory(cat);
     } else {
       navigate(href);
