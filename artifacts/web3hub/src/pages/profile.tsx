@@ -8,13 +8,12 @@ import {
   Bell, Bookmark, Settings, LogOut,
   Twitter, MessageCircle, Send, BookOpen, Copy,
   AlertCircle, FileText, PenSquare,
-  BarChart2, Users, Coins, Wrench,
+  BarChart2, Users, Coins,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLang } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
-import { ScrapePanel } from "@/components/admin/ScrapePanel";
 import { PointsPanel } from "@/components/admin/PointsPanel";
 import { SlotMachine } from "@/components/slot-machine";
 import { Link } from "wouter";
@@ -36,7 +35,6 @@ type NavTab =
   | "stats"
   | "settings"
   | "admin"
-  | "scrape"
   | "points";
 
 const ALL_SECTIONS = [
@@ -263,7 +261,6 @@ export default function Profile() {
     ...(admin ? [
       { tab: "admin"  as NavTab, icon: <ShieldCheck className="w-4 h-4" />, label: "申请审核" },
       { tab: "points" as NavTab, icon: <Coins className="w-4 h-4" />,       label: "积分管理" },
-      { tab: "scrape" as NavTab, icon: <Wrench className="w-4 h-4" />,      label: "内容抓取" },
     ] : []),
   ];
 
@@ -557,21 +554,6 @@ export default function Profile() {
           </div>
           <div className="bg-card border border-border rounded-2xl p-6">
             <PointsPanel adminWallet={address ?? ""} />
-          </div>
-        </div>
-      ) : null;
-
-      case "scrape": return admin ? (
-        <div className="space-y-4">
-          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-2xl px-5 py-3 flex items-center gap-3">
-            <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">内容抓取 · 仅管理员可见</p>
-              <p className="text-xs text-blue-600/70 dark:text-blue-400/60 mt-0.5">输入外部链接，一键抓取并发布到平台</p>
-            </div>
-          </div>
-          <div className="bg-card border border-border rounded-2xl p-6">
-            <ScrapePanel adminWallet={address ?? ""} />
           </div>
         </div>
       ) : null;
