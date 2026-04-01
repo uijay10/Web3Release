@@ -7,7 +7,7 @@ import {
   Users, ClipboardList, Star, Ban, Download,
   CheckCircle, XCircle, RefreshCw, Pin, Send,
   ChevronDown, AlertCircle, ShieldOff, Cpu, Trash2, Calendar,
-  Handshake
+  Handshake, Rss, Plus, PlayCircle, Filter
 } from "lucide-react";
 import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
 
@@ -41,7 +41,7 @@ async function adminGet(path: string, wallet: string) {
   return fetch(`${apiBase}/admin${path}${sep}adminWallet=${encodeURIComponent(wallet)}`).then(r => r.json());
 }
 
-type Tab = "applications" | "users" | "send" | "system" | "claims";
+type Tab = "applications" | "users" | "send" | "system" | "claims" | "autoscrape";
 
 interface DialogState {
   type: "approve" | "reject";
@@ -80,8 +80,103 @@ export default function AdminPage() {
   const [cleanupLoading, setCleanupLoading] = useState(false);
   const [cleanupResult, setCleanupResult] = useState<string>("");
 
+  const [scrapeRuns, setScrapeRuns] = useState<any[]>([]);
+  const [scrapeLogs, setScrapeLogs] = useState<any[]>([]);
+  const [scrapeLogsRunId, setScrapeLogsRunId] = useState<string | null>(null);
+  const [scrapeSources, setScrapeSources] = useState<any[]>([]);
+  const [scrapeKeywordText, setScrapeKeywordText] = useState("");
+  const [scrapeMsg, setScrapeMsg] = useState("");
+  const [newSrcName, setNewSrcName] = useState("");
+  const [newSrcUrl, setNewSrcUrl] = useState("");
+  const [newSrcPriority, setNewSrcPriority] = useState("2");
+  const [scrapeRunning, setScrapeRunning] = useState(false);
+
   const admin = isAdmin(address);
   const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(""), 3000); };
+
+  async function scrapeGet(path: string) {
+    return fetch(`${apiBase}/auto-scrape${path}?adminWallet=${encodeURIComponent(address ?? "")}`).then(r => r.json());
+  }
+  async function scrapePost(path: string, body: object = {}) {
+    return fetch(`${apiBase}/auto-scrape${path}?adminWallet=${encodeURIComponent(address ?? "")}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminWallet: address, ...body }),
+    }).then(r => r.json());
+  }
+  async function scrapePut(path: string, body: object = {}) {
+    return fetch(`${apiBase}/auto-scrape${path}?adminWallet=${encodeURIComponent(address ?? "")}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminWallet: address, ...body }),
+    }).then(r => r.json());
+  }
+  async function scrapeDelete(path: string) {
+    return fetch(`${apiBase}/auto-scrape${path}?adminWallet=${encodeURIComponent(address ?? "")}`, {
+      method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminWallet: address }),
+    }).then(r => r.json());
+  }
+
+  async function loadScrapeTab() {
+    const [runsRes, sourcesRes, kwRes] = await Promise.all([
+      scrapeGet("/runs"),
+      scrapeGet("/sources"),
+      scrapeGet("/keywords"),
+    ]);
+    if (runsRes.runs) setScrapeRuns(runsRes.runs);
+    if (sourcesRes.sources) setScrapeSources(sourcesRes.sources);
+    if (kwRes.keywords) {
+      const kws = (kwRes.keywords as Array<{ keyword: string }>).map(k => k.keyword);
+      setScrapeKeywordText(kws.join(", "));
+    }
+  }
+
+  async function loadScrapeLogs(runId: string) {
+    setScrapeLogsRunId(runId);
+    const res = await scrapeGet(`/logs?runId=${encodeURIComponent(runId)}`);
+    if (res.logs) setScrapeLogs(res.logs);
+  }
+
+  async function triggerScrape() {
+    setScrapeRunning(true);
+    setScrapeMsg("正在触发抓取任务...");
+    try {
+      const res = await scrapePost("/run");
+      setScrapeMsg(res.ok ? "✓ 抓取任务已在后台启动，请稍后刷新查看结果" : `❌ ${res.error}`);
+      setTimeout(() => loadScrapeTab(), 5000);
+    } catch (e) { setScrapeMsg(`❌ ${String(e)}`); }
+    finally { setScrapeRunning(false); setTimeout(() => setScrapeMsg(""), 8000); }
+  }
+
+  async function seedSources() {
+    const res = await scrapePost("/sources/seed");
+    setScrapeMsg(res.ok ? `✓ ${res.message}` : `❌ ${res.error}`);
+    loadScrapeTab();
+    setTimeout(() => setScrapeMsg(""), 4000);
+  }
+
+  async function addSource() {
+    if (!newSrcName.trim() || !newSrcUrl.trim()) { setScrapeMsg("名称和 URL 均为必填"); return; }
+    const res = await scrapePost("/sources", { name: newSrcName, url: newSrcUrl, type: "rss", priority: Number(newSrcPriority) });
+    if (res.ok) { setNewSrcName(""); setNewSrcUrl(""); setScrapeMsg("✓ 添加成功"); loadScrapeTab(); }
+    else setScrapeMsg(`❌ ${res.error}`);
+    setTimeout(() => setScrapeMsg(""), 3000);
+  }
+
+  async function deleteSource(id: number) {
+    const res = await scrapeDelete(`/sources/${id}`);
+    if (res.ok) { setScrapeMsg("✓ 已删除"); loadScrapeTab(); }
+    else setScrapeMsg(`❌ ${res.error}`);
+    setTimeout(() => setScrapeMsg(""), 3000);
+  }
+
+  async function toggleSource(id: number, enabled: boolean) {
+    await scrapePut(`/sources/${id}`, { enabled: !enabled });
+    loadScrapeTab();
+  }
+
+  async function saveKeywords() {
+    const kws = scrapeKeywordText.split(/[,\n]+/).map(k => k.trim()).filter(Boolean);
+    const res = await scrapePut("/keywords", { keywords: kws });
+    setScrapeMsg(res.ok ? `✓ 已保存 ${res.count} 个关键词` : `❌ ${res.error}`);
+    setTimeout(() => setScrapeMsg(""), 3000);
+  }
 
   useEffect(() => {
     if (isConnected !== undefined && !isConnected) { setLocation("/"); return; }
@@ -260,6 +355,9 @@ export default function AdminPage() {
         </button>
         <button className={tabCls(tab === "claims")} onClick={() => setTab("claims")}>
           <Handshake className="w-4 h-4 inline mr-1" />认领审核
+        </button>
+        <button className={tabCls(tab === "autoscrape")} onClick={() => { setTab("autoscrape"); loadScrapeTab(); }}>
+          <Rss className="w-4 h-4 inline mr-1" />自动抓取
         </button>
       </div>
 
@@ -661,6 +759,166 @@ export default function AdminPage() {
                 {cleanupResult}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ─── Auto-Scrape Tab ─── */}
+      {tab === "autoscrape" && (
+        <div className="space-y-6">
+          {/* Header + Run button */}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-lg font-bold flex items-center gap-2"><Rss className="w-5 h-5 text-primary" />AI 自动抓取</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">每2小时自动从 60+ RSS 源抓取 Web3 事件，通过 DeepSeek 解析后入库</p>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={seedSources}
+                className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-muted transition-colors flex items-center gap-1.5">
+                <Plus className="w-4 h-4" />初始化数据源
+              </button>
+              <button onClick={triggerScrape} disabled={scrapeRunning}
+                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-50">
+                <PlayCircle className="w-4 h-4" />{scrapeRunning ? "启动中..." : "立即执行抓取"}
+              </button>
+            </div>
+          </div>
+
+          {scrapeMsg && (
+            <div className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${scrapeMsg.startsWith("✓") ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"}`}>
+              {scrapeMsg}
+            </div>
+          )}
+
+          {/* Run History */}
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-sm">执行历史</h3>
+              <button onClick={loadScrapeTab} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <RefreshCw className="w-3.5 h-3.5" />刷新
+              </button>
+            </div>
+            {scrapeRuns.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">暂无执行记录</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead><tr className="border-b border-border">
+                    <th className="text-left py-2 pr-3 font-semibold text-muted-foreground">Run ID</th>
+                    <th className="text-left py-2 pr-3 font-semibold text-muted-foreground">开始时间</th>
+                    <th className="text-right py-2 pr-3 font-semibold text-muted-foreground">源</th>
+                    <th className="text-right py-2 pr-3 font-semibold text-muted-foreground">发现</th>
+                    <th className="text-right py-2 pr-3 font-semibold text-muted-foreground">入库</th>
+                    <th className="text-right py-2 pr-3 font-semibold text-muted-foreground">错误</th>
+                    <th className="py-2"></th>
+                  </tr></thead>
+                  <tbody>
+                    {scrapeRuns.map((r, i) => (
+                      <tr key={r.run_id ?? i} className={`border-b border-border/50 hover:bg-muted/30 ${scrapeLogsRunId === r.run_id ? "bg-primary/5" : ""}`}>
+                        <td className="py-2 pr-3 font-mono text-[10px] text-muted-foreground">{String(r.run_id ?? "").slice(-12)}</td>
+                        <td className="py-2 pr-3">{r.started_at ? new Date(r.started_at).toLocaleString("zh-CN") : "-"}</td>
+                        <td className="py-2 pr-3 text-right">{r.total_sources ?? 0}</td>
+                        <td className="py-2 pr-3 text-right">{r.total_found ?? 0}</td>
+                        <td className="py-2 pr-3 text-right font-semibold text-green-600">{r.total_saved ?? 0}</td>
+                        <td className="py-2 pr-3 text-right text-red-500">{r.errors ?? 0}</td>
+                        <td className="py-2">
+                          <button onClick={() => loadScrapeLogs(r.run_id)}
+                            className="text-xs px-2 py-0.5 rounded-lg border border-border hover:bg-muted transition-colors">
+                            详情
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Logs Detail */}
+          {scrapeLogsRunId && scrapeLogs.length > 0 && (
+            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm">执行日志 — <span className="font-mono text-xs text-muted-foreground">{scrapeLogsRunId.slice(-12)}</span></h3>
+                <button onClick={() => { setScrapeLogsRunId(null); setScrapeLogs([]); }} className="text-xs text-muted-foreground hover:text-foreground">关闭</button>
+              </div>
+              <div className="overflow-x-auto max-h-72 overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-card"><tr className="border-b border-border">
+                    <th className="text-left py-2 pr-3 font-semibold text-muted-foreground">来源</th>
+                    <th className="text-center py-2 pr-3 font-semibold text-muted-foreground">状态</th>
+                    <th className="text-right py-2 pr-3 font-semibold text-muted-foreground">发现</th>
+                    <th className="text-right py-2 pr-3 font-semibold text-muted-foreground">入库</th>
+                    <th className="text-left py-2 font-semibold text-muted-foreground">备注</th>
+                  </tr></thead>
+                  <tbody>
+                    {scrapeLogs.map((l, i) => (
+                      <tr key={l.id ?? i} className="border-b border-border/40">
+                        <td className="py-1.5 pr-3 font-medium">{l.source_name}</td>
+                        <td className="py-1.5 pr-3 text-center">
+                          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${l.status === "ok" ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" : l.status === "error" ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400" : "bg-muted text-muted-foreground"}`}>
+                            {l.status}
+                          </span>
+                        </td>
+                        <td className="py-1.5 pr-3 text-right">{l.items_found ?? 0}</td>
+                        <td className="py-1.5 pr-3 text-right font-semibold text-green-600">{l.items_saved ?? 0}</td>
+                        <td className="py-1.5 text-muted-foreground truncate max-w-[200px]">{l.error_msg ?? ""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sources Management */}
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <h3 className="font-semibold text-sm flex items-center gap-2"><Filter className="w-4 h-4" />RSS 数据源 ({scrapeSources.length})</h3>
+            <div className="flex gap-2 flex-wrap">
+              <input value={newSrcName} onChange={e => setNewSrcName(e.target.value)} placeholder="来源名称"
+                className="flex-1 min-w-[120px] px-3 py-2 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-primary/20 outline-none" />
+              <input value={newSrcUrl} onChange={e => setNewSrcUrl(e.target.value)} placeholder="RSS URL"
+                className="flex-[3] min-w-[200px] px-3 py-2 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-primary/20 outline-none" />
+              <select value={newSrcPriority} onChange={e => setNewSrcPriority(e.target.value)}
+                className="px-3 py-2 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-primary/20 outline-none">
+                <option value="1">优先级 1</option>
+                <option value="2">优先级 2</option>
+                <option value="3">优先级 3</option>
+              </select>
+              <button onClick={addSource} className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-1.5">
+                <Plus className="w-4 h-4" />添加
+              </button>
+            </div>
+            <div className="max-h-64 overflow-y-auto space-y-1">
+              {scrapeSources.map((src, i) => (
+                <div key={src.id ?? i} className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-muted/40 group">
+                  <button onClick={() => toggleSource(src.id, src.enabled)}
+                    className={`w-8 h-4.5 rounded-full flex-shrink-0 transition-colors ${src.enabled ? "bg-green-500" : "bg-muted"}`}
+                    title={src.enabled ? "点击禁用" : "点击启用"}>
+                    <div className={`w-3.5 h-3.5 rounded-full bg-white shadow mx-0.5 transition-transform ${src.enabled ? "translate-x-3.5" : "translate-x-0"}`} />
+                  </button>
+                  <span className={`text-xs font-semibold min-w-[80px] ${!src.enabled ? "text-muted-foreground line-through" : ""}`}>{src.name}</span>
+                  <span className="text-xs text-muted-foreground flex-1 truncate">{src.url}</span>
+                  <span className="text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted">P{src.priority}</span>
+                  <button onClick={() => deleteSource(src.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 transition-all">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Keywords */}
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+            <h3 className="font-semibold text-sm">过滤关键词（逗号或换行分隔）</h3>
+            <textarea value={scrapeKeywordText} onChange={e => setScrapeKeywordText(e.target.value)} rows={5}
+              className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-primary/20 outline-none resize-y font-mono"
+              placeholder="blockchain, web3, airdrop, testnet, ..." />
+            <button onClick={saveKeywords}
+              className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity">
+              保存关键词
+            </button>
           </div>
         </div>
       )}

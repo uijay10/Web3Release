@@ -7,6 +7,7 @@ import spacesRouter from "./spaces";
 import adminRouter from "./admin";
 import notificationsRouter from "./notifications";
 import aiRouter from "./ai";
+import autoScrapeRouter from "./auto-scrape";
 const router: IRouter = Router();
 
 router.use(healthRouter);
@@ -17,5 +18,6 @@ router.use("/spaces", spacesRouter);
 router.use("/admin", adminRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/ai", aiRouter);
+router.use("/auto-scrape", autoScrapeRouter);
 
 export default router;

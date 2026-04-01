@@ -1,0 +1,429 @@
+import OpenAI from "openai";
+import Parser from "rss-parser";
+import { db, postsTable } from "@workspace/db";
+import { sql, inArray } from "drizzle-orm";
+import https from "node:https";
+import http from "node:http";
+
+const openrouter = new OpenAI({
+  baseURL: process.env.AI_INTEGRATIONS_OPENROUTER_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENROUTER_API_KEY ?? "dummy",
+});
+
+const DEEPSEEK_MODEL = "deepseek/deepseek-v3.2";
+const AI_SYSTEM_WALLET = "ai-system";
+const AI_SYSTEM_NAME = "AI精选";
+const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
+const BATCH_SIZE = 8;
+const MAX_RETRIES = 3;
+
+export const CATEGORY_MAP: Record<string, string> = {
+  "测试网": "testnet",
+  "IDO/Launchpad": "ido", "IDO": "ido", "Launchpad": "ido",
+  "预售": "presale",
+  "融资公告": "funding",
+  "空投": "airdrop",
+  "招聘": "recruiting",
+  "节点招募": "nodes",
+  "主网上线": "mainnet",
+  "代币解锁": "unlock",
+  "交易所上线": "exchange",
+  "链上任务": "quest",
+  "开发者专区": "developer",
+};
+
+function mapCategory(cats: string[]): string | null {
+  for (const cat of cats) {
+    if (CATEGORY_MAP[cat]) return CATEGORY_MAP[cat];
+    for (const [zh, en] of Object.entries(CATEGORY_MAP)) {
+      if (cat.includes(zh)) return en;
+    }
+  }
+  return null;
+}
+
+export const DEFAULT_SOURCES = [
+  { name: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/", type: "rss", priority: 1 },
+  { name: "Cointelegraph", url: "https://cointelegraph.com/rss", type: "rss", priority: 1 },
+  { name: "Decrypt", url: "https://decrypt.co/feed", type: "rss", priority: 1 },
+  { name: "The Block", url: "https://www.theblock.co/rss", type: "rss", priority: 1 },
+  { name: "U.Today", url: "https://u.today/rss", type: "rss", priority: 1 },
+  { name: "BeInCrypto", url: "https://beincrypto.com/feed/", type: "rss", priority: 1 },
+  { name: "CryptoSlate", url: "https://cryptoslate.com/feed/", type: "rss", priority: 1 },
+  { name: "Bitcoin Magazine", url: "https://bitcoinmagazine.com/feed", type: "rss", priority: 1 },
+  { name: "CoinGape", url: "https://coingape.com/feed/", type: "rss", priority: 1 },
+  { name: "CryptoPotato", url: "https://cryptopotato.com/feed/", type: "rss", priority: 1 },
+  { name: "News.Bitcoin.com", url: "https://news.bitcoin.com/feed/", type: "rss", priority: 1 },
+  { name: "Bitcoinist", url: "https://bitcoinist.com/feed/", type: "rss", priority: 2 },
+  { name: "The Daily Hodl", url: "https://dailyhodl.com/feed/", type: "rss", priority: 2 },
+  { name: "AMBCrypto", url: "https://ambcrypto.com/feed/", type: "rss", priority: 2 },
+  { name: "Crypto Briefing", url: "https://cryptobriefing.com/feed/", type: "rss", priority: 2 },
+  { name: "Blockworks", url: "https://blockworks.co/feed/", type: "rss", priority: 1 },
+  { name: "The Defiant", url: "https://thedefiant.io/feed/", type: "rss", priority: 1 },
+  { name: "CryptoNews", url: "https://cryptonews.com/news/feed/", type: "rss", priority: 2 },
+  { name: "NewsBTC", url: "https://www.newsbtc.com/feed/", type: "rss", priority: 2 },
+  { name: "Crypto Ninjas", url: "https://www.cryptoninjas.net/feed/", type: "rss", priority: 2 },
+  { name: "CoinJournal", url: "https://coinjournal.net/feed/", type: "rss", priority: 2 },
+  { name: "Finance Magnates Crypto", url: "https://www.financemagnates.com/feed/", type: "rss", priority: 2 },
+  { name: "CoinGeek", url: "https://coingeek.com/feed/", type: "rss", priority: 2 },
+  { name: "Crypto Daily", url: "https://cryptodaily.co.uk/feed", type: "rss", priority: 2 },
+  { name: "Ledger Insights", url: "https://www.ledgerinsights.com/feed/", type: "rss", priority: 2 },
+  { name: "Protos", url: "https://www.protos.com/feed/", type: "rss", priority: 2 },
+  { name: "Unchained", url: "https://unchainedcrypto.com/feed/", type: "rss", priority: 2 },
+  { name: "Bankless", url: "https://www.bankless.com/feed", type: "rss", priority: 1 },
+  { name: "Solana Blog", url: "https://solana.com/blog/rss.xml", type: "rss", priority: 1 },
+  { name: "Ethereum Blog", url: "https://blog.ethereum.org/feed.xml", type: "rss", priority: 1 },
+  { name: "Polygon Blog", url: "https://polygon.technology/blog/feed", type: "rss", priority: 1 },
+  { name: "Binance Blog", url: "https://www.binance.com/en/blog/feed", type: "rss", priority: 1 },
+  { name: "Coinbase Blog", url: "https://www.coinbase.com/blog/rss", type: "rss", priority: 1 },
+  { name: "Ripple Blog", url: "https://ripple.com/feed/", type: "rss", priority: 2 },
+  { name: "Cardano Blog", url: "https://cardano.org/feed/", type: "rss", priority: 2 },
+  { name: "Near Protocol Blog", url: "https://near.org/blog/feed/", type: "rss", priority: 2 },
+  { name: "Chainlink Blog", url: "https://blog.chain.link/feed/", type: "rss", priority: 1 },
+  { name: "Optimism Blog", url: "https://optimism.io/blog/feed", type: "rss", priority: 1 },
+  { name: "Arbitrum Blog", url: "https://arbitrum.io/blog/feed", type: "rss", priority: 1 },
+  { name: "zkSync Blog", url: "https://zksync.io/blog/feed", type: "rss", priority: 1 },
+  { name: "Medium Blockchain", url: "https://medium.com/feed/tag/blockchain", type: "rss", priority: 2 },
+  { name: "Medium Web3", url: "https://medium.com/feed/tag/web3", type: "rss", priority: 2 },
+  { name: "Medium Crypto", url: "https://medium.com/feed/tag/cryptocurrency", type: "rss", priority: 2 },
+  { name: "Medium DeFi", url: "https://medium.com/feed/tag/defi", type: "rss", priority: 2 },
+  { name: "Medium NFT", url: "https://medium.com/feed/tag/nft", type: "rss", priority: 2 },
+  { name: "Medium DAO", url: "https://medium.com/feed/tag/dao", type: "rss", priority: 3 },
+  { name: "Medium Layer2", url: "https://medium.com/feed/tag/layer2", type: "rss", priority: 2 },
+  { name: "Reddit r/cryptocurrency", url: "https://old.reddit.com/r/cryptocurrency/.rss", type: "rss", priority: 2 },
+  { name: "Reddit r/defi", url: "https://old.reddit.com/r/defi/.rss", type: "rss", priority: 2 },
+  { name: "Reddit r/solana", url: "https://old.reddit.com/r/solana/.rss", type: "rss", priority: 2 },
+  { name: "Reddit r/ethereum", url: "https://old.reddit.com/r/ethereum/.rss", type: "rss", priority: 2 },
+  { name: "Blockchain.news", url: "https://blockchain.news/feed", type: "rss", priority: 2 },
+  { name: "CoinMarketCap News", url: "https://coinmarketcap.com/headlines/news/rss/", type: "rss", priority: 1 },
+  { name: "CNBC Crypto", url: "https://www.cnbc.com/id/10000664/device/rss/rss.html", type: "rss", priority: 2 },
+  { name: "Yahoo Finance Crypto", url: "https://finance.yahoo.com/news/rssindex", type: "rss", priority: 2 },
+  { name: "Investing.com Crypto", url: "https://www.investing.com/rss/news_1.rss", type: "rss", priority: 2 },
+  { name: "FXStreet Crypto", url: "https://www.fxstreet.com/rss/crypto", type: "rss", priority: 2 },
+  { name: "CCN", url: "https://www.ccn.com/feed/", type: "rss", priority: 3 },
+  { name: "Smart Liquidity", url: "https://smartliquidity.info/feed/", type: "rss", priority: 3 },
+  { name: "MakerDAO Blog", url: "https://blog.makerdao.com/feed/", type: "rss", priority: 2 },
+  { name: "Aave Blog", url: "https://aave.com/blog/feed", type: "rss", priority: 2 },
+  { name: "Uniswap Blog", url: "https://uniswap.org/blog/feed", type: "rss", priority: 2 },
+];
+
+export const DEFAULT_KEYWORDS = [
+  "blockchain","web3","crypto","bitcoin","btc","ethereum","eth","solana",
+  "defi","nft","rwa","depin","layer1","layer2","dao","zk","zkp",
+  "airdrop","testnet","mainnet","ido","presale","launchpad","token",
+  "funding","grant","hackathon","quest","node","staking","yield",
+  "区块链","加密货币","空投","测试网","主网","代币","融资","挖矿",
+  "交易所","上线","发行","生态","跨链","钱包","隐私","智能合约",
+  "ai agent","defi protocol","liquidity","tvl","dex","cex","nft mint",
+  "layer 2","rollup","bridge","lsd","lst","restaking","eigenlayer",
+];
+
+export interface ScrapeSource {
+  id?: number;
+  name: string;
+  url: string;
+  type: string;
+  priority: number;
+  enabled: boolean;
+}
+
+export interface ScrapeLogEntry {
+  id?: number;
+  runId: string;
+  sourceName: string;
+  sourceUrl: string;
+  status: "ok" | "error" | "skip";
+  itemsFound: number;
+  itemsSaved: number;
+  errorMsg?: string | null;
+  createdAt?: Date;
+}
+
+export interface ScrapeRunSummary {
+  runId: string;
+  totalSources: number;
+  totalItemsFound: number;
+  totalItemsSaved: number;
+  errors: number;
+  durationMs: number;
+}
+
+async function sleep(ms: number) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function fetchRssWithRetry(url: string, retries = MAX_RETRIES): Promise<Parser.Output<Record<string, unknown>> | null> {
+  const parser = new Parser({
+    timeout: 15000,
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; Web3ReleaseBot/1.0; +https://web3release.com)",
+      "Accept": "application/rss+xml, application/xml, application/atom+xml, text/xml, */*",
+    },
+    requestOptions: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const feed = await parser.parseURL(url);
+      return feed;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (attempt === retries) {
+        console.warn(`[auto-scrape] fetchRss failed after ${retries} attempts: ${url} — ${msg}`);
+        return null;
+      }
+      await sleep(attempt * 1500);
+    }
+  }
+  return null;
+}
+
+function passesKeywordFilter(text: string, keywords: string[]): boolean {
+  const lower = text.toLowerCase();
+  return keywords.some(kw => lower.includes(kw.toLowerCase()));
+}
+
+function safeDate(val: unknown): Date | null {
+  if (!val || typeof val !== "string") return null;
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+interface ProcessedEvent {
+  title: string;
+  project_name: string;
+  description: string;
+  category: string[];
+  start_time: string | null;
+  end_time: string | null;
+  source_url: string;
+  importance: "high" | "medium" | "low";
+  ai_confidence: number;
+}
+
+const WEB3_BATCH_PROMPT = `你是 Web3 事件提取专家，专为 web3release.com 平台工作。
+
+平台栏目（从这里选择 category，1-2个）：
+测试网、IDO/Launchpad、预售、融资公告、空投、招聘、节点招募、主网上线、代币解锁、交易所上线、链上任务、开发者专区
+
+任务：对下面每条 RSS 文章进行判断：
+1. 是否属于 Web3 / 加密货币领域的有效事件？
+2. 是否属于上面的某个平台栏目？
+3. 提取时间（如有）并生成中文摘要
+
+输出要求：
+- 只返回纯 JSON 数组，不要 markdown 或代码块
+- 每条符合条件的事件格式如下（不符合的直接跳过，不输出）：
+{
+  "title": "优化后的中文标题（20字以内）",
+  "project_name": "项目名",
+  "description": "100-150字中文描述，说明机会要点和时间",
+  "category": ["空投"],
+  "start_time": "ISO格式 或 null",
+  "end_time": "ISO格式 或 null",
+  "source_url": "原始URL",
+  "importance": "high/medium/low",
+  "ai_confidence": 0.85
+}
+
+不符合条件的跳过（不输出到数组）。如果没有任何符合的，返回 []
+
+文章列表：
+{{ARTICLES}}`;
+
+async function processBatchWithDeepSeek(
+  articles: Array<{ title: string; description: string; link: string; pubDate?: string }>,
+  retries = MAX_RETRIES,
+): Promise<ProcessedEvent[]> {
+  const articlesText = articles.map((a, i) =>
+    `[${i + 1}] 标题: ${a.title}\n描述: ${a.description?.slice(0, 600) ?? ""}\n链接: ${a.link}\n发布时间: ${a.pubDate ?? "未知"}`
+  ).join("\n\n---\n\n");
+
+  const prompt = WEB3_BATCH_PROMPT.replace("{{ARTICLES}}", articlesText);
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const completion = await openrouter.chat.completions.create({
+        model: DEEPSEEK_MODEL,
+        max_tokens: 8192,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+      });
+
+      const raw = completion.choices[0]?.message?.content ?? "[]";
+      const cleaned = raw.trim()
+        .replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "");
+
+      let parsed: ProcessedEvent[];
+      try {
+        parsed = JSON.parse(cleaned);
+        if (!Array.isArray(parsed)) parsed = [];
+      } catch {
+        parsed = [];
+      }
+
+      return parsed.filter(ev => ev && typeof ev.title === "string" && ev.title.trim());
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (attempt === retries) {
+        console.error(`[auto-scrape] DeepSeek batch failed after ${retries} attempts: ${msg}`);
+        return [];
+      }
+      await sleep(attempt * 2000);
+    }
+  }
+  return [];
+}
+
+async function getExistingUrls(urls: string[]): Promise<Set<string>> {
+  if (urls.length === 0) return new Set();
+  try {
+    const rows = await db.execute(
+      sql`SELECT source_url FROM posts WHERE source_url = ANY(${urls})`
+    );
+    return new Set((rows.rows as Array<{ source_url: string }>).map(r => r.source_url));
+  } catch {
+    return new Set();
+  }
+}
+
+async function insertPost(ev: ProcessedEvent, section: string): Promise<boolean> {
+  try {
+    const now = new Date();
+    await db.insert(postsTable).values({
+      title: ev.title.slice(0, 200),
+      content: (ev.description ?? "").slice(0, 2000),
+      section,
+      authorWallet: AI_SYSTEM_WALLET,
+      authorName: (ev.project_name?.slice(0, 100)) || AI_SYSTEM_NAME,
+      authorType: "ai",
+      sourceUrl: ev.source_url?.slice(0, 500) ?? null,
+      aiConfidence: typeof ev.ai_confidence === "number" ? Math.min(1, Math.max(0, ev.ai_confidence)) : 0.8,
+      importance: (["high", "medium", "low"] as const).includes(ev.importance as "high") ? ev.importance : "medium",
+      eventStartTime: safeDate(ev.start_time),
+      eventEndTime: safeDate(ev.end_time),
+      expiresAt: new Date(now.getTime() + SIXTY_DAYS_MS),
+      views: 0, likes: 0, comments: 0, kolLikePoints: 0, kolCommentPoints: 0,
+      isPinned: false, pinQueued: false,
+    });
+    return true;
+  } catch (e) {
+    console.error("[auto-scrape] insertPost error:", e);
+    return false;
+  }
+}
+
+async function logEntry(entry: ScrapeLogEntry): Promise<void> {
+  try {
+    await db.execute(sql`
+      INSERT INTO scrape_logs (run_id, source_name, source_url, status, items_found, items_saved, error_msg)
+      VALUES (${entry.runId}, ${entry.sourceName}, ${entry.sourceUrl}, ${entry.status}, ${entry.itemsFound}, ${entry.itemsSaved}, ${entry.errorMsg ?? null})
+    `);
+  } catch (e) {
+    console.error("[auto-scrape] log error:", e);
+  }
+}
+
+export async function getKeywordsFromDb(): Promise<string[]> {
+  try {
+    const rows = await db.execute(sql`SELECT keyword FROM scrape_keywords WHERE enabled = true`);
+    const kws = (rows.rows as Array<{ keyword: string }>).map(r => r.keyword);
+    return kws.length > 0 ? kws : DEFAULT_KEYWORDS;
+  } catch {
+    return DEFAULT_KEYWORDS;
+  }
+}
+
+export async function getSourcesFromDb(): Promise<ScrapeSource[]> {
+  try {
+    const rows = await db.execute(sql`SELECT id, name, url, type, priority, enabled FROM scrape_sources WHERE enabled = true ORDER BY priority ASC, id ASC`);
+    const sources = rows.rows as ScrapeSource[];
+    if (sources.length > 0) return sources;
+    return DEFAULT_SOURCES.map(s => ({ ...s, enabled: true }));
+  } catch {
+    return DEFAULT_SOURCES.map(s => ({ ...s, enabled: true }));
+  }
+}
+
+export async function runAutoScrape(): Promise<ScrapeRunSummary> {
+  const runId = `run_${Date.now()}`;
+  const startMs = Date.now();
+  console.log(`[auto-scrape] Starting run ${runId}`);
+
+  const [sources, keywords] = await Promise.all([getSourcesFromDb(), getKeywordsFromDb()]);
+  let totalItemsFound = 0;
+  let totalItemsSaved = 0;
+  let errors = 0;
+
+  for (const source of sources) {
+    try {
+      const feed = await fetchRssWithRetry(source.url);
+      if (!feed || !Array.isArray(feed.items) || feed.items.length === 0) {
+        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: 0, itemsSaved: 0, errorMsg: "No feed items" });
+        continue;
+      }
+
+      const candidates = feed.items
+        .slice(0, 30)
+        .filter(item => {
+          const text = `${item.title ?? ""} ${item.contentSnippet ?? item.summary ?? item.content ?? ""}`;
+          return passesKeywordFilter(text, keywords);
+        })
+        .map(item => ({
+          title: (item.title ?? "").replace(/<[^>]+>/g, "").trim(),
+          description: (item.contentSnippet ?? item.summary ?? item.content ?? "").replace(/<[^>]+>/g, "").slice(0, 800).trim(),
+          link: item.link ?? item.guid ?? source.url,
+          pubDate: item.pubDate ?? item.isoDate,
+        }))
+        .filter(c => c.title && c.link);
+
+      if (candidates.length === 0) {
+        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: 0, itemsSaved: 0, errorMsg: "All filtered out by keywords" });
+        continue;
+      }
+
+      const allLinks = candidates.map(c => c.link);
+      const existingUrls = await getExistingUrls(allLinks);
+      const newCandidates = candidates.filter(c => !existingUrls.has(c.link));
+
+      if (newCandidates.length === 0) {
+        await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "skip", itemsFound: candidates.length, itemsSaved: 0, errorMsg: "All already in DB" });
+        continue;
+      }
+
+      totalItemsFound += newCandidates.length;
+      let savedCount = 0;
+
+      for (let i = 0; i < newCandidates.length; i += BATCH_SIZE) {
+        const batch = newCandidates.slice(i, i + BATCH_SIZE);
+        const events = await processBatchWithDeepSeek(batch);
+
+        for (const ev of events) {
+          const section = mapCategory(Array.isArray(ev.category) ? ev.category : []);
+          if (!section) continue;
+          const saved = await insertPost(ev, section);
+          if (saved) savedCount++;
+        }
+
+        if (i + BATCH_SIZE < newCandidates.length) await sleep(1000);
+      }
+
+      totalItemsSaved += savedCount;
+      await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "ok", itemsFound: newCandidates.length, itemsSaved: savedCount });
+    } catch (e: unknown) {
+      errors++;
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`[auto-scrape] source ${source.name} error:`, msg);
+      await logEntry({ runId, sourceName: source.name, sourceUrl: source.url, status: "error", itemsFound: 0, itemsSaved: 0, errorMsg: msg.slice(0, 500) });
+    }
+
+    await sleep(300);
+  }
+
+  const durationMs = Date.now() - startMs;
+  console.log(`[auto-scrape] Run ${runId} done. Found: ${totalItemsFound}, Saved: ${totalItemsSaved}, Errors: ${errors}, Duration: ${durationMs}ms`);
+
+  return { runId, totalSources: sources.length, totalItemsFound, totalItemsSaved, errors, durationMs };
+}
