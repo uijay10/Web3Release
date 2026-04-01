@@ -177,7 +177,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (isHome && cat) {
       e.preventDefault();
       setActiveCategory(cat);
-    } else if (!isHome) {
+    } else {
       navigate(href);
     }
   };
