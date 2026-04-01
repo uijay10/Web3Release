@@ -36,6 +36,7 @@ const NAV_KEYS = [
   { key: "nav_exchange",  href: "/section/exchange" },
   { key: "nav_quest",     href: "/section/quest" },
   { key: "nav_developer", href: "/developer" },
+  { key: "nav_grant",     href: "/section/grant" },
 ];
 
 const LANGUAGES: { value: LangCode; label: string }[] = [

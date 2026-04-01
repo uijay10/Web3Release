@@ -33,6 +33,7 @@ const SECTION_TO_ZH: Record<string, string> = {
   exchange:  "交易所上线",
   quest:     "链上任务",
   developer: "开发者专区",
+  grant:     "项目捐赠/赞助",
 };
 
 const CAT_I18N: Record<string, string> = {
@@ -48,6 +49,7 @@ const CAT_I18N: Record<string, string> = {
   "交易所上线": "nav_exchange",
   "链上任务":   "nav_quest",
   "开发者专区": "nav_developer",
+  "项目捐赠/赞助": "nav_grant",
 };
 
 function importanceDot(importance?: string) {
