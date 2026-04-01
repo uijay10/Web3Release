@@ -35,8 +35,9 @@ const NAV_KEYS = [
   { key: "nav_unlock",    href: "/section/unlock" },
   { key: "nav_exchange",  href: "/section/exchange" },
   { key: "nav_quest",     href: "/section/quest" },
-  { key: "nav_developer", href: "/developer" },
-  { key: "nav_grant",     href: "/section/grant" },
+  { key: "nav_developer",  href: "/developer" },
+  { key: "nav_grant",      href: "/section/grant" },
+  { key: "nav_bugbounty",  href: "/section/bugbounty" },
 ];
 
 const LANGUAGES: { value: LangCode; label: string }[] = [

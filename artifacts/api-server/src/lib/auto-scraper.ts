@@ -30,6 +30,13 @@ export const CATEGORY_MAP: Record<string, string> = {
   "交易所上线": "exchange",
   "链上任务": "quest",
   "开发者专区": "developer",
+  "项目捐赠/赞助": "grant",
+  "捐赠/赞助": "grant",
+  "资助项目": "grant",
+  "Grant": "grant",
+  "Grants": "grant",
+  "漏洞赏金": "bugbounty",
+  "Bug Bounty": "bugbounty",
 };
 
 function mapCategory(cats: string[]): string | null {
@@ -165,6 +172,68 @@ export const DEFAULT_SOURCES = [
   { name: "Medium Airdrop", url: "https://medium.com/feed/tag/airdrop", type: "rss", priority: 2 },
   { name: "Reddit r/web3", url: "https://old.reddit.com/r/web3/.rss", type: "rss", priority: 2 },
   { name: "Reddit r/NFT", url: "https://old.reddit.com/r/NFT/.rss", type: "rss", priority: 3 },
+
+  // ── 测试网任务 / 链上任务来源 ──────────────────────────────────────
+  { name: "AirdropAlert", url: "https://airdropalert.com/feed/rss.xml", type: "rss", priority: 1 },
+  { name: "Dropstab Activities", url: "https://dropstab.com/feed", type: "rss", priority: 2 },
+  { name: "Medium Testnet", url: "https://medium.com/feed/tag/testnet", type: "rss", priority: 2 },
+  { name: "Medium Airdrop Quests", url: "https://medium.com/feed/tag/airdrop-farming", type: "rss", priority: 2 },
+  { name: "Reddit r/Airdrop", url: "https://old.reddit.com/r/Airdrop/.rss", type: "rss", priority: 2 },
+  { name: "Reddit r/CryptoAirdrops", url: "https://old.reddit.com/r/CryptoAirdrops/.rss", type: "rss", priority: 2 },
+  { name: "Medium Layer3", url: "https://medium.com/feed/layer3xyz", type: "rss", priority: 2 },
+  { name: "Intract Blog", url: "https://medium.com/feed/intract-io", type: "rss", priority: 2 },
+
+  // ── Web3 招聘来源 ────────────────────────────────────────────────
+  { name: "Web3.career Jobs", url: "https://web3.career/remote-crypto-jobs.rss", type: "rss", priority: 1 },
+  { name: "CryptoJobsList", url: "https://cryptojobslist.com/rss.xml", type: "rss", priority: 1 },
+  { name: "Cryptocurrency Jobs", url: "https://cryptocurrencyjobs.co/feed/", type: "rss", priority: 1 },
+  { name: "BeInCrypto Jobs", url: "https://beincrypto.com/jobs/feed/", type: "rss", priority: 2 },
+  { name: "LaborX Blog", url: "https://medium.com/feed/laborx", type: "rss", priority: 3 },
+  { name: "Medium Web3 Jobs", url: "https://medium.com/feed/tag/web3-jobs", type: "rss", priority: 2 },
+  { name: "Reddit r/Jobs4Bitcoins", url: "https://old.reddit.com/r/Jobs4Bitcoins/.rss", type: "rss", priority: 3 },
+
+  // ── 开发者讨论 / 开发者专区 ─────────────────────────────────────
+  { name: "DEV.to Web3 Tag", url: "https://dev.to/feed/tag/web3", type: "rss", priority: 2 },
+  { name: "DEV.to Blockchain Tag", url: "https://dev.to/feed/tag/blockchain", type: "rss", priority: 2 },
+  { name: "Developer DAO Blog", url: "https://medium.com/feed/developer-dao", type: "rss", priority: 2 },
+  { name: "Ethereum Magicians Forum", url: "https://ethereum-magicians.org/latest.rss", type: "rss", priority: 1 },
+  { name: "Reddit r/ethdev", url: "https://old.reddit.com/r/ethdev/.rss", type: "rss", priority: 2 },
+  { name: "Reddit r/SolanaDev", url: "https://old.reddit.com/r/SolanaDev/.rss", type: "rss", priority: 2 },
+
+  // ── 漏洞赏金 / Bug Bounty 来源 ──────────────────────────────────
+  { name: "Immunefi Blog", url: "https://medium.com/feed/immunefi", type: "rss", priority: 1 },
+  { name: "Code4rena Blog", url: "https://medium.com/feed/code-423n4", type: "rss", priority: 1 },
+  { name: "HackenProof Blog", url: "https://medium.com/feed/hackenproof", type: "rss", priority: 2 },
+  { name: "Medium Bug Bounty", url: "https://medium.com/feed/tag/bug-bounty", type: "rss", priority: 2 },
+  { name: "Reddit r/Bugbounty Web3", url: "https://old.reddit.com/r/bugbounty/.rss", type: "rss", priority: 3 },
+
+  // ── 融资公告 / 投融资来源 ────────────────────────────────────────
+  { name: "CryptoRank Fundraising", url: "https://cryptorank.io/news/feed?category=funding", type: "rss", priority: 1 },
+  { name: "Medium Crypto Funding", url: "https://medium.com/feed/tag/crypto-funding", type: "rss", priority: 2 },
+  { name: "Medium Venture Capital", url: "https://medium.com/feed/tag/venture-capital", type: "rss", priority: 2 },
+  { name: "Crunchbase Crypto News", url: "https://news.crunchbase.com/tag/cryptocurrency/feed/", type: "rss", priority: 1 },
+
+  // ── 预售 / IDO / Launchpad 来源 ─────────────────────────────────
+  { name: "Seedify Blog", url: "https://medium.com/feed/seedify-fund", type: "rss", priority: 1 },
+  { name: "DAO Maker Blog", url: "https://medium.com/feed/daomaker", type: "rss", priority: 1 },
+  { name: "Polkastarter Blog", url: "https://medium.com/feed/polkastarter", type: "rss", priority: 2 },
+  { name: "PinkSale Blog", url: "https://medium.com/feed/pinksale-finance", type: "rss", priority: 2 },
+  { name: "CoinList Blog", url: "https://coinlist.co/blog/rss", type: "rss", priority: 1 },
+  { name: "Medium IDO", url: "https://medium.com/feed/tag/ido", type: "rss", priority: 2 },
+  { name: "Medium Presale", url: "https://medium.com/feed/tag/presale", type: "rss", priority: 2 },
+  { name: "Legion Blog", url: "https://medium.com/feed/legionapp", type: "rss", priority: 1 },
+
+  // ── 资助/捐赠 / Grants 来源 ──────────────────────────────────────
+  { name: "Gitcoin Blog", url: "https://www.gitcoin.co/blog/rss", type: "rss", priority: 1 },
+  { name: "Ethereum Foundation Blog", url: "https://blog.ethereum.org/feed.xml", type: "rss", priority: 1 },
+  { name: "Near Foundation Blog", url: "https://near.org/blog/feed/", type: "rss", priority: 1 },
+  { name: "Arbitrum Foundation Blog", url: "https://medium.com/feed/offchainlabs", type: "rss", priority: 1 },
+  { name: "Optimism Foundation Blog", url: "https://optimism.io/blog/feed", type: "rss", priority: 1 },
+  { name: "a16z Crypto Blog Grants", url: "https://a16zcrypto.com/feed/", type: "rss", priority: 1 },
+  { name: "Binance Labs Blog", url: "https://medium.com/feed/binance-labs", type: "rss", priority: 1 },
+  { name: "Medium Grants", url: "https://medium.com/feed/tag/crypto-grants", type: "rss", priority: 2 },
+  { name: "Medium Web3 Grants", url: "https://medium.com/feed/tag/web3-grants", type: "rss", priority: 2 },
+  { name: "Solana Foundation Blog", url: "https://solana.foundation/news/rss", type: "rss", priority: 1 },
 ];
 
 export const DEFAULT_KEYWORDS = [
@@ -190,12 +259,30 @@ export const DEFAULT_KEYWORDS = [
   // 招聘 / 开发者
   "hiring","job","developer","engineer","ambassador","community","kol",
   "testnet node","validator","operator","early adopter",
+  // 漏洞赏金
+  "bug bounty","bounty program","security audit","vulnerability","exploit",
+  "hackenproof","immunefi","code4rena","security researcher","responsible disclosure",
+  // 融资公告
+  "raises","raised","seed round","series a","series b","pre-seed","investment round",
+  "lead investor","backed by","announces funding","closes funding",
+  // 预售 / IDO
+  "public sale","private sale","seedify","dao maker","polkastarter","coinlist","legion",
+  "pinksale","initial dex offering","token sale","dxsale","whitelisted",
+  // Grants / 资助
+  "grant program","grant round","gitcoin","ecosystem fund","foundation grant",
+  "incubation","accelerator program","web3 foundation","near grants","arbitrum grants",
+  "optimism rpgf","retroactive funding","binance labs","a16z crypto","grants for",
+  // Web3 招聘
+  "web3 job","crypto job","blockchain developer","solidity developer","rust developer",
+  "web3.career","cryptojobslist","remote blockchain","protocol engineer","smart contract engineer",
   // 中文关键词
   "区块链","加密货币","空投","测试网","主网","代币","融资","挖矿",
   "交易所","上线","发行","生态","跨链","钱包","隐私","智能合约",
   "节点","质押","铸造","白名单","快照","奖励","激励","测试","社区",
   "链游","元宇宙","去中心化","公链","侧链","二层","零知识","锁仓",
   "预售","内测","公测","开放","申请","报名","任务","活动","招募",
+  "漏洞","赏金","资助","捐赠","赞助","孵化","加速器","招聘",
+  "融资轮","种子轮","战略投资","天使轮","安全审计","漏洞赏金",
 ];
 
 export interface ScrapeSource {
@@ -288,21 +375,26 @@ const WEB3_BATCH_PROMPT = `你是 Web3 事件提取专家，专为 web3release.c
 平台栏目说明（严格按定义选择，1-2个）：
 - 测试网：项目发布/升级测试网络，邀请用户参与测试
 - IDO/Launchpad：代币首次公开发行、Launchpad 上架
-- 预售：代币/NFT 预售活动
+- 预售：代币/NFT 预售活动（含 CoinList、Seedify、DAO Maker、PinkSale、Legion 等平台）
 - 融资公告：项目完成融资轮次、战略投资、政府法规政策、行业监管新闻
 - 空投：面向用户的代币空投活动
-- 招聘：区块链项目招聘岗位
+- 招聘：区块链项目招聘岗位，Web3/加密相关职位，含远程岗位
 - 节点招募：招募验证器节点/矿工节点参与
 - 主网上线：主网正式上线、跨链桥上线、协议在主网部署、代币扩展至新链
 - 代币解锁：代币定期解锁/释放事件
 - 交易所上线：代币在 CEX/DEX 上新、退市
-- 链上任务：【仅限】用户需主动完成链上操作才能获得激励的活动，如积分任务、测试网体验任务、空投前置任务、钱包迁移警告（需用户操作）。合作公告、功能上线、协议扩展不属于此类
-- 开发者专区：面向开发者的工具、SDK、API、黑客松、技术升级、智能合约相关新闻
+- 链上任务：【仅限】用户需主动完成链上操作才能获得激励的活动，如积分任务、测试网体验任务、空投前置任务、Galxe/Layer3/QuestN/Zealy/TaskOn 等平台任务（需用户操作）。合作公告、功能上线、协议扩展不属于此类
+- 开发者专区：面向开发者的工具、SDK、API、黑客松、技术升级、智能合约、开发者教程相关新闻
+- 漏洞赏金：Bug Bounty 项目、安全审计活动、漏洞奖励计划（含 Immunefi、Code4rena、HackenProof 等平台）
+- 项目捐赠/赞助：Grant 资助计划、Sponsorship、加速器/孵化器项目、生态基金（含 Gitcoin、Web3 Foundation、Ethereum Foundation、Solana Foundation、Arbitrum、Optimism RPGF、Binance Labs、a16z 等）
 
 选择规则：
 - 合作公告/战略合作 → 融资公告
 - 新功能上线/协议扩展 → 主网上线 或 开发者专区
 - 只有需要用户手动操作才能获益时 → 链上任务
+- Bug Bounty / 安全漏洞奖励 → 漏洞赏金
+- 基金会资助/生态奖金/Grant/Gitcoin Rounds → 项目捐赠/赞助
+- Web3 招聘职位 → 招聘
 
 任务：对下面每条 RSS 文章进行判断：
 1. 是否属于 Web3 / 加密货币领域的有效事件？

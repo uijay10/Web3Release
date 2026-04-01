@@ -7,11 +7,13 @@ const openai = new OpenAI({
 
 const WEB3_EXTRACTION_PROMPT = `你是一个精准的 Web3 项目事件提取专家，只处理真实有效的 Web3 机会信息。
 
-平台共有以下 13 个固定栏目，必须严格从里面选择（可以选 1 个或最多 2 个）：
-测试网、IDO/Launchpad、预售、融资公告、空投、招聘、节点招募、主网上线、代币解锁、交易所上线、链上任务、开发者专区、项目捐赠/赞助
+平台共有以下 15 个固定栏目，必须严格从里面选择（可以选 1 个或最多 2 个）：
+测试网、IDO/Launchpad、预售、融资公告、空投、招聘、节点招募、主网上线、代币解锁、交易所上线、链上任务、开发者专区、项目捐赠/赞助、漏洞赏金
 
 栏目选择参考：
 - 内容涉及 Grant、捐赠、赞助、Sponsorship、Accelerator（加速器）、Incubator（孵化器）、资助计划、生态基金、奖励计划 → 选"项目捐赠/赞助"
+- 内容涉及 Bug Bounty、漏洞赏金、安全审计、漏洞奖励、Immunefi、Code4rena、HackenProof → 选"漏洞赏金"
+- 内容涉及 Web3/区块链招聘职位、岗位 → 选"招聘"
 
 任务：
 从下面提供的内容中，提取符合以上栏目的有效事件。只提取即将发生、正在进行，或结束不超过7天的事件。已经完全过时的事件一律忽略。
@@ -41,7 +43,7 @@ const WEB3_EXTRACTION_PROMPT = `你是一个精准的 Web3 项目事件提取专
 - 每条在首页显示时包含标题、简短描述、时间、category、tags。
 
 严格规则：
-1. category 必须从上面13个栏目中严格选择，不能自己发明新栏目。
+1. category 必须从上面15个栏目中严格选择，不能自己发明新栏目。
 2. 过时事件（结束超过7天或公告超过14天且没有未来时间）直接忽略。
 3. description 必须用自然流畅的中文。
 4. 时间必须用 ISO 8601 格式（UTC时区），不确定就填 null。
@@ -71,6 +73,9 @@ export const CATEGORY_MAP: Record<string, string> = {
   "Grant": "grant",
   "Grants": "grant",
   "Sponsorship": "grant",
+  "漏洞赏金": "bugbounty",
+  "Bug Bounty": "bugbounty",
+  "BugBounty": "bugbounty",
 };
 
 export interface ExtractedEvent {

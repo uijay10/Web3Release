@@ -18,7 +18,7 @@ function getApiBase() {
 const NAV_SECTIONS = [
   "testnet", "ido", "presale", "funding", "airdrop",
   "recruiting", "nodes", "mainnet", "unlock", "exchange",
-  "quest", "developer", "grant",
+  "quest", "developer", "grant", "bugbounty",
 ] as const;
 
 type NavSection = typeof NAV_SECTIONS[number];
@@ -26,11 +26,11 @@ type NavSection = typeof NAV_SECTIONS[number];
 const PROJECT_SECTIONS: NavSection[] = [...NAV_SECTIONS];
 
 const KOL_SECTIONS: NavSection[] = [
-  "testnet", "ido", "airdrop", "nodes", "quest", "developer", "recruiting", "grant",
+  "testnet", "ido", "airdrop", "nodes", "quest", "developer", "recruiting", "grant", "bugbounty",
 ];
 
 const DEV_SECTIONS: NavSection[] = [
-  "developer", "testnet", "quest", "recruiting", "grant",
+  "developer", "testnet", "quest", "recruiting", "grant", "bugbounty",
 ];
 
 const NORMAL_SECTIONS: NavSection[] = ["recruiting"];
@@ -40,7 +40,8 @@ const SECTION_LABEL_KEYS: Record<string, string> = {
   funding: "nav_funding", airdrop: "nav_airdrop", recruiting: "nav_recruiting",
   nodes: "nav_nodes", mainnet: "nav_mainnet", unlock: "nav_unlock",
   exchange: "nav_exchange", quest: "nav_quest", developer: "nav_developer",
-  grant: "nav_grant",
+  grant:     "nav_grant",
+  bugbounty: "nav_bugbounty",
 };
 
 function getSections(spaceType: string, adminUser: boolean): string[] {
