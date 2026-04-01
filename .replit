@@ -32,3 +32,4 @@ channel = "stable-25_05"
 
 [userenv.development]
 SCRAPE_INTERNAL_KEY = "web3release-scrape-2026"
+SCRAPE_CRON_SCHEDULE = "0 * * * *"
