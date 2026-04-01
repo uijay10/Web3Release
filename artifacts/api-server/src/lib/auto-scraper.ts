@@ -285,8 +285,24 @@ interface ProcessedEvent {
 
 const WEB3_BATCH_PROMPT = `你是 Web3 事件提取专家，专为 web3release.com 平台工作。
 
-平台栏目（从这里选择 category，1-2个）：
-测试网、IDO/Launchpad、预售、融资公告、空投、招聘、节点招募、主网上线、代币解锁、交易所上线、链上任务、开发者专区
+平台栏目说明（严格按定义选择，1-2个）：
+- 测试网：项目发布/升级测试网络，邀请用户参与测试
+- IDO/Launchpad：代币首次公开发行、Launchpad 上架
+- 预售：代币/NFT 预售活动
+- 融资公告：项目完成融资轮次、战略投资、政府法规政策、行业监管新闻
+- 空投：面向用户的代币空投活动
+- 招聘：区块链项目招聘岗位
+- 节点招募：招募验证器节点/矿工节点参与
+- 主网上线：主网正式上线、跨链桥上线、协议在主网部署、代币扩展至新链
+- 代币解锁：代币定期解锁/释放事件
+- 交易所上线：代币在 CEX/DEX 上新、退市
+- 链上任务：【仅限】用户需主动完成链上操作才能获得激励的活动，如积分任务、测试网体验任务、空投前置任务、钱包迁移警告（需用户操作）。合作公告、功能上线、协议扩展不属于此类
+- 开发者专区：面向开发者的工具、SDK、API、黑客松、技术升级、智能合约相关新闻
+
+选择规则：
+- 合作公告/战略合作 → 融资公告
+- 新功能上线/协议扩展 → 主网上线 或 开发者专区
+- 只有需要用户手动操作才能获益时 → 链上任务
 
 任务：对下面每条 RSS 文章进行判断：
 1. 是否属于 Web3 / 加密货币领域的有效事件？
@@ -364,6 +380,20 @@ async function getExistingUrls(urls: string[]): Promise<Set<string>> {
       sql`SELECT source_url FROM posts WHERE source_url = ANY(${urls})`
     );
     return new Set((rows.rows as Array<{ source_url: string }>).map(r => r.source_url));
+  } catch {
+    return new Set();
+  }
+}
+
+async function getExistingTitles(titles: string[]): Promise<Set<string>> {
+  if (titles.length === 0) return new Set();
+  try {
+    const rows = await db.execute(
+      sql`SELECT title FROM posts
+          WHERE title = ANY(${titles})
+            AND created_at > NOW() - INTERVAL '14 days'`
+    );
+    return new Set((rows.rows as Array<{ title: string }>).map(r => r.title));
   } catch {
     return new Set();
   }
@@ -493,7 +523,11 @@ export async function runAutoScrape(): Promise<ScrapeRunSummary> {
           const batch = newCandidates.slice(i, i + BATCH_SIZE);
           const events = await processBatchWithDeepSeek(batch);
 
+          const generatedTitles = events.map(ev => ev.title).filter(Boolean);
+          const existingTitles = await getExistingTitles(generatedTitles);
+
           for (const ev of events) {
+            if (existingTitles.has(ev.title)) continue;
             const section = mapCategory(Array.isArray(ev.category) ? ev.category : []);
             if (!section) continue;
             const saved = await insertPost(ev, section);
