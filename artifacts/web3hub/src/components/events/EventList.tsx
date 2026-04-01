@@ -99,7 +99,7 @@ function EventRow({
         )}
       </div>
 
-      <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 leading-snug mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+      <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 leading-snug mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
         {event.title}
       </h3>
 
@@ -120,7 +120,7 @@ function EventRow({
       )}
 
       {event.description && (
-        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2.5 line-clamp-2">
+        <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed mb-2.5 line-clamp-2">
           {event.description}
         </p>
       )}
