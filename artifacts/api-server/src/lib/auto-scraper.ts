@@ -105,17 +105,97 @@ export const DEFAULT_SOURCES = [
   { name: "MakerDAO Blog", url: "https://blog.makerdao.com/feed/", type: "rss", priority: 2 },
   { name: "Aave Blog", url: "https://aave.com/blog/feed", type: "rss", priority: 2 },
   { name: "Uniswap Blog", url: "https://uniswap.org/blog/feed", type: "rss", priority: 2 },
+
+  // L1 / L2 公链博客
+  { name: "Avalanche Blog", url: "https://medium.com/feed/avalancheavax", type: "rss", priority: 1 },
+  { name: "Fantom Blog", url: "https://medium.com/feed/fantomfoundation", type: "rss", priority: 2 },
+  { name: "Base Blog", url: "https://base.mirror.xyz/feed/atom", type: "rss", priority: 1 },
+  { name: "Starknet Blog", url: "https://medium.com/feed/starkware", type: "rss", priority: 1 },
+  { name: "Linea Blog", url: "https://linea.mirror.xyz/feed/atom", type: "rss", priority: 1 },
+  { name: "Scroll Blog", url: "https://scroll.io/blog/rss.xml", type: "rss", priority: 1 },
+  { name: "Mantle Blog", url: "https://www.mantle.xyz/blog/rss.xml", type: "rss", priority: 1 },
+  { name: "BNB Chain Blog", url: "https://www.bnbchain.org/en/blog/rss.xml", type: "rss", priority: 1 },
+  { name: "Sui Blog", url: "https://blog.sui.io/feed/", type: "rss", priority: 1 },
+  { name: "Aptos Blog", url: "https://aptoslabs.medium.com/feed", type: "rss", priority: 1 },
+  { name: "Cosmos Blog", url: "https://blog.cosmos.network/feed", type: "rss", priority: 1 },
+  { name: "Polkadot Blog", url: "https://polkadot.network/blog/feed", type: "rss", priority: 1 },
+  { name: "TON Blog", url: "https://blog.ton.org/rss.xml", type: "rss", priority: 1 },
+
+  // DeFi 协议博客
+  { name: "Compound Blog", url: "https://medium.com/feed/compound-finance", type: "rss", priority: 2 },
+  { name: "Curve Finance Blog", url: "https://blog.curve.fi/feed/", type: "rss", priority: 2 },
+  { name: "1inch Blog", url: "https://blog.1inch.io/feed/", type: "rss", priority: 2 },
+  { name: "dYdX Blog", url: "https://dydx.exchange/blog/rss.xml", type: "rss", priority: 2 },
+  { name: "GMX Blog", url: "https://medium.com/feed/gmx-io", type: "rss", priority: 2 },
+  { name: "Pendle Finance Blog", url: "https://medium.com/feed/pendle-finance", type: "rss", priority: 2 },
+  { name: "Lido Blog", url: "https://lido.fi/blog/rss.xml", type: "rss", priority: 1 },
+  { name: "EigenLayer Blog", url: "https://www.blog.eigenlayer.xyz/rss/", type: "rss", priority: 1 },
+
+  // 数据 / 研究平台
+  { name: "Messari Research", url: "https://messari.io/rss/news.xml", type: "rss", priority: 1 },
+  { name: "Delphi Digital Blog", url: "https://members.delphidigital.io/feed/podcast", type: "rss", priority: 2 },
+  { name: "Galaxy Research", url: "https://www.galaxy.com/research/rss/", type: "rss", priority: 2 },
+  { name: "Nansen Blog", url: "https://www.nansen.ai/post/rss.xml", type: "rss", priority: 2 },
+  { name: "Token Terminal Blog", url: "https://tokenterminal.com/blog/rss.xml", type: "rss", priority: 2 },
+  { name: "DeFiLlama Blog", url: "https://defillama.com/blog/rss.xml", type: "rss", priority: 1 },
+  { name: "CryptoRank Blog", url: "https://cryptorank.io/news/feed", type: "rss", priority: 2 },
+
+  // NFT / GameFi
+  { name: "OpenSea Blog", url: "https://opensea.io/blog/feed/", type: "rss", priority: 2 },
+  { name: "Blur Blog", url: "https://mirror.xyz/blurdao.eth/feed/atom", type: "rss", priority: 2 },
+  { name: "Axie Infinity Blog", url: "https://axie.substack.com/feed", type: "rss", priority: 2 },
+  { name: "Immutable Blog", url: "https://www.immutable.com/blog/rss.xml", type: "rss", priority: 2 },
+
+  // 交易所 / 基础设施
+  { name: "OKX Blog", url: "https://www.okx.com/learn/category/news/feed", type: "rss", priority: 1 },
+  { name: "Kraken Blog", url: "https://blog.kraken.com/feed/", type: "rss", priority: 2 },
+  { name: "Bybit Blog", url: "https://learn.bybit.com/news/feed/", type: "rss", priority: 2 },
+  { name: "Alchemy Blog", url: "https://www.alchemy.com/blog/rss.xml", type: "rss", priority: 2 },
+  { name: "Infura Blog", url: "https://blog.infura.io/feed/", type: "rss", priority: 2 },
+  { name: "Hardhat Blog", url: "https://hardhat.org/blog/rss.xml", type: "rss", priority: 3 },
+
+  // 其他综合媒体
+  { name: "Web3 Foundation Blog", url: "https://medium.com/feed/web3foundation", type: "rss", priority: 1 },
+  { name: "Electric Capital Blog", url: "https://medium.com/feed/electric-capital", type: "rss", priority: 2 },
+  { name: "a16z Crypto Blog", url: "https://a16zcrypto.com/feed/", type: "rss", priority: 1 },
+  { name: "Paradigm Blog", url: "https://www.paradigm.xyz/feed.xml", type: "rss", priority: 1 },
+  { name: "Multicoin Capital Blog", url: "https://multicoin.capital/feed/", type: "rss", priority: 2 },
+  { name: "Pantera Capital Blog", url: "https://panteracapital.com/blockchain-letter/feed/", type: "rss", priority: 2 },
+  { name: "Medium ZK", url: "https://medium.com/feed/tag/zero-knowledge-proof", type: "rss", priority: 2 },
+  { name: "Medium Airdrop", url: "https://medium.com/feed/tag/airdrop", type: "rss", priority: 2 },
+  { name: "Reddit r/web3", url: "https://old.reddit.com/r/web3/.rss", type: "rss", priority: 2 },
+  { name: "Reddit r/NFT", url: "https://old.reddit.com/r/NFT/.rss", type: "rss", priority: 3 },
 ];
 
 export const DEFAULT_KEYWORDS = [
+  // 基础 Web3 词汇
   "blockchain","web3","crypto","bitcoin","btc","ethereum","eth","solana",
   "defi","nft","rwa","depin","layer1","layer2","dao","zk","zkp",
+  // 事件类型（英文）
   "airdrop","testnet","mainnet","ido","presale","launchpad","token",
   "funding","grant","hackathon","quest","node","staking","yield",
-  "区块链","加密货币","空投","测试网","主网","代币","融资","挖矿",
-  "交易所","上线","发行","生态","跨链","钱包","隐私","智能合约",
+  "token unlock","token sale","token listing","token generation event","tge",
+  "public sale","private sale","whitelist","early access","beta",
+  "incentive","reward","bounty","mint","claim","snapshot",
+  // 链名 / 生态
+  "arbitrum","optimism","zksync","base","starknet","linea","scroll","mantle",
+  "avalanche","polygon","bnb","sui","aptos","cosmos","polkadot","ton",
+  "near","fantom","algorand","tron","hedera","stellar","iota",
+  // 项目类型
   "ai agent","defi protocol","liquidity","tvl","dex","cex","nft mint",
   "layer 2","rollup","bridge","lsd","lst","restaking","eigenlayer",
+  "perp","perpetual","options","lending","borrowing","yield farming",
+  "launchpad","incubator","accelerator","investment","seed round","series",
+  "oracle","data feed","cross-chain","interoperability","modular",
+  // 招聘 / 开发者
+  "hiring","job","developer","engineer","ambassador","community","kol",
+  "testnet node","validator","operator","early adopter",
+  // 中文关键词
+  "区块链","加密货币","空投","测试网","主网","代币","融资","挖矿",
+  "交易所","上线","发行","生态","跨链","钱包","隐私","智能合约",
+  "节点","质押","铸造","白名单","快照","奖励","激励","测试","社区",
+  "链游","元宇宙","去中心化","公链","侧链","二层","零知识","锁仓",
+  "预售","内测","公测","开放","申请","报名","任务","活动","招募",
 ];
 
 export interface ScrapeSource {
