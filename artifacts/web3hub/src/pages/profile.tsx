@@ -628,19 +628,6 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Points */}
-          <div className="px-3 py-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 rounded-xl flex items-center gap-2">
-            <Coins className="w-4 h-4 text-amber-500 shrink-0" />
-            <div>
-              <p className="text-[10px] text-amber-600/70 dark:text-amber-400/70 font-medium">
-                {zh ? "我的代币" : "My Tokens"}
-              </p>
-              <p className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
-                {((me as any)?.points ?? 0).toLocaleString()} {zh ? "分" : "pts"}
-              </p>
-            </div>
-          </div>
-
           <div className="border-t border-border/60" />
 
           {/* Navigation */}

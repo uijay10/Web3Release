@@ -263,6 +263,9 @@ router.post("/", async (req, res) => {
       ? new Date(Date.now() + 15 * 24 * 3600_000)
       : null;
 
+  // Admin who hasn't set a spaceType still posts as "project" so it appears on the home feed
+  const resolvedAuthorType = user?.spaceType ?? (isAdmin ? "project" : null);
+
   const inserted = await db.insert(postsTable).values({
     title,
     content,
@@ -270,7 +273,7 @@ router.post("/", async (req, res) => {
     authorWallet: lw,
     authorName: user?.spaceType || user?.username || null,
     authorAvatar: user?.avatar ?? null,
-    authorType: user?.spaceType ?? null,
+    authorType: resolvedAuthorType,
     likes: 0,
     comments: 0,
     kolLikePoints: 0,
