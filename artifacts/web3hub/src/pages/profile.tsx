@@ -7,8 +7,8 @@ import {
   Check, Edit2, Save, ShieldCheck, Globe, ExternalLink,
   Bell, Bookmark, Settings, LogOut,
   Twitter, MessageCircle, Send, BookOpen, Copy,
-  AlertCircle, LayoutDashboard, FileText, PenSquare,
-  BarChart2, Users, ChevronRight, Coins,
+  AlertCircle, FileText, PenSquare,
+  BarChart2, Users, Coins,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLang } from "@/lib/i18n";
@@ -25,7 +25,6 @@ function getApiBase() {
 const apiBase = getApiBase();
 
 type NavTab =
-  | "overview"
   | "subscriptions"
   | "notifications"
   | "publish"
@@ -89,9 +88,12 @@ export default function Profile() {
 
   const isSpaceOwner = me?.spaceStatus === "approved" || me?.spaceStatus === "active";
   const spaceType = me?.spaceType;
-  const displayUsername = me?.username || truncateAddress(address ?? "");
+  const defaultName = zh
+    ? (isSpaceOwner ? "团队" : "用户")
+    : (isSpaceOwner ? "Team" : "User");
+  const displayUsername = me?.username || defaultName;
 
-  const [activeTab, setActiveTab] = useState<NavTab>("overview");
+  const [activeTab, setActiveTab] = useState<NavTab>("notifications");
   const [subscriptions, setSubscriptions] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [notifUnread, setNotifUnread] = useState(0);
@@ -242,7 +244,7 @@ export default function Profile() {
     setSlotPulling(true);
     setSlotResult(null);
     try {
-      const res = await fetch(`${apiBase}/slot/pull`, {
+      const res = await fetch(`${apiBase}/users/slot-pull`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet: address }),
@@ -268,7 +270,6 @@ export default function Profile() {
   type NavItem = { tab: NavTab; icon: React.ReactNode; label: string; disabled?: boolean };
 
   const NAV_ITEMS: NavItem[] = [
-    { tab: "overview",       icon: <LayoutDashboard className="w-4 h-4" />, label: zh ? "概览" : "Overview" },
     { tab: "subscriptions",  icon: <Bookmark className="w-4 h-4" />,        label: zh ? "我的订阅" : "Subscriptions" },
     { tab: "notifications",  icon: <Bell className="w-4 h-4" />,            label: zh ? "最近通知" : "Notifications" },
     ...(isSpaceOwner
@@ -290,87 +291,6 @@ export default function Profile() {
 
   const renderMain = () => {
     switch (activeTab) {
-
-      case "overview": return (
-        <div className="space-y-5">
-
-          {/* Daily Slot Machine */}
-          <div className="rounded-2xl p-6 text-center space-y-4"
-            style={{ background: "linear-gradient(135deg, #1e40af 0%, #4f46e5 50%, #7c3aed 100%)" }}>
-            <div className="text-3xl mb-1">🎰</div>
-            <h2 className="text-xl font-extrabold text-white">
-              {zh ? "每日拉霸机抽奖" : "Daily Slot Machine"}
-            </h2>
-            <p className="text-sm text-white/70">
-              {zh ? "每日一次 · 奖励 100~1000 $WBR · TGE 按 1:1 兑换"
-                  : "Once daily · Win 100~1000 $WBR · 1:1 at TGE"}
-            </p>
-
-            {slotResult && (
-              <div className="mx-auto max-w-xs py-2.5 px-4 rounded-full bg-white/20 text-white font-bold text-sm">
-                {slotResult}
-              </div>
-            )}
-
-            {slotCd ? (
-              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white/70 text-sm font-mono select-none">
-                ⏳ {zh ? "今日已抽" : "Come back in"} · {slotCd}
-              </div>
-            ) : (
-              <button
-                onClick={handleSlotPull}
-                disabled={slotPulling}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-violet-700 font-extrabold text-base shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {slotPulling
-                  ? (zh ? "抽取中..." : "Pulling...")
-                  : (zh ? "🎲 立即抽取" : "🎲 Pull Now")}
-              </button>
-            )}
-          </div>
-
-          {/* Recent Notifications */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Bell className="w-4 h-4 text-rose-500" />
-                {zh ? "最近通知" : "Recent Notifications"}
-                {notifUnread > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">{notifUnread}</span>
-                )}
-              </h3>
-              <button onClick={() => { setActiveTab("notifications"); markRead(); }}
-                className="text-xs text-primary hover:underline flex items-center gap-0.5">
-                {zh ? "查看全部" : "View all"} <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-            {notifications.length === 0 ? (
-              <div className="py-8 text-center">
-                <Bell className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">{zh ? "暂无通知" : "No notifications yet"}</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {notifications.slice(0, 4).map((n: any) => (
-                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl ${!n.isRead ? "bg-primary/5 border border-primary/10" : "bg-muted/30"}`}>
-                    <span className="shrink-0 mt-0.5 text-base"><NotifIcon type={n.type} /></span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm leading-snug">
-                        {n.fromName && <span className="font-semibold">{n.fromName} </span>}
-                        {n.postTitle
-                          ? (zh ? `对「${n.postTitle}」进行了互动` : `interacted with "${n.postTitle}"`)
-                          : (n.type === "new_apply" ? (zh ? "向您发起了匹配申请" : "sent you a match request") : n.type)}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(n.createdAt, zh)}</p>
-                    </div>
-                    {!n.isRead && <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      );
 
       case "subscriptions": return (
         <div className="bg-card border border-border rounded-2xl p-5 space-y-5">
@@ -679,10 +599,10 @@ export default function Profile() {
           </div>
 
           {/* Project Links */}
-          <div className="bg-card border border-border rounded-xl p-3 space-y-1">
+          <div className="space-y-0.5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-semibold text-muted-foreground">{zh ? "项目链接" : "Links"}</span>
-              <button onClick={openEditLinks} className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground">
+              <button onClick={openEditLinks} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
                 <Edit2 className="w-3 h-3" />
               </button>
             </div>
@@ -751,7 +671,42 @@ export default function Profile() {
         </aside>
 
         {/* ── MAIN CONTENT ── */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 space-y-5">
+
+          {/* Always-visible Slot Machine */}
+          <div className="rounded-2xl p-6 text-center space-y-4"
+            style={{ background: "linear-gradient(135deg, #1e40af 0%, #4f46e5 50%, #7c3aed 100%)" }}>
+            <div className="text-3xl mb-1">🎰</div>
+            <h2 className="text-xl font-extrabold text-white">
+              {zh ? "每日拉霸机抽奖" : "Daily Slot Machine"}
+            </h2>
+            <p className="text-sm text-white/70">
+              {zh ? "每日一次 · 奖励 100~1000 $WBR · TGE 按 1:1 兑换"
+                  : "Once daily · Win 100~1000 $WBR · 1:1 at TGE"}
+            </p>
+            {slotResult && (
+              <div className="mx-auto max-w-xs py-2.5 px-4 rounded-full bg-white/20 text-white font-bold text-sm">
+                {slotResult}
+              </div>
+            )}
+            {slotCd ? (
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white/70 text-sm font-mono select-none">
+                ⏳ {zh ? "今日已抽" : "Come back in"} · {slotCd}
+              </div>
+            ) : (
+              <button
+                onClick={handleSlotPull}
+                disabled={slotPulling}
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-violet-700 font-extrabold text-base shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {slotPulling
+                  ? (zh ? "抽取中..." : "Pulling...")
+                  : (zh ? "🎲 立即抽取" : "🎲 Pull Now")}
+              </button>
+            )}
+          </div>
+
+          {/* Tab content */}
           {renderMain()}
         </main>
       </div>
@@ -771,7 +726,7 @@ export default function Profile() {
               <div key={label}>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
                 <input type="url" value={val} onChange={e => set(e.target.value)} placeholder={ph}
-                  className="w-full text-sm bg-muted/40 border border-border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  className="w-full text-sm bg-white dark:bg-slate-800 border border-border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
             ))}
             <div className="flex gap-3 pt-2">
