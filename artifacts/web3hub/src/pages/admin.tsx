@@ -7,7 +7,7 @@ import {
   Users, ClipboardList, Star, Ban, Download,
   CheckCircle, XCircle, RefreshCw, Pin, Send,
   ChevronDown, AlertCircle, ShieldOff, Cpu, Trash2, Calendar,
-  Handshake, Rss, Plus, PlayCircle, Filter
+  Handshake, Rss, Plus, Filter
 } from "lucide-react";
 import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
 
@@ -89,7 +89,6 @@ export default function AdminPage() {
   const [newSrcName, setNewSrcName] = useState("");
   const [newSrcUrl, setNewSrcUrl] = useState("");
   const [newSrcPriority, setNewSrcPriority] = useState("2");
-  const [scrapeRunning, setScrapeRunning] = useState(false);
 
   const admin = isAdmin(address);
   const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(""), 3000); };
@@ -131,24 +130,6 @@ export default function AdminPage() {
     setScrapeLogsRunId(runId);
     const res = await scrapeGet(`/logs?runId=${encodeURIComponent(runId)}`);
     if (res.logs) setScrapeLogs(res.logs);
-  }
-
-  async function triggerScrape() {
-    setScrapeRunning(true);
-    setScrapeMsg("正在触发抓取任务...");
-    try {
-      const res = await scrapePost("/run");
-      setScrapeMsg(res.ok ? "✓ 抓取任务已在后台启动，请稍后刷新查看结果" : `❌ ${res.error}`);
-      setTimeout(() => loadScrapeTab(), 5000);
-    } catch (e) { setScrapeMsg(`❌ ${String(e)}`); }
-    finally { setScrapeRunning(false); setTimeout(() => setScrapeMsg(""), 8000); }
-  }
-
-  async function seedSources() {
-    const res = await scrapePost("/sources/seed");
-    setScrapeMsg(res.ok ? `✓ ${res.message}` : `❌ ${res.error}`);
-    loadScrapeTab();
-    setTimeout(() => setScrapeMsg(""), 4000);
   }
 
   async function addSource() {
@@ -766,22 +747,10 @@ export default function AdminPage() {
       {/* ─── Auto-Scrape Tab ─── */}
       {tab === "autoscrape" && (
         <div className="space-y-6">
-          {/* Header + Run button */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h2 className="text-lg font-bold flex items-center gap-2"><Rss className="w-5 h-5 text-primary" />AI 自动抓取</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">每2小时自动从 60+ RSS 源抓取 Web3 事件，通过 DeepSeek 解析后入库</p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <button onClick={seedSources}
-                className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-muted transition-colors flex items-center gap-1.5">
-                <Plus className="w-4 h-4" />初始化数据源
-              </button>
-              <button onClick={triggerScrape} disabled={scrapeRunning}
-                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-50">
-                <PlayCircle className="w-4 h-4" />{scrapeRunning ? "启动中..." : "立即执行抓取"}
-              </button>
-            </div>
+          {/* Header */}
+          <div>
+            <h2 className="text-lg font-bold flex items-center gap-2"><Rss className="w-5 h-5 text-primary" />AI 自动抓取</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">每2小时自动从 110+ RSS 源抓取 Web3 事件，通过 DeepSeek 解析后入库</p>
           </div>
 
           {scrapeMsg && (
