@@ -201,7 +201,8 @@ router.post("/", async (req, res) => {
 
   const spaceType = user.spaceType ?? "";
   const isAdmin = ADMIN_WALLETS_SET.has(lw);
-  const isNormalPoster = !spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer");
+  // Admins always get project-tier treatment regardless of spaceType
+  const isNormalPoster = !isAdmin && (!spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer"));
 
   if (!isAdmin) {
     // Temporarily: only team (project) accounts may post

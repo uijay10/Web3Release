@@ -42,7 +42,8 @@ const SECTION_LABEL_KEYS: Record<string, string> = {
   exchange: "nav_exchange", quest: "nav_quest", developer: "nav_developer",
 };
 
-function getSections(spaceType: string): string[] {
+function getSections(spaceType: string, adminUser: boolean): string[] {
+  if (adminUser) return PROJECT_SECTIONS;
   if (spaceType === "kol") return KOL_SECTIONS;
   if (spaceType === "developer") return DEV_SECTIONS;
   if (!spaceType) return NORMAL_SECTIONS;
@@ -204,7 +205,8 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
     });
   };
 
-  const availableSections = getSections(spaceType);
+  const isAdminUser = isAdmin(address);
+  const availableSections = getSections(spaceType, isAdminUser);
   const inputCls = "w-full p-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground";
 
   const withPin = wantToPin && pinCount > 0;
@@ -221,7 +223,7 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
     setError(""); return true;
   };
 
-  const isNormalPoster = !spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer");
+  const isNormalPoster = !isAdminUser && (!spaceType || (spaceType !== "project" && spaceType !== "kol" && spaceType !== "developer"));
   const normalPostsUsed = isNormalPoster ? (() => {
     const todayStr = new Date().toISOString().slice(0, 10);
     const storedDate = me?.normalDailyPostDate ?? null;
@@ -535,7 +537,7 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
                 <option key={s} value={s}>{t(SECTION_LABEL_KEYS[s] ?? s)}</option>
               ))}
             </select>
-            {!spaceType && (
+            {!spaceType && !isAdminUser && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
                 {t("normalPostHint").replace("{n}", String(normalPostsRemaining))}
               </p>
@@ -565,8 +567,8 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
             <div className="text-xs text-muted-foreground text-right mt-1">{content.length}/5000</div>
           </div>
 
-          {/* Pin option — project users only */}
-          {pinCount > 0 && spaceType === "project" && (
+          {/* Pin option — project users and admins */}
+          {pinCount > 0 && (spaceType === "project" || isAdminUser) && (
             <label className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed cursor-pointer transition-colors
               hover:border-amber-300 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50 dark:has-[:checked]:bg-amber-950/20">
               <input type="checkbox" checked={wantToPin} onChange={e => setWantToPin(e.target.checked)}
