@@ -5,14 +5,16 @@ import { RoleBadge } from "@/components/role-badge";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Check, Edit2, Save, ShieldCheck, Globe, ExternalLink,
-  LayoutDashboard, Bell, Bookmark, Settings, LogOut,
+  Bell, Bookmark, Settings, LogOut,
   Twitter, MessageCircle, Send, BookOpen, Copy,
-  AlertCircle, ChevronRight,
+  AlertCircle, LayoutDashboard, FileText, PenSquare,
+  BarChart2, Users, ChevronRight, Coins,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLang } from "@/lib/i18n";
 import { isAdmin } from "@/lib/admin";
 import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
+import { Link } from "wouter";
 
 function getApiBase() {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -22,14 +24,22 @@ function getApiBase() {
 }
 const apiBase = getApiBase();
 
-type NavTab = "overview" | "subscriptions" | "notifications" | "admin";
+type NavTab =
+  | "overview"
+  | "subscriptions"
+  | "notifications"
+  | "publish"
+  | "posts"
+  | "apply"
+  | "stats"
+  | "settings"
+  | "admin";
 
 const ALL_SECTIONS = [
   "测试网","IDO/Launchpad","预售","融资公告","空投",
   "招聘","节点招募","主网上线","代币解锁","交易所上线",
   "链上任务","开发者专区",
 ];
-
 const SECTION_EN: Record<string, string> = {
   "测试网": "Testnet", "IDO/Launchpad": "IDO/Launchpad", "预售": "Presale",
   "融资公告": "Funding", "空投": "Airdrop", "招聘": "Hiring",
@@ -54,6 +64,15 @@ function timeAgo(iso: string, zh: boolean): string {
   return zh ? `${days}天前` : `${days}d ago`;
 }
 
+function getSlotCountdown(lastPull: string) {
+  const diff = new Date(lastPull).getTime() + 24 * 3600 * 1000 - Date.now();
+  if (diff <= 0) return "";
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export default function Profile() {
   const { address, isConnected, disconnect } = useWeb3Auth() as any;
   const upsertMutation = useUpsertUser();
@@ -68,6 +87,10 @@ export default function Profile() {
   const { t, lang } = useLang();
   const zh = lang === "zh-CN";
 
+  const isSpaceOwner = me?.spaceStatus === "approved" || me?.spaceStatus === "active";
+  const spaceType = me?.spaceType;
+  const displayUsername = me?.username || truncateAddress(address ?? "");
+
   const [activeTab, setActiveTab] = useState<NavTab>("overview");
   const [subscriptions, setSubscriptions] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -79,10 +102,10 @@ export default function Profile() {
   const [telegram, setTelegram]     = useState("");
   const [whitepaper, setWhitepaper] = useState("");
   const [username, setUsername]     = useState("");
-  const [dirty, setDirty]           = useState(false);
+  const [usernameDirty, setUsernameDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle"|"saving"|"saved">("idle");
 
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditLinks, setShowEditLinks] = useState(false);
   const [editTwitter, setEditTwitter]     = useState("");
   const [editWebsite, setEditWebsite]     = useState("");
   const [editDiscord, setEditDiscord]     = useState("");
@@ -90,9 +113,9 @@ export default function Profile() {
   const [editWhitepaper, setEditWhitepaper] = useState("");
   const [editSaving, setEditSaving]       = useState(false);
 
-  const isSpaceOwner = me?.spaceStatus === "approved" || me?.spaceStatus === "active";
-  const spaceType = me?.spaceType;
-  const displayUsername = me?.username || truncateAddress(address ?? "");
+  const [slotCd, setSlotCd] = useState("");
+  const [slotPulling, setSlotPulling] = useState(false);
+  const [slotResult, setSlotResult] = useState<string | null>(null);
 
   useEffect(() => {
     if (!me) return;
@@ -104,6 +127,14 @@ export default function Profile() {
     setWhitepaper((me as any).whitepaper ?? "");
     setSubscriptions((me as any).subscriptions ?? []);
   }, [me]);
+
+  useEffect(() => {
+    if (!me?.lastSlotPull) { setSlotCd(""); return; }
+    const tick = () => setSlotCd(getSlotCountdown(me.lastSlotPull));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [me?.lastSlotPull]);
 
   const fetchNotifs = useCallback(async () => {
     if (!address) return;
@@ -147,15 +178,15 @@ export default function Profile() {
     } catch {}
   };
 
-  const handleSave = () => {
-    if (!address || !dirty) return;
+  const handleSaveUsername = () => {
+    if (!address || !usernameDirty) return;
     setSaveStatus("saving");
     upsertMutation.mutate(
-      { data: { wallet: address, username, twitter, website, language: lang, discord, telegram, whitepaper } as any },
+      { data: { wallet: address, username, language: lang } as any },
       {
         onSuccess: () => {
           setSaveStatus("saved");
-          setDirty(false);
+          setUsernameDirty(false);
           queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
           setTimeout(() => setSaveStatus("idle"), 3000);
         },
@@ -177,14 +208,14 @@ export default function Profile() {
     reader.readAsDataURL(file);
   };
 
-  const openEditModal = () => {
+  const openEditLinks = () => {
     setEditTwitter(twitter); setEditWebsite(website);
     setEditDiscord(discord); setEditTelegram(telegram);
     setEditWhitepaper(whitepaper);
-    setShowEditModal(true);
+    setShowEditLinks(true);
   };
 
-  const saveEditModal = async () => {
+  const saveEditLinks = async () => {
     if (!address) return;
     setEditSaving(true);
     try {
@@ -202,8 +233,26 @@ export default function Profile() {
       setDiscord(editDiscord); setTelegram(editTelegram);
       setWhitepaper(editWhitepaper);
       queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
-      setShowEditModal(false);
+      setShowEditLinks(false);
     } catch {} finally { setEditSaving(false); }
+  };
+
+  const handleSlotPull = async () => {
+    if (!address || slotPulling || slotCd) return;
+    setSlotPulling(true);
+    setSlotResult(null);
+    try {
+      const res = await fetch(`${apiBase}/slot/pull`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address }),
+      });
+      const data = await res.json();
+      if (data.amount) {
+        setSlotResult(zh ? `🎉 恭喜获得 ${data.amount} $WBR！` : `🎉 You won ${data.amount} $WBR!`);
+        queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+      }
+    } catch {} finally { setSlotPulling(false); }
   };
 
   if (!isConnected) {
@@ -216,101 +265,95 @@ export default function Profile() {
     );
   }
 
-  const NAV_ITEMS: { tab: NavTab; icon: React.ReactNode; label: string }[] = [
+  type NavItem = { tab: NavTab; icon: React.ReactNode; label: string; disabled?: boolean };
+
+  const NAV_ITEMS: NavItem[] = [
     { tab: "overview",       icon: <LayoutDashboard className="w-4 h-4" />, label: zh ? "概览" : "Overview" },
     { tab: "subscriptions",  icon: <Bookmark className="w-4 h-4" />,        label: zh ? "我的订阅" : "Subscriptions" },
     { tab: "notifications",  icon: <Bell className="w-4 h-4" />,            label: zh ? "最近通知" : "Notifications" },
-    ...(admin ? [{ tab: "admin" as NavTab, icon: <ShieldCheck className="w-4 h-4" />, label: "管理员面板" }] : []),
+    ...(isSpaceOwner
+      ? [
+          { tab: "publish" as NavTab, icon: <FileText className="w-4 h-4" />, label: zh ? "发布内容" : "Publish" },
+          { tab: "posts"   as NavTab, icon: <PenSquare className="w-4 h-4" />, label: zh ? "我的发布" : "My Posts" },
+          { tab: "stats"   as NavTab, icon: <BarChart2 className="w-4 h-4" />, label: zh ? "数据统计" : "Stats" },
+        ]
+      : [
+          { tab: "publish" as NavTab, icon: <FileText className="w-4 h-4" />, label: zh ? "发布内容" : "Publish", disabled: true },
+          { tab: "posts"   as NavTab, icon: <PenSquare className="w-4 h-4" />, label: zh ? "我的发布" : "My Posts", disabled: true },
+          { tab: "apply"   as NavTab, icon: <Users className="w-4 h-4" />,     label: zh ? "团队申请" : "Apply" },
+          { tab: "stats"   as NavTab, icon: <BarChart2 className="w-4 h-4" />, label: zh ? "数据统计" : "Stats", disabled: true },
+        ]
+    ),
+    { tab: "settings", icon: <Settings className="w-4 h-4" />, label: zh ? "账号设置" : "Settings" },
+    ...(admin ? [{ tab: "admin" as NavTab, icon: <ShieldCheck className="w-4 h-4" />, label: "Admin" }] : []),
   ];
 
   const renderMain = () => {
     switch (activeTab) {
 
       case "overview": return (
-        <div className="space-y-4">
+        <div className="space-y-5">
 
-          {/* Welcome Card */}
-          <div className="rounded-2xl px-7 py-6 text-white"
-            style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #6d28d9 100%)" }}>
-            <div className="mb-5">
-              <div className="flex items-center gap-2.5 mb-1">
-                <p className="text-white/70 text-sm">{zh ? "欢迎回来 👋" : "Welcome back 👋"}</p>
-                <RoleBadge spaceType={isSpaceOwner ? spaceType : null} size="xs" />
-                {admin && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-200 border border-amber-400/30">Admin</span>}
-              </div>
-              <h1 className="text-2xl font-extrabold leading-tight tracking-tight">{displayUsername}</h1>
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="font-mono text-xs text-white/50">{truncateAddress(address ?? "")}</span>
-                {address && (
-                  <button onClick={() => navigator.clipboard.writeText(address)}
-                    className="p-1 rounded hover:bg-white/10 transition-colors text-white/40 hover:text-white/70">
-                    <Copy className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+          {/* Daily Slot Machine */}
+          <div className="rounded-2xl p-6 text-center space-y-4"
+            style={{ background: "linear-gradient(135deg, #1e40af 0%, #4f46e5 50%, #7c3aed 100%)" }}>
+            <div className="text-3xl mb-1">🎰</div>
+            <h2 className="text-xl font-extrabold text-white">
+              {zh ? "每日拉霸机抽奖" : "Daily Slot Machine"}
+            </h2>
+            <p className="text-sm text-white/70">
+              {zh ? "每日一次 · 奖励 100~1000 $WBR · TGE 按 1:1 兑换"
+                  : "Once daily · Win 100~1000 $WBR · 1:1 at TGE"}
+            </p>
 
-          {/* Subscriptions preview */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-sm flex items-center gap-2">
-                <Bookmark className="w-4 h-4 text-amber-500" />
-                {zh ? "我的订阅" : "My Subscriptions"}
-              </h2>
-              <button onClick={() => setActiveTab("subscriptions")}
-                className="text-xs text-primary hover:underline flex items-center gap-0.5">
-                {zh ? "管理订阅" : "Manage"} <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-            {subscriptions.length === 0 ? (
-              <div className="py-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">{zh ? "还没有订阅任何栏目" : "No subscriptions yet"}</p>
-                <button onClick={() => setActiveTab("subscriptions")} className="text-xs text-primary hover:underline">
-                  {zh ? "去订阅 →" : "Subscribe now →"}
-                </button>
+            {slotResult && (
+              <div className="mx-auto max-w-xs py-2.5 px-4 rounded-full bg-white/20 text-white font-bold text-sm">
+                {slotResult}
+              </div>
+            )}
+
+            {slotCd ? (
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white/70 text-sm font-mono select-none">
+                ⏳ {zh ? "今日已抽" : "Come back in"} · {slotCd}
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {subscriptions.slice(0, 8).map(s => (
-                  <span key={s} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
-                    {zh ? s : (SECTION_EN[s] ?? s)}
-                  </span>
-                ))}
-                {subscriptions.length > 8 && (
-                  <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                    +{subscriptions.length - 8}
-                  </span>
-                )}
-              </div>
+              <button
+                onClick={handleSlotPull}
+                disabled={slotPulling}
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-violet-700 font-extrabold text-base shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {slotPulling
+                  ? (zh ? "抽取中..." : "Pulling...")
+                  : (zh ? "🎲 立即抽取" : "🎲 Pull Now")}
+              </button>
             )}
           </div>
 
-          {/* Notifications preview */}
+          {/* Recent Notifications */}
           <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-sm flex items-center gap-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
                 <Bell className="w-4 h-4 text-rose-500" />
-                {zh ? "最近通知" : "Notifications"}
+                {zh ? "最近通知" : "Recent Notifications"}
                 {notifUnread > 0 && (
                   <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">{notifUnread}</span>
                 )}
-              </h2>
+              </h3>
               <button onClick={() => { setActiveTab("notifications"); markRead(); }}
                 className="text-xs text-primary hover:underline flex items-center gap-0.5">
                 {zh ? "查看全部" : "View all"} <ChevronRight className="w-3 h-3" />
               </button>
             </div>
             {notifications.length === 0 ? (
-              <div className="py-6 text-center">
+              <div className="py-8 text-center">
                 <Bell className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">{zh ? "暂无通知" : "No notifications yet"}</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {notifications.slice(0, 4).map((n: any) => (
-                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.isRead ? "bg-primary/5 border border-primary/10" : "bg-muted/30"}`}>
-                    <div className="shrink-0 mt-0.5 text-base"><NotifIcon type={n.type} /></div>
+                  <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl ${!n.isRead ? "bg-primary/5 border border-primary/10" : "bg-muted/30"}`}>
+                    <span className="shrink-0 mt-0.5 text-base"><NotifIcon type={n.type} /></span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm leading-snug">
                         {n.fromName && <span className="font-semibold">{n.fromName} </span>}
@@ -336,10 +379,12 @@ export default function Profile() {
               <Bookmark className="w-4 h-4 text-amber-500" />
               {zh ? "我的订阅" : "My Subscriptions"}
             </h2>
-            <span className="text-xs text-muted-foreground">{zh ? `已订阅 ${subscriptions.length} 个栏目` : `${subscriptions.length} subscribed`}</span>
+            <span className="text-xs text-muted-foreground">
+              {zh ? `已订阅 ${subscriptions.length} 个` : `${subscriptions.length} subscribed`}
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">
-            {zh ? "点击标签切换订阅状态，订阅后将收到该栏目的新内容推送。" : "Click a section to toggle subscription."}
+            {zh ? "点击标签切换订阅状态，订阅后将收到该栏目的新内容推送。" : "Click to toggle subscription."}
           </p>
           <div className="flex flex-wrap gap-2">
             {ALL_SECTIONS.map(s => {
@@ -357,18 +402,6 @@ export default function Profile() {
               );
             })}
           </div>
-          {subscriptions.length > 0 && (
-            <div className="pt-2 border-t border-border/60">
-              <p className="text-xs text-muted-foreground mb-2">{zh ? "当前已订阅：" : "Currently subscribed:"}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {subscriptions.map(s => (
-                  <span key={s} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                    {zh ? s : (SECTION_EN[s] ?? s)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       );
 
@@ -383,7 +416,7 @@ export default function Profile() {
               )}
             </h2>
             {notifUnread > 0 && (
-              <button onClick={markRead} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <button onClick={markRead} className="text-xs text-muted-foreground hover:text-foreground">
                 {zh ? "全部已读" : "Mark all read"}
               </button>
             )}
@@ -392,13 +425,12 @@ export default function Profile() {
             <div className="py-16 text-center">
               <Bell className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
               <p className="text-muted-foreground font-medium">{zh ? "暂无通知" : "No notifications yet"}</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">{zh ? "订阅栏目后将第一时间收到推送" : "Subscribe to sections to receive updates"}</p>
             </div>
           ) : (
             <div className="space-y-2">
               {notifications.map((n: any) => (
-                <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${!n.isRead ? "bg-primary/5 border border-primary/10" : "hover:bg-muted/40"}`}>
-                  <div className="shrink-0 mt-0.5 text-base"><NotifIcon type={n.type} /></div>
+                <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl ${!n.isRead ? "bg-primary/5 border border-primary/10" : "hover:bg-muted/40"}`}>
+                  <span className="shrink-0 mt-0.5 text-base"><NotifIcon type={n.type} /></span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-snug">
                       {n.fromName && <span className="font-semibold">{n.fromName} </span>}
@@ -416,14 +448,193 @@ export default function Profile() {
         </div>
       );
 
+      case "publish": return isSpaceOwner ? (
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <FileText className="w-4 h-4 text-blue-500" />
+            {zh ? "发布内容" : "Publish Content"}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {zh ? "作为团队成员，你可以向各分区发布内容。" : "As a team member, you can publish content to any section."}
+          </p>
+          <Link href="/post/new"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow transition-all">
+            <PenSquare className="w-4 h-4" />
+            {zh ? "发布新内容" : "Create New Post"}
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
+          <FileText className="w-10 h-10 text-muted-foreground/20 mx-auto" />
+          <p className="font-medium text-muted-foreground">{zh ? "仅团队用户可发布内容" : "Team members only"}</p>
+          <button onClick={() => setActiveTab("apply")} className="text-sm text-primary hover:underline">
+            {zh ? "申请成为团队用户 →" : "Apply for team access →"}
+          </button>
+        </div>
+      );
+
+      case "posts": return isSpaceOwner ? (
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <PenSquare className="w-4 h-4 text-green-500" />
+            {zh ? "我的发布" : "My Posts"}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {zh ? "查看你发布过的所有内容。" : "View all your published posts."}
+          </p>
+          <Link href="/section/testnet"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+            {zh ? "进入社区查看 →" : "Browse in community →"}
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
+          <PenSquare className="w-10 h-10 text-muted-foreground/20 mx-auto" />
+          <p className="font-medium text-muted-foreground">{zh ? "仅团队用户可查看发布记录" : "Team members only"}</p>
+          <button onClick={() => setActiveTab("apply")} className="text-sm text-primary hover:underline">
+            {zh ? "申请成为团队用户 →" : "Apply for team access →"}
+          </button>
+        </div>
+      );
+
+      case "apply": return (
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Users className="w-4 h-4 text-violet-500" />
+            {zh ? "团队申请" : "Apply for Team"}
+          </h2>
+          {me?.spaceStatus === "pending" ? (
+            <div className="py-8 text-center space-y-2">
+              <div className="text-3xl">⏳</div>
+              <p className="font-semibold text-amber-600 dark:text-amber-400">{zh ? "审核中" : "Under Review"}</p>
+              <p className="text-sm text-muted-foreground">{zh ? "我们将在24小时内完成审核。" : "We'll review within 24 hours."}</p>
+            </div>
+          ) : isSpaceOwner ? (
+            <div className="py-8 text-center space-y-2">
+              <div className="text-3xl">✅</div>
+              <p className="font-semibold text-emerald-600 dark:text-emerald-400">{zh ? "已通过" : "Approved"}</p>
+              <p className="text-sm text-muted-foreground">{zh ? "你已是团队用户，享有发布权限。" : "You are a team member with publishing rights."}</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                {zh
+                  ? "申请成为团队用户后，你将获得专属展示位与发布权限，加入 Web3 Release 生态。"
+                  : "Apply to become a team member and get a dedicated profile, publishing rights, and ecosystem benefits."}
+              </p>
+              <Link href="/apply"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm shadow transition-all">
+                <Users className="w-4 h-4" />
+                {zh ? "立即申请 →" : "Apply Now →"}
+              </Link>
+            </>
+          )}
+        </div>
+      );
+
+      case "stats": return isSpaceOwner ? (
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-orange-500" />
+            {zh ? "数据统计" : "Stats"}
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { label: zh ? "积分" : "Points",  value: (me as any)?.points ?? 0,    color: "text-amber-500" },
+              { label: zh ? "能量" : "Energy",  value: (me as any)?.energy ?? 0,    color: "text-blue-500" },
+              { label: zh ? "代币" : "Tokens",  value: (me as any)?.tokens ?? 0,    color: "text-violet-500" },
+              { label: zh ? "置顶次数" : "Pins", value: (me as any)?.pinCount ?? 0,  color: "text-rose-500" },
+            ].map(item => (
+              <div key={item.label} className="bg-muted/40 rounded-xl p-4 text-center">
+                <p className={`text-2xl font-extrabold ${item.color}`}>{item.value.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
+          <BarChart2 className="w-10 h-10 text-muted-foreground/20 mx-auto" />
+          <p className="font-medium text-muted-foreground">{zh ? "仅团队用户可查看统计" : "Team members only"}</p>
+          <button onClick={() => setActiveTab("apply")} className="text-sm text-primary hover:underline">
+            {zh ? "申请成为团队用户 →" : "Apply for team access →"}
+          </button>
+        </div>
+      );
+
+      case "settings": return (
+        <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Settings className="w-4 h-4 text-slate-500" />
+            {zh ? "账号设置" : "Account Settings"}
+          </h2>
+
+          {/* Username */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">{zh ? "显示名称" : "Display Name"}</label>
+            <div className="flex gap-2">
+              <input
+                value={username}
+                onChange={e => { setUsername(e.target.value); setUsernameDirty(true); }}
+                placeholder={truncateAddress(address)}
+                maxLength={32}
+                className="flex-1 text-sm bg-muted/40 border border-border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              {usernameDirty && (
+                <button onClick={handleSaveUsername} disabled={saveStatus === "saving"}
+                  className="flex items-center gap-1 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60">
+                  <Save className="w-3 h-3" />
+                  {saveStatus === "saving" ? "..." : saveStatus === "saved" ? "✓" : (zh ? "保存" : "Save")}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Avatar */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">{zh ? "头像" : "Avatar"}</label>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl border-2 border-border"
+                style={me?.avatar
+                  ? { backgroundImage: `url(${me.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
+                  : { background: generateGradient(address) }} />
+              <button onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-medium hover:bg-muted transition-colors">
+                <Edit2 className="w-3 h-3" />
+                {zh ? "更换头像" : "Change Avatar"}
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-border/60 space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">{zh ? "钱包地址" : "Wallet Address"}</label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-lg">{address}</span>
+              <button onClick={() => navigator.clipboard.writeText(address ?? "")}
+                className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground">
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-border/60">
+            <button onClick={() => disconnect?.()}
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 hover:border-red-200 transition-all">
+              <LogOut className="w-3.5 h-3.5" />
+              {zh ? "断开钱包" : "Disconnect Wallet"}
+            </button>
+          </div>
+        </div>
+      );
+
       case "admin": return admin ? (
         <div className="space-y-4">
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-3 flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">{zh ? "管理员面板" : "Admin Panel"}</p>
-              <p className="text-xs text-amber-600/70 dark:text-amber-400/70">{zh ? "仅管理员可见" : "Visible to admins only"}</p>
-            </div>
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+              {zh ? "管理员面板 · 仅管理员可见" : "Admin Panel · Admins only"}
+            </p>
           </div>
           <ClaimsPanel />
         </div>
@@ -437,105 +648,117 @@ export default function Profile() {
     <>
       <div className="flex gap-5 items-start">
 
-        {/* Left Nav */}
-        <aside className="w-44 shrink-0 sticky top-24">
-          <div className="bg-card border border-border rounded-2xl p-2 space-y-0.5">
-            {NAV_ITEMS.map(({ tab, icon, label }) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all ${
-                  activeTab === tab
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                }`}>
-                {icon}
-                <span className="truncate">{label}</span>
-              </button>
-            ))}
-          </div>
-        </aside>
+        {/* ── LEFT SIDEBAR ── */}
+        <aside className="w-52 shrink-0 sticky top-24 space-y-4">
 
-        {/* Main Content */}
-        <main className="flex-1 min-w-0">{renderMain()}</main>
-
-        {/* Right Sidebar */}
-        <aside className="w-64 shrink-0 sticky top-24 space-y-4">
-
-          {/* Avatar + settings */}
-          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="relative group cursor-pointer shrink-0" onClick={() => fileRef.current?.click()}>
-                <div className="w-12 h-12 rounded-xl border-2 border-border"
-                  style={me?.avatar
-                    ? { backgroundImage: `url(${me.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
-                    : { background: generateGradient(address) }} />
-                <div className="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Edit2 className="w-3.5 h-3.5 text-white" />
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+          {/* Avatar + Username + Wallet */}
+          <div className="flex flex-col items-center gap-2 pt-2">
+            <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
+              <div className="w-16 h-16 rounded-full border-2 border-border"
+                style={me?.avatar
+                  ? { backgroundImage: `url(${me.avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
+                  : { background: generateGradient(address) }} />
+              <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Edit2 className="w-3.5 h-3.5 text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <input value={username} onChange={e => { setUsername(e.target.value); setDirty(true); }}
-                  placeholder={truncateAddress(address)} maxLength={32}
-                  className="w-full text-sm bg-muted/40 border border-border rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary/40 mb-1" />
-                {dirty && (
-                  <button onClick={handleSave} disabled={saveStatus === "saving"}
-                    className="w-full flex items-center justify-center gap-1 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors">
-                    <Save className="w-3 h-3" />
-                    {saveStatus === "saving" ? (zh ? "保存中..." : "Saving...") : saveStatus === "saved" ? "✓" : (zh ? "保存" : "Save")}
-                  </button>
-                )}
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+            </div>
+            <div className="text-center">
+              <div className="flex items-center gap-1 justify-center">
+                <p className="text-sm font-bold leading-tight">{displayUsername}</p>
+                <RoleBadge spaceType={isSpaceOwner ? spaceType : null} size="xs" />
+              </div>
+              <div className="flex items-center gap-1 mt-0.5 justify-center">
+                <span className="text-xs font-mono text-muted-foreground">{truncateAddress(address ?? "")}</span>
+                <button onClick={() => navigator.clipboard.writeText(address ?? "")}
+                  className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground/50 hover:text-muted-foreground">
+                  <Copy className="w-3 h-3" />
+                </button>
               </div>
             </div>
           </div>
 
           {/* Project Links */}
-          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-muted-foreground" />
-                {zh ? "项目链接" : "Project Links"}
-              </h3>
-              <button onClick={openEditModal}
-                className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-                <Edit2 className="w-3.5 h-3.5" />
+          <div className="bg-card border border-border rounded-xl p-3 space-y-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-muted-foreground">{zh ? "项目链接" : "Links"}</span>
+              <button onClick={openEditLinks} className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground">
+                <Edit2 className="w-3 h-3" />
               </button>
             </div>
-            <div className="space-y-1.5">
-              {[
-                { icon: <Twitter className="w-3.5 h-3.5 text-sky-500" />, val: twitter, ph: "X / Twitter" },
-                { icon: <Globe className="w-3.5 h-3.5 text-green-500" />, val: website, ph: zh ? "官网" : "Website" },
-                { icon: <MessageCircle className="w-3.5 h-3.5 text-indigo-500" />, val: discord, ph: "Discord" },
-                { icon: <Send className="w-3.5 h-3.5 text-blue-400" />, val: telegram, ph: "Telegram" },
-                { icon: <BookOpen className="w-3.5 h-3.5 text-amber-500" />, val: whitepaper, ph: zh ? "白皮书" : "Whitepaper" },
-              ].map(({ icon, val, ph }, i) => (
-                <div key={i} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors group">
-                  <span className="shrink-0">{icon}</span>
-                  {val ? (
-                    <a href={val} target="_blank" rel="noreferrer"
-                      className="text-xs text-foreground/80 hover:text-primary truncate flex-1 flex items-center gap-1 font-medium">
-                      <span className="truncate">{val.replace(/^https?:\/\/(www\.)?/, "")}</span>
-                      <ExternalLink className="w-3 h-3 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  ) : (
-                    <span className="text-xs text-muted-foreground/40 italic flex-1">{ph}</span>
-                  )}
-                </div>
-              ))}
+            {[
+              { icon: <Twitter className="w-3 h-3 text-sky-500" />, val: twitter, ph: "Twitter" },
+              { icon: <Globe className="w-3 h-3 text-green-500" />, val: website, ph: zh ? "官网" : "Website" },
+              { icon: <MessageCircle className="w-3 h-3 text-indigo-500" />, val: discord, ph: "Discord" },
+              { icon: <Send className="w-3 h-3 text-blue-400" />, val: telegram, ph: "Telegram" },
+              { icon: <BookOpen className="w-3 h-3 text-amber-500" />, val: whitepaper, ph: zh ? "白皮书" : "Whitepaper" },
+            ].map(({ icon, val, ph }, i) => (
+              <div key={i} className="flex items-center gap-2 py-1 group">
+                <span className="shrink-0">{icon}</span>
+                {val ? (
+                  <a href={val} target="_blank" rel="noreferrer"
+                    className="text-xs text-foreground/80 hover:text-primary truncate flex-1 flex items-center gap-1">
+                    <span className="truncate">{val.replace(/^https?:\/\/(www\.)?/, "")}</span>
+                    <ExternalLink className="w-2.5 h-2.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground/40 italic">{ph}</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Points */}
+          <div className="px-3 py-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 rounded-xl flex items-center gap-2">
+            <Coins className="w-4 h-4 text-amber-500 shrink-0" />
+            <div>
+              <p className="text-[10px] text-amber-600/70 dark:text-amber-400/70 font-medium">
+                {zh ? "我的积分" : "My Points"}
+              </p>
+              <p className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
+                {((me as any)?.points ?? 0).toLocaleString()} {zh ? "分" : "pts"}
+              </p>
             </div>
           </div>
 
-          {/* Disconnect */}
-          <button onClick={() => disconnect?.()}
-            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-900 transition-all">
-            <LogOut className="w-3 h-3" />
-            {zh ? "断开钱包" : "Disconnect"}
-          </button>
+          <div className="border-t border-border/60" />
+
+          {/* Navigation */}
+          <nav className="space-y-0.5">
+            {NAV_ITEMS.map(({ tab, icon, label, disabled }) => (
+              <button key={tab}
+                onClick={() => !disabled && setActiveTab(tab)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all ${
+                  disabled
+                    ? "text-muted-foreground/30 cursor-not-allowed"
+                    : activeTab === tab
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                }`}>
+                {icon}
+                <span className="truncate flex-1">{label}</span>
+                {disabled && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground/50 font-normal shrink-0">
+                    {zh ? "团队" : "Team"}
+                  </span>
+                )}
+                {tab === "notifications" && notifUnread > 0 && (
+                  <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white font-bold">{notifUnread}</span>
+                )}
+              </button>
+            ))}
+          </nav>
         </aside>
+
+        {/* ── MAIN CONTENT ── */}
+        <main className="flex-1 min-w-0">
+          {renderMain()}
+        </main>
       </div>
 
       {/* Edit Links Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditModal(false)}>
+      {showEditLinks && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditLinks(false)}>
           <div className="bg-background border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-bold text-base">{zh ? "编辑项目链接" : "Edit Project Links"}</h3>
             {[
@@ -552,11 +775,11 @@ export default function Profile() {
               </div>
             ))}
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setShowEditModal(false)}
+              <button onClick={() => setShowEditLinks(false)}
                 className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">
                 {zh ? "取消" : "Cancel"}
               </button>
-              <button onClick={saveEditModal} disabled={editSaving}
+              <button onClick={saveEditLinks} disabled={editSaving}
                 className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60">
                 {editSaving ? (zh ? "保存中..." : "Saving...") : (zh ? "保存" : "Save")}
               </button>
