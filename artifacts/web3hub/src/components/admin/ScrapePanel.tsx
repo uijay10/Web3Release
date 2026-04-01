@@ -9,10 +9,19 @@ function getApiBase() {
   return parts.join("/") + "/api";
 }
 
-const ALL_SECTIONS = [
-  "测试网","IDO/Launchpad","预售","融资公告","空投",
-  "招聘","节点招募","主网上线","代币解锁","交易所上线",
-  "链上任务","开发者专区",
+const ALL_SECTIONS: { key: string; label: string }[] = [
+  { key: "testnet",    label: "测试网" },
+  { key: "ido",        label: "IDO/Launchpad" },
+  { key: "presale",    label: "预售" },
+  { key: "funding",    label: "融资公告" },
+  { key: "airdrop",    label: "空投" },
+  { key: "recruiting", label: "招聘" },
+  { key: "nodes",      label: "节点招募" },
+  { key: "mainnet",    label: "主网上线" },
+  { key: "unlock",     label: "代币解锁" },
+  { key: "exchange",   label: "交易所上线" },
+  { key: "quest",      label: "链上任务" },
+  { key: "developer",  label: "开发者专区" },
 ];
 
 interface ScrapeResult {
@@ -273,14 +282,14 @@ export function ScrapePanel({ adminWallet }: { adminWallet?: string }) {
               <Tag className="w-3.5 h-3.5" /> 发布分区
             </label>
             <div className="flex flex-wrap gap-2">
-              {ALL_SECTIONS.map(s => (
-                <button key={s} onClick={() => setSection(s)}
+              {ALL_SECTIONS.map(({ key, label }) => (
+                <button key={key} onClick={() => setSection(key)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
-                    section === s
+                    section === key
                       ? "bg-primary text-primary-foreground border-primary"
                       : "border-border text-muted-foreground hover:border-primary hover:text-primary"
                   }`}>
-                  {s}
+                  {label}
                 </button>
               ))}
             </div>

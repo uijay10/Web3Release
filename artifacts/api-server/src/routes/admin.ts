@@ -4,6 +4,8 @@ import { eq, desc, asc, sql, and, gte, lte } from "drizzle-orm";
 import { ADMIN_WALLETS, requireAdmin } from "../lib/admin-check";
 import { createChallenge, issueAdminToken, verifyChallenge } from "../lib/admin-token";
 import * as cheerio from "cheerio";
+import * as https from "node:https";
+import * as http from "node:http";
 
 const router: IRouter = Router();
 
@@ -368,22 +370,79 @@ router.post("/scrape", requireAdmin, async (req, res) => {
   if (!url || !/^https?:\/\//i.test(url)) {
     return res.status(400).json({ error: "Valid http(s) URL required" });
   }
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; Web3HubBot/1.0)",
-        "Accept": "text/html,application/xhtml+xml",
+  function fetchHtmlWithHttps(targetUrl: string, insecure = false): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const parsedUrl = new URL(targetUrl);
+      const isHttps = parsedUrl.protocol === "https:";
+      const reqHeaders = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-      },
+        "Connection": "close",
+      };
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || (isHttps ? 443 : 80),
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: "GET",
+        headers: reqHeaders,
+        ...(isHttps && insecure ? { rejectUnauthorized: false } : {}),
+        timeout: 12000,
+      };
+      const mod = isHttps ? https : http;
+      const req = mod.request(options, (resp) => {
+        if ((resp.statusCode ?? 0) >= 300 && (resp.statusCode ?? 0) < 400 && resp.headers.location) {
+          resp.resume();
+          return resolve(fetchHtmlWithHttps(resp.headers.location, insecure));
+        }
+        if ((resp.statusCode ?? 200) >= 400) {
+          resp.resume();
+          return reject(new Error(`HTTP_${resp.statusCode}`));
+        }
+        const chunks: Buffer[] = [];
+        resp.on("data", (chunk: Buffer) => chunks.push(chunk));
+        resp.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+        resp.on("error", reject);
+      });
+      req.on("error", reject);
+      req.on("timeout", () => { req.destroy(); reject(new Error("timeout")); });
+      req.end();
     });
-    clearTimeout(timeout);
-    if (!response.ok) {
-      return res.status(502).json({ error: `Remote server returned ${response.status}` });
+  }
+
+  async function fetchHtml(targetUrl: string): Promise<string> {
+    try {
+      return await fetchHtmlWithHttps(targetUrl, false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes("certificate") ||
+        msg.includes("SSL") ||
+        msg.includes("unsuitable") ||
+        msg.includes("TLS") ||
+        msg.includes("cert")
+      ) {
+        return await fetchHtmlWithHttps(targetUrl, true);
+      }
+      throw err;
     }
-    const html = await response.text();
+  }
+
+  try {
+    let html: string;
+    try {
+      html = await fetchHtml(url);
+    } catch (fetchErr: unknown) {
+      const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+      if (msg.startsWith("HTTP_")) {
+        const code = msg.slice(5);
+        return res.status(502).json({ error: `目标网站返回错误状态 ${code}，请确认链接有效且公开可访问` });
+      }
+      if (msg.includes("abort") || msg.includes("timeout")) {
+        return res.status(504).json({ error: "连接超时（12秒），目标网站响应太慢或已屏蔽爬虫" });
+      }
+      return res.status(502).json({ error: `无法访问目标网站：${msg}` });
+    }
     const $ = cheerio.load(html);
 
     // Title: og:title → twitter:title → <title>
@@ -437,10 +496,7 @@ router.post("/scrape", requireAdmin, async (req, res) => {
     });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("abort") || msg.includes("timeout")) {
-      return res.status(504).json({ error: "Request timed out (12s). The target URL may be too slow or blocked." });
-    }
-    res.status(502).json({ error: `Fetch failed: ${msg}` });
+    res.status(500).json({ error: `服务器内部错误：${msg}` });
   }
 });
 
