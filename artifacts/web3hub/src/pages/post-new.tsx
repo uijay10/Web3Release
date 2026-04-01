@@ -443,34 +443,41 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
       {/* ── Post Confirmation Overlay ── */}
       {step === "confirm" && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setStep("form")} />
-          <div className="relative w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-2xl p-6 space-y-5">
-            <button onClick={() => setStep("form")} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setStep("form")} />
+          <div className="relative w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-5"
+            style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}>
+            <button onClick={() => setStep("form")}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400"
+              style={{ backgroundColor: "#f3f4f6" }}>
               <X className="w-4 h-4" />
             </button>
             <div className="flex flex-col items-center text-center gap-2">
-              <div className="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-1">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1"
+                style={{ backgroundColor: "#dcfce7" }}>
                 <CheckCircle2 className="w-7 h-7 text-green-500" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">{t("postConfirmTitle")}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{confirmText}</p>
+              <h3 className="text-lg font-bold" style={{ color: "#111827" }}>{t("postConfirmTitle")}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>{confirmText}</p>
             </div>
-            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-1.5 text-left">
-              <p className="text-xs text-gray-400">
-                {t("postConfirmSectionLabel")} <span className="font-semibold text-gray-700">{t(SECTION_LABEL_KEYS[section] ?? section)}</span>
+            <div className="rounded-xl p-4 space-y-1.5 text-left"
+              style={{ backgroundColor: "#f9fafb", border: "1px solid #f3f4f6" }}>
+              <p className="text-xs" style={{ color: "#9ca3af" }}>
+                {t("postConfirmSectionLabel")} <span className="font-semibold" style={{ color: "#374151" }}>{t(SECTION_LABEL_KEYS[section] ?? section)}</span>
                 {withPin && <span className="ml-2 text-amber-500 font-bold">{t("postPin3Days")}</span>}
               </p>
-              <p className="text-sm font-bold text-gray-900 line-clamp-2">{title}</p>
-              <p className="text-xs text-gray-500 line-clamp-2">{content}</p>
+              <p className="text-sm font-bold line-clamp-2" style={{ color: "#111827" }}>{title}</p>
+              <p className="text-xs line-clamp-2" style={{ color: "#6b7280" }}>{content}</p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep("form")}
-                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-colors">
-                {t("cancel")}
+                className="flex-1 py-3 rounded-xl font-semibold text-sm text-white"
+                style={{ backgroundColor: "#ef4444" }}>
+                {lang === "zh-CN" ? "取消" : "Cancel"}
               </button>
               <button onClick={handleConfirmedPost} disabled={createPost.isPending}
-                className="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-sm transition-all disabled:opacity-60 shadow-lg shadow-green-500/20">
-                {createPost.isPending ? t("postFormSubmitting") : t("postConfirmPublish")}
+                className="flex-1 py-3 rounded-xl font-bold text-sm text-white disabled:opacity-60"
+                style={{ backgroundColor: "#22c55e" }}>
+                {createPost.isPending ? t("postFormSubmitting") : (lang === "zh-CN" ? "确定发布" : "Confirm")}
               </button>
             </div>
           </div>
@@ -551,18 +558,7 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
 
           {/* Content */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-semibold">{t("postFormContent")} *</label>
-              <button
-                type="button"
-                onClick={() => { setAiOpen(true); setAiResult(""); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-                style={{ background: "linear-gradient(135deg, #1a1040 0%, #2a1060 100%)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.35)" }}
-              >
-                <Sparkles className="w-3 h-3" />
-                {t("aiAssistantBtn")}
-              </button>
-            </div>
+            <label className="block text-sm font-semibold mb-2">{t("postFormContent")} *</label>
             <textarea value={content} onChange={e => setContent(e.target.value)}
               placeholder={t("postFormContent") + "..."} rows={8}
               className={`${inputCls} resize-y min-h-[160px]`} maxLength={5000} />
@@ -587,11 +583,16 @@ ${typeInfo.tag} #${projectName} #Web3Release #Web3
             <div className="px-4 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">{error}</div>
           )}
 
-
-          <button type="submit" disabled={createPost.isPending}
-            className="w-full py-4 rounded-xl font-bold text-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-50">
-            {t("aiPublishBtn")}
-          </button>
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={() => setLocation("/")}
+              className="flex-1 py-3.5 rounded-xl font-semibold text-base border border-border bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
+              {lang === "zh-CN" ? "取消" : "Cancel"}
+            </button>
+            <button type="submit" disabled={createPost.isPending}
+              className="flex-1 py-3.5 rounded-xl font-bold text-base bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors disabled:opacity-50">
+              {createPost.isPending ? t("postFormSubmitting") : (lang === "zh-CN" ? "发布" : "Publish")}
+            </button>
+          </div>
         </form>
       </div>
     </>
