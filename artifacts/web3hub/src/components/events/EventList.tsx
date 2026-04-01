@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Search, ExternalLink, Pin } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Search, ExternalLink, Pin, Shuffle } from "lucide-react";
 import { createPortal } from "react-dom";
 import {
   type Web3Event,
@@ -155,6 +155,57 @@ function EventRow({
   );
 }
 
+/* ── Sorting helpers ─────────────────────────────────────── */
+
+function getSourceKey(url?: string): string {
+  if (!url || url === "#") return "_unknown";
+  try { return new URL(url).hostname.replace(/^www\./, ""); }
+  catch { return url.slice(0, 40); }
+}
+
+/** LCG-based seeded shuffle — stable per session seed */
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const out = [...arr];
+  let s = seed >>> 0;
+  for (let i = out.length - 1; i > 0; i--) {
+    s = Math.imul(s, 1664525) + 1013904223 >>> 0;
+    const j = s % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * Round-robin interleave across source domains so no single
+ * source dominates consecutive rows.
+ */
+function spreadBySource(posts: Web3Event[], seed?: number): Web3Event[] {
+  if (posts.length <= 3) return posts;
+
+  const buckets = new Map<string, Web3Event[]>();
+  for (const post of posts) {
+    const src = getSourceKey(post.source_url);
+    if (!buckets.has(src)) buckets.set(src, []);
+    buckets.get(src)!.push(post);
+  }
+
+  let queues = [...buckets.values()];
+  // Shuffle bucket order (so the same source isn't always column-1)
+  if (seed !== undefined) queues = seededShuffle(queues, seed);
+
+  const result: Web3Event[] = [];
+  while (result.length < posts.length) {
+    let progressed = false;
+    for (const q of queues) {
+      if (q.length > 0) { result.push(q.shift()!); progressed = true; }
+    }
+    if (!progressed) break;
+  }
+  return result;
+}
+
+/* ── EventList component ─────────────────────────────────── */
+
 export function EventList() {
   const { activeCategory } = useEventFilter();
   const { t, lang } = useLang();
@@ -162,12 +213,15 @@ export function EventList() {
   const { address } = useWeb3Auth();
   const adminUser = isAdmin(address);
 
+  /** Stable random seed for this browser session */
+  const sessionSeed = useRef(Math.random() * 0xffffffff >>> 0);
+
   const [allEvents, setAllEvents] = useState<Web3Event[]>([]);
   const [pinnedPosts, setPinnedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"time" | "importance">("time");
+  const [sortBy, setSortBy] = useState<"time" | "importance" | "random">("time");
   const [fetchTick, setFetchTick] = useState(0);
 
   const [pinTargetId, setPinTargetId] = useState<number | string | null>(null);
@@ -216,13 +270,14 @@ export function EventList() {
   }, [fetchTick]);
 
   const importanceOrder: Record<string, number> = { "高": 0, "high": 0, "中": 1, "medium": 1 };
+  const getTime = (e: Web3Event) =>
+    e.crawl_time ? new Date(e.crawl_time).getTime()
+    : e.start_time ? new Date(e.start_time).getTime()
+    : 0;
 
-  const filtered = allEvents
+  const base = allEvents
     .filter(e => !isEventExpired(e))
-    .filter(e => {
-      if (activeCategory === "全部") return true;
-      return (e.category ?? []).includes(activeCategory);
-    })
+    .filter(e => activeCategory === "全部" || (e.category ?? []).includes(activeCategory))
     .filter(e => {
       if (!searchTerm) return true;
       const q = searchTerm.toLowerCase();
@@ -231,17 +286,25 @@ export function EventList() {
         (e.description ?? "").toLowerCase().includes(q) ||
         (e.tags ?? []).some(tag => tag.toLowerCase().includes(q))
       );
-    })
-    .sort((a, b) => {
-      if (sortBy === "importance") {
-        const ia = importanceOrder[a.importance ?? ""] ?? 2;
-        const ib = importanceOrder[b.importance ?? ""] ?? 2;
-        if (ia !== ib) return ia - ib;
-      }
-      const da = a.crawl_time ? new Date(a.crawl_time).getTime() : (a.start_time ? new Date(a.start_time).getTime() : 0);
-      const db = b.crawl_time ? new Date(b.crawl_time).getTime() : (b.start_time ? new Date(b.start_time).getTime() : 0);
-      return db - da;
     });
+
+  // Primary sort
+  let primarySorted: Web3Event[];
+  if (sortBy === "random") {
+    primarySorted = seededShuffle(base, sessionSeed.current);
+  } else if (sortBy === "importance") {
+    primarySorted = [...base].sort((a, b) => {
+      const ia = importanceOrder[a.importance ?? ""] ?? 2;
+      const ib = importanceOrder[b.importance ?? ""] ?? 2;
+      if (ia !== ib) return ia - ib;
+      return getTime(b) - getTime(a);
+    });
+  } else {
+    primarySorted = [...base].sort((a, b) => getTime(b) - getTime(a));
+  }
+
+  // Always spread by source to avoid same-source batches
+  const filtered = spreadBySource(primarySorted, sessionSeed.current);
 
   const doAdminPin = async () => {
     if (!address || !pinTargetId) return;
@@ -299,14 +362,25 @@ export function EventList() {
               </span>
             )}
           </h2>
-          <button
-            onClick={() => setSortBy(s => s === "time" ? "importance" : "time")}
-            className="text-xs px-2.5 py-1 border border-slate-200 dark:border-slate-700 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400"
-          >
-            {sortBy === "time"
-              ? (zh ? "⏱ 最新" : "⏱ Latest")
-              : (zh ? "⭐ 重要" : "⭐ Important")}
-          </button>
+          <div className="flex items-center gap-1">
+            {(["time", "importance", "random"] as const).map(mode => (
+              <button
+                key={mode}
+                onClick={() => setSortBy(mode)}
+                className={`text-xs px-2.5 py-1 border rounded-full transition-colors ${
+                  sortBy === mode
+                    ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
+                    : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500"
+                }`}
+              >
+                {mode === "time"
+                  ? (zh ? "⏱ 最新" : "⏱ Latest")
+                  : mode === "importance"
+                  ? (zh ? "⭐ 热门" : "⭐ Hot")
+                  : (zh ? "🔀 随机" : "🔀 Mix")}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Search */}
