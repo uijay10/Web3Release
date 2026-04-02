@@ -5,29 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "postinstall": "npm install"
+    "start": "next start"
   },
   "dependencies": {
     "next": "14.2.15",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "lucide-react": "^0.545.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "typescript": "^5.9.2",
-    "tailwindcss": "^4.1.14",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
-    "eslint": "^9.11.1",
-    "eslint-config-next": "14.2.15"
-  },
-  "engines": {
-    "npm": ">=8.0.0",
-    "node": ">=18.0.0"
+    "typescript": "^5.9.2"
   }
 }
